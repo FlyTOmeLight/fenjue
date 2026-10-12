@@ -301,7 +301,8 @@ try:
             'try { process.exitCode = await session.attach(); } finally { await session.close(); }\n')
         terminal = Terminal([str(supervisor), str(killed)], env)
         try:
-            assert terminal.wait() == 143, "Pane termination signal must preserve exit status"
+            actual = terminal.wait()
+            assert actual == 143, f"Pane termination signal must preserve exit status: got {actual}; output={terminal.output[-2000:]!r}"
         finally:
             terminal.close()
 

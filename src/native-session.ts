@@ -534,9 +534,13 @@ export class NativeSession {
     let suggestion = explicitNew ? mainRoute(this.config) : previous.suggestion ?? previous.route;
     const current = effective(params, previous.route);
     if (previous.mode !== "manual") {
-      const s = this.config.semantic!, rule = this.config.rules.find(r => input.text.trimStart().startsWith(r.prefix));
-      if (rule) { suggestion = this.config.routes[rule.route]!; reason = "prefix-rule"; }
-      else if (!explicitNew && previous.task.messages.length && isContinuation(input.text)) reason = "continuation";
+      const s = this.config.semantic!, text = input.text.trimStart();
+      const nativeRule = this.config.native?.rules?.find(r => text.startsWith(r.prefix));
+      const rule = this.config.rules.find(r => text.startsWith(r.prefix));
+      if (nativeRule || rule) {
+        suggestion = nativeRule ? { model: nativeRule.model, effort: nativeRule.effort } : this.config.routes[rule!.route]!;
+        reason = "prefix-rule";
+      } else if (!explicitNew && previous.task.messages.length && isContinuation(input.text)) reason = "continuation";
       else {
         try {
           const context = this.classifierView(view);

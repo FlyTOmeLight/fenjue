@@ -127,7 +127,8 @@ try {
     assert.notEqual(digest(instructions(baselines.get(sol))), digest(instructions(baselines.get(astra))), "Fresh native models must have different instructions");
   }
   const thread = await startThread(sol), threadId = thread.thread.id;
-  const routes = [{ model: sol, effort: "medium" }, { model: astra, effort: "high" }, { model: sol, effort: "low" }];
+  const routes = [{ model: sol, effort: "medium" }, { model: astra, effort: "high" }, { model: sol, effort: "low" },
+    ...(!live ? [{ model: astra, effort: "low" }, { model: sol, effort: "xhigh" }, { model: astra, effort: "xhigh" }] : [])];
   for (const [index, route] of routes.entries()) {
     phase = index === 1 && !live ? "tool" : "answer";
     const prompt = live ? [
@@ -149,7 +150,8 @@ try {
   }
   checks.push(live ? "real Sol/Astra/Sol turns complete with cross-model history" : "Sol/Astra/Sol use each model's fresh native instructions and chosen effort");
   if (!live) {
-    checks.push("native tool execution and continuation retain Astra/high", "final answer captured without a subsequent user message");
+    checks.push("native tool execution and continuation retain Astra/high", "final answer captured without a subsequent user message",
+      "Astra/low, Sol/xhigh and Astra/xhigh reach the native model provider");
     phase = "approval"; toolSent = false;
     let approvals = 0;
     client!.onRequest = async message => {

@@ -1,9 +1,9 @@
 import { record, type Config, type Route } from "./config.js";
 import { ClassificationError, type Classification } from "./classification.js";
 
-export const NATIVE_POLICY = "balanced-native-v5";
+export const NATIVE_POLICY = "balanced-native-v6";
 export function nativePolicy(config: Pick<Config, "native">): string {
-  return config.native?.expertPolicy === "constraints" ? "constraints-native-v2" : NATIVE_POLICY;
+  return config.native?.expertPolicy === "constraints" ? "constraints-native-v3" : NATIVE_POLICY;
 }
 export const EFFORTS = ["none", "minimal", "low", "medium", "high", "xhigh", "max", "ultra"];
 export function mainRoute(config: Config): Route {
@@ -21,7 +21,8 @@ export function validateNativeCatalog(value: unknown, config: Config): void {
   }
   if (!record(value) || !Array.isArray(value.models)) throw new Error("无效原生模型目录");
   const candidates = [...Object.values(config.routes), ...(config.native?.expertModel ?
-    ["medium", "high"].map(effort => ({ model: config.native!.expertModel!, effort })) : []),
+    ["low", "medium", "high"].map(effort => ({ model: config.native!.expertModel!, effort })) : []),
+    ...(config.native?.rules ?? []),
     ...(config.native?.review ? [config.native.review] : [])];
   for (const route of candidates) {
     const model = value.models.find(m => record(m) && m.slug === route.model);
@@ -58,7 +59,7 @@ export function nativeSelection(config: Config, classification: Classification, 
     1 - p.uncertainty.unknown_cause, 1 - p.consequence.sensitive);
   const highSupport = Math.max(p.reasoning.architecture + p.reasoning.diagnosis,
     p.uncertainty.unknown_cause, p.consequence.sensitive);
-  const lowSupport = Math.min(mainSupport, ordinarySupport, p.reasoning.mechanical, p.consequence.reversible);
+  const lowSupport = Math.min(ordinarySupport, p.reasoning.mechanical, p.consequence.reversible);
   const held: NativeSelection["held"] = [];
   let model: string;
   if (expertSupport > 0 && expertSupport >= threshold && expert) model = expert;

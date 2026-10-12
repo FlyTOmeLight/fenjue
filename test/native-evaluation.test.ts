@@ -83,7 +83,7 @@ test("native classifier CLI uses the selected env key, enforces a call budget an
   const report = JSON.parse(stdout);
   assert.equal(report.mode, "live-classifier"); assert.equal(report.realGPTCalls, 0);
   assert.equal(report.liveClassifierCalls, 5); assert.equal(report.policyMatched, 6);
-  assert.equal(report.policy, "constraints-native-v2");
+  assert.equal(report.policy, "constraints-native-v3");
   assert.match(report.datasetDigest, /^[0-9a-f]{64}$/);
   assert.doesNotMatch(stdout, /selected-native-key|ignored-secret/);
   assert.deepEqual(server.errors, []);

@@ -8,7 +8,7 @@ Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型
 
 ## 能做什么
 
-- 根据当前阶段选择主模型的 low / medium / high，或显式配置的专家模型。
+- 根据当前阶段分别选择主模型或专家模型，以及 low / medium / high；支持显式指定 xhigh。
 - 在同一任务内随阶段升降档；正在执行的轮次与工具续接保持路线固定。
 - 支持 `shadow`（只观察）、`auto`（自动选择）、`manual`（固定选择）。
 - 为分类保留任务目标、最新请求及工具证据；压缩分类视图不改写 Codex 的执行历史。
@@ -46,6 +46,8 @@ npm start -- codex-native --config fenjue.config.json
 将配置的 `semantic.mode` 改为 `auto` 后重新启动，即可自动选择。配置中的 `native.expertModel` 开启专家模型；设为 `"native": {}` 时只选择主模型的三档思考强度。
 
 交互时按 **F8 → a / m / s** 切换自动、手动和观察模式。`/model` 会暂停自动路由；切换从下一个新轮次生效。没有底栏时，使用启动输出提供的 `routing` 控制命令。
+
+原生示例提供 `[sol-xhigh]` 和 `[astra-xhigh]` 消息前缀。在 auto 模式下，它们分别指定 Sol xhigh 和 Astra xhigh；shadow 只记录建议，manual 保持手动选择。普通自动分类仍选择 low / medium / high，详见 [显式路线](docs/daily-use.md#显式选择-xhigh)。
 
 ```bash
 npm start -- status --watch

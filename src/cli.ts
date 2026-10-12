@@ -46,6 +46,7 @@ const help = `焚诀 0.2：Codex 任务路由
 --no-bar 关闭底栏；Responses 入口改用窗口标题，--no-title 可关闭焚诀标题。
 原生入口保留 Codex 自带的 model/effort 显示；/model 固定选择，F8 → a 恢复自动。
 配置 native: {} 自动启用原生交互入口；native.expertModel 选择跨系统路由模型。
+native.rules 可按消息前缀显式指定模型和 effort，优先于普通 rules；手动模式仍优先。
 native.review 配置自动只读审查；改动后相同测试再次失败时触发，auto 模式下生效。
 exec、review、JSON 输出及非 TTY 不启用底栏。底栏需要本机安装 tmux。
 status 默认读取 .fenjue 中最近启动的日志；--watch 持续跟踪该文件，Ctrl-C 退出。

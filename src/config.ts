@@ -25,6 +25,7 @@ export interface NativeReviewConfig extends Route {
   maxTokens: number;
   maxToolCalls: number;
 }
+export interface NativeRule extends Route { prefix: string }
 export interface Config {
   version: 1;
   auth: "chatgpt" | "api-key" | "mock";
@@ -35,7 +36,7 @@ export interface Config {
   rules: { prefix: string; route: string }[];
   semantic?: SemanticConfig;
   capture?: { directory: string; execution?: ExecutionCaptureConfig };
-  native?: { expertModel?: string; expertPolicy?: "constraints"; review?: NativeReviewConfig };
+  native?: { expertModel?: string; expertPolicy?: "constraints"; review?: NativeReviewConfig; rules?: NativeRule[] };
 }
 export const AUTO_MODEL = "fenjue-auto";
 export const PROXY_HEADER = "x-fenjue-token";
@@ -44,13 +45,16 @@ const VERCEL_ENDPOINT = "https://ai-gateway.vercel.sh/typesafe/v1/systemone";
 export function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
+function validRoute(value: unknown): value is Route {
+  return record(value) && typeof value.model === "string" && /^[a-zA-Z0-9][a-zA-Z0-9._/-]{0,120}$/.test(value.model) && value.model !== AUTO_MODEL &&
+    typeof value.effort === "string" && ["minimal", "low", "medium", "high", "xhigh", "max", "ultra", "none"].includes(value.effort);
+}
 export function parseConfig(value: unknown): Config {
   if (!record(value) || value.version !== 1) throw new Error("配置 version 必须为 1");
   if (!["chatgpt", "api-key", "mock"].includes(String(value.auth))) throw new Error("auth 必须为 chatgpt、api-key 或 mock");
   if (!record(value.routes) || !Object.keys(value.routes).length) throw new Error("routes 不能为空");
   for (const [name, route] of Object.entries(value.routes)) {
-    if (!record(route) || typeof route.model !== "string" || !/^[a-zA-Z0-9][a-zA-Z0-9._/-]{0,120}$/.test(route.model) || route.model === AUTO_MODEL ||
-      typeof route.effort !== "string" || !["minimal","low","medium","high","xhigh","max","ultra","none"].includes(route.effort)) {
+    if (!validRoute(route)) {
       throw new Error(`路线 ${name} 必须提供真实 model 和有效 effort`);
     }
   }
@@ -77,6 +81,10 @@ export function parseConfig(value: unknown): Config {
     throw new Error("native.expertModel 必须为真实模型名；省略时只自动选择主模型的三档 effort");
   }
   let native = value.native;
+  if (record(native) && native.rules !== undefined && (!Array.isArray(native.rules) || native.rules.some(r =>
+    !record(r) || typeof r.prefix !== "string" || !r.prefix.trim() || !validRoute(r)))) {
+    throw new Error("native.rules 需要非空 prefix、真实 model 和有效 effort");
+  }
   if (record(native) && native.expertPolicy !== undefined &&
       (native.expertPolicy !== "constraints" || typeof native.expertModel !== "string")) {
     throw new Error("native.expertPolicy 仅支持候选 constraints，且需要 expertModel");

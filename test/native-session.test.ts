@@ -8,6 +8,7 @@ import { NativeRecords, type NativeEvent } from "../src/native-records.js";
 import { ExecutionCapture, executionDraft } from "../src/execution-capture.js";
 import { nativeSelection, validateNativeCatalog } from "../src/native-policy.js";
 import { nativeArguments } from "../src/native-launcher.js";
+import { parseConfig } from "../src/config.js";
 import { draftCase } from "../src/cases.js";
 import { fingerprint, type TaskView } from "../src/task-state.js";
 import { type Classify, type Features, type QuestionScores, ClassificationError } from "../src/classification.js";
@@ -169,6 +170,7 @@ test("native balanced policy separates local diagnosis, broad integration and br
   const c = config(); validateNativeCatalog(models(), c);
   for (const [features, model, effort] of [
     [{ reasoning: "mechanical" }, "fixture-fast", "low"],
+    [{ reasoning: "mechanical", scope: "cross_system" }, "fixture-deep", "low"],
     [{ reasoning: "solution", scope: "multifile" }, "fixture-fast", "medium"],
     [{ reasoning: "diagnosis", uncertainty: "unknown_cause" }, "fixture-fast", "high"],
     [{ reasoning: "solution", scope: "cross_system" }, "fixture-deep", "medium"],
@@ -196,6 +198,7 @@ test("constraint candidates separate capability from service count, reasoning de
     { features: { reasoning: "diagnosis" as const, uncertainty: "unknown_cause" as const }, coupled: 0, model: "fixture-fast", effort: "high" },
     { features: { reasoning: "solution" as const }, coupled: 1, model: "fixture-deep", effort: "medium" },
     { features: { reasoning: "mechanical" as const }, coupled: 0, model: "fixture-fast", effort: "low" },
+    { features: { reasoning: "mechanical" as const }, coupled: 1, model: "fixture-deep", effort: "low" },
   ]) {
     const result = { ...classification(features), constraints: { choice: coupled ? "coupled" as const : "independent" as const,
       confidence: 1, probabilities: { coupled, independent: 1 - coupled } } };
@@ -235,7 +238,7 @@ test("native candidate followups retain history while reducing expert effort and
     input: [{ type: "text", text: "把刚才的方案整理成三点，不增加分析" }] } });
   const sent = f.server.at(-1)!;
   assert.equal(sent.params.model, "fixture-fast"); assert.equal(sent.params.effort, "low");
-  assert.match(f.events.findLast(e => e.type === "planned")!.policy as string, /^constraints-native-v2:/);
+  assert.match(f.events.findLast(e => e.type === "planned")!.policy as string, /^constraints-native-v3:/);
   assert.match(views.at(-1)!.currentTask.messages[0]!, /公平性/);
 });
 
@@ -695,4 +698,68 @@ test("cancelling native history recovery cancels the pending turn without callin
   const next = f.start("将 world 改成大写");
   assert.equal(f.server.filter(m => m.method === "thread/turns/list").length, 1, "An accepted new task must discard pending recovery of old history");
   await next;
+});
+
+test("native explicit routes validate capability without changing the Responses route pool", () => {
+  const c = config(), original = structuredClone(c.routes);
+  c.native!.rules = [{ prefix: "[sol-xhigh]", model: "fixture-fast", effort: "xhigh" },
+    { prefix: "[astra-xhigh]", model: "fixture-deep", effort: "xhigh" }];
+  assert.deepEqual(parseConfig(c).routes, original);
+  assert.throws(() => validateNativeCatalog(models(), c), /fixture-fast \/ xhigh/);
+  const catalog = models();
+  for (const model of catalog.models) model.supported_reasoning_levels = ["low", "medium", "high", "xhigh"].map(effort => ({ effort, description: "" }));
+  validateNativeCatalog(catalog, c);
+  catalog.models[1]!.supported_reasoning_levels = ["medium", "high", "xhigh"].map(effort => ({ effort, description: "" }));
+  assert.throws(() => validateNativeCatalog(catalog, c), /fixture-deep \/ low/);
+  for (const rules of [null, {}, [{ prefix: "", model: "fixture-fast", effort: "xhigh" }],
+    [{ prefix: "[xhigh]", model: "fenjue-auto", effort: "xhigh" }],
+    [{ prefix: "[xhigh]", model: "fixture-fast", effort: "unknown" }]]) {
+    assert.throws(() => parseConfig({ ...c, native: { ...c.native, rules } }), /native.rules/);
+  }
+});
+
+test("explicit native xhigh preserves Plan, active leases and restored continuation, then resumes stage routing", async t => {
+  for (const [prefix, model] of [["[sol-xhigh]", "fixture-fast"], ["[astra-xhigh]", "fixture-deep"]] as const) {
+    const c = config(); c.native!.rules = [{ prefix, model, effort: "xhigh" }];
+    let calls = 0;
+    const classify: Classify = async () => { calls++; return classification({ relation: "continue", reasoning: "mechanical", scope: "cross_system" }); };
+    const f = await fixture(t, classify, false, c);
+    const first = await f.start(`${prefix} 核对复杂方案`, { approvalPolicy: "never", sandboxPolicy: { type: "readOnly" },
+      collaborationMode: { mode: "plan", settings: { model: "fixture-fast", reasoning_effort: "medium", developer_instructions: "retain" } } });
+    assert.equal(calls, 0);
+    assert.deepEqual(f.server.at(-1)!.params.collaborationMode.settings, { model, reasoning_effort: "xhigh", developer_instructions: "retain" });
+    assert.equal(f.server.at(-1)!.params.approvalPolicy, "never");
+    const turn = f.accept(first);
+    await f.start("执行中补充说明");
+    assert.equal(f.server.at(-1)!.params.model, model); assert.equal(f.server.at(-1)!.params.effort, "xhigh");
+    f.complete(turn); f.session.close();
+    const next = new NativeSession(c, f.records, m => f.server.push(structuredClone(m)), m => f.client.push(m),
+      e => f.events.push(e), classify); f.sessions.push(next);
+    await next.fromClient({ id: "resume-xhigh", method: "thread/resume", params: { threadId: "thread" } });
+    assert.equal(f.server.at(-1)!.params.model, model);
+    assert.equal(f.server.at(-1)!.params.config.model_reasoning_effort, "xhigh");
+    next.fromServer({ id: "resume-xhigh", result: { thread: { id: "thread", turns: [{ id: turn }] }, model, reasoningEffort: "xhigh" } });
+    const run = async (id: string, text: string) => {
+      await next.fromClient({ id, method: "turn/start", params: { threadId: "thread", input: [{ type: "text", text }] } });
+      const sent = f.server.at(-1)!;
+      next.fromServer({ id, result: { turn: { id, status: "inProgress" } } });
+      next.fromServer({ method: "turn/completed", params: { threadId: "thread", turn: { id, status: "completed", items: [] } } });
+      return sent.params;
+    };
+    assert.equal((await run("continue-xhigh", "继续")).effort, "xhigh"); assert.equal(calls, 0);
+    const simple = await run("summarize-xhigh", "按已定字段整理两份服务配置，不增加分析");
+    assert.equal(simple.model, "fixture-deep"); assert.equal(simple.effort, "low"); assert.equal(calls, 1);
+  }
+});
+
+test("manual and shadow modes retain user execution choices despite native xhigh prefixes", async t => {
+  for (const mode of ["manual", "shadow"] as const) {
+    const c = config(); c.native!.rules = [{ prefix: "[astra-xhigh]", model: "fixture-deep", effort: "xhigh" }];
+    const f = await fixture(t, async () => { assert.fail("prefix must not invoke classifier"); }, false, c);
+    f.session.setMode(mode);
+    const first = await f.start("[astra-xhigh] 评估方案");
+    assert.equal(f.server.at(-1)!.params.model, "fixture-fast"); assert.equal(f.server.at(-1)!.params.effort, "medium");
+    f.complete(f.accept(first));
+    if (mode === "shadow") assert.deepEqual(f.records.load("thread")!.suggestion, { model: "fixture-deep", effort: "xhigh" });
+  }
 });

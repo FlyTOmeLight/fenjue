@@ -14,6 +14,8 @@
 
 原生配置的 fast / balanced / deep 路线必须为同一主模型的 low / medium / high。`native.expertModel` 是可选的专家模型；运行时检查本机 Codex 模型目录是否支持指定模型与强度。
 
+模型与强度分别判断：明确且可逆的机械步骤可以使用专家模型 low，普通实施使用 medium，架构和诊断使用 high。指代不明或需求缺失时仍保留已有底线，不因阶段标签直接降档。普通自动分类不选择 xhigh。
+
 本地 Kev 示例没有 `native` 字段。用于原生入口时，复制配置并增加 `"native": {}`；如需专家模型，再指定 `expertModel`。Kev 服务需独立安装和启动，Fenjue 不分发服务或模型权重。
 
 配置字段以 [src/config.ts](../src/config.ts) 的校验为准；不在此承诺所有账号都支持示例模型。
@@ -39,6 +41,33 @@ F8 菜单中的 a / m / s 分别切换以上模式。`/model` 会暂停自动路
 npm start -- routing auto --socket /path/from/startup
 npm start -- status --watch
 ```
+
+## 显式选择 xhigh
+
+`native-balanced.json` 和 `native-constraints-shadow.json` 提供以下原生规则：
+
+```json
+"native": {
+  "expertModel": "gpt-6-astra",
+  "rules": [
+    { "prefix": "[sol-xhigh]", "model": "gpt-6.1-sol", "effort": "xhigh" },
+    { "prefix": "[astra-xhigh]", "model": "gpt-6-astra", "effort": "xhigh" }
+  ]
+}
+```
+
+在 auto 模式下提交：
+
+```text
+[sol-xhigh] 深入核对这个方案的关键假设
+[astra-xhigh] 分析多个系统之间的约束和失败路径
+```
+
+前缀优先于普通 `rules`，无需分类器判定这一轮的路线。shadow 只记录建议；manual 不采用前缀建议。`[deep]` 仍指定主模型 high。
+
+仅“继续”会沿用 xhigh；新的明确请求会重新按阶段判断，可能降档。需要持续使用 xhigh 时，可再次加前缀，或通过 Codex `/model` 固定模型和强度。活动轮及工具续接不因后来输入而切换路线。
+
+`native.rules` 只影响原生交互入口，不扩大 exec / review 的 Responses 模型池。启动时校验这些显式路线是否被模型目录支持，不支持会明确报错。修改配置后需退出并重新启动；保留会话可使用 resume。
 
 ## 恢复与历史
 

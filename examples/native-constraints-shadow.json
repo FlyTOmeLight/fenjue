@@ -8,7 +8,14 @@
     "deep": { "model": "gpt-6.1-sol", "effort": "high" }
   },
   "rules": [{ "prefix": "[deep]", "route": "deep" }],
-  "native": { "expertModel": "gpt-6-astra", "expertPolicy": "constraints" },
+  "native": {
+    "expertModel": "gpt-6-astra",
+    "expertPolicy": "constraints",
+    "rules": [
+      { "prefix": "[sol-xhigh]", "model": "gpt-6.1-sol", "effort": "xhigh" },
+      { "prefix": "[astra-xhigh]", "model": "gpt-6-astra", "effort": "xhigh" }
+    ]
+  },
   "semantic": {
     "provider": "vercel",
     "model": "typesafe-ai/jev",

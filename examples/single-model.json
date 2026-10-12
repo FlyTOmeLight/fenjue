@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "auth": "chatgpt",
+  "defaultRoute": "balanced",
+  "routes": {
+    "balanced": {
+      "model": "gpt-6.1-sol",
+      "effort": "medium"
+    },
+    "deep": {
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    }
+  },
+  "rules": [
+    {
+      "prefix": "[deep]",
+      "route": "deep"
+    }
+  ]
+}

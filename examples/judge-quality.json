@@ -1,0 +1,9 @@
+{
+  "kind": "text",
+  "requirements": ["只回复 OK，不加标点或解释。"],
+  "criteria": [{ "id": "exact-answer", "description": "答案必须恰好是 OK。" }],
+  "answer": "OK",
+  "evidence": [],
+  "executionStatus": "completed",
+  "verification": { "status": "unknown", "evidence": [] }
+}

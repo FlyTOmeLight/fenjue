@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "baseline": "scope-auto",
+  "strategies": [
+    {
+      "id": "scope-auto",
+      "kind": "expert-auto",
+      "expertModel": "gpt-6-astra"
+    },
+    {
+      "id": "constraints-auto",
+      "kind": "expert-auto",
+      "expertModel": "gpt-6-astra",
+      "expertPolicy": "constraints"
+    },
+    {
+      "id": "fixed-sol-high",
+      "kind": "fixed",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      }
+    },
+    {
+      "id": "fixed-astra-high",
+      "kind": "fixed",
+      "route": {
+        "model": "gpt-6-astra",
+        "effort": "high"
+      }
+    },
+    {
+      "id": "fixed-astra-xhigh",
+      "kind": "fixed",
+      "route": {
+        "model": "gpt-6-astra",
+        "effort": "xhigh"
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "id": "cross-known",
+      "category": "cross-known",
+      "group": "pilot-cross-known",
+      "split": "calibration",
+      "origin": "synthetic",
+      "snapshot": "snapshots/cross-known",
+      "prompts": [
+        "有两个独立服务的简化实现：directory-service.mjs 提供游标分页协议，sync-service.mjs 是同步消费者。协议和验收规则已确定，请同时落实：page(records, after, size) 返回 {items,next}，next 为最后一个条目 id，已经到最后一页时为 null；after 未找到应抛 Error；size 必须为正整数。collect(fetchPage,size) 按 next 逐页收集，保留原顺序；空 items 仍有 next 时继续读取；游标重复应抛 Error 防止无限循环；网络异常原样传播。两服务独立部署，不共享内部数据结构，不新增依赖。"
+      ],
+      "acceptance": {
+        "argv": [
+          "node",
+          "{suite}/acceptance.mjs",
+          "cross-known"
+        ],
+        "timeoutMs": 20000
+      },
+      "limits": {
+        "wallMs": 240000,
+        "toolCalls": 30,
+        "tokens": 600000
+      }
+    },
+    {
+      "id": "ledger-batch",
+      "category": "coupled-diagnosis",
+      "group": "ledger-batch",
+      "split": "holdout",
+      "origin": "synthetic",
+      "snapshot": "snapshots/ledger-batch",
+      "prompts": [
+        "ledger.mjs 的内存事件账本在乱序和失败批次后状态错误。请查明并修复 createLedger()，保留 applyBatch(events)/get(id)。每个事件的 id 为非空字符串，version 为正安全整数，value 为字符串。每个 id 从 version=1 起，仅连续版本对外可见；有缺口时缓存较新事件，补齐后连续推进，get 返回 {version,value}，尚无连续版本时返回 undefined。同一 id/version 的重复值忽略，不同值冲突必须抛 Error，包括已应用和缓存版本。不同 id 独立；跨 id 的整个批次必须原子提交：任意非法事件、冲突或非数组输入都抛 Error，不能改变此前已应用、缓存或去重状态。空批次合法；get 返回对象被调用方修改不得污染内部状态。不能改变输入事件。请实际修改并自测，无需新增依赖。",
+        "同一任务只做一个文档修改：把 README.md 首行 # Ledger draft 改为 # Ledger，其他文字、空格和换行原样保留。本轮不重新设计或修改已修复的账本。"
+      ],
+      "acceptance": {
+        "argv": [
+          "node",
+          "{suite}/acceptance.mjs",
+          "ledger-batch"
+        ],
+        "timeoutMs": 20000
+      },
+      "limits": {
+        "wallMs": 420000,
+        "toolCalls": 50,
+        "tokens": 600000
+      }
+    }
+  ]
+}

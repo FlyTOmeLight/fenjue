@@ -1,0 +1,19 @@
+Fenjue is independently written.
+Design research references (no source copied into this implementation):
+- gargpratyush/jev-router, MIT, 38da6b84ea01241bfc41fbddc0928d0f40a703f0
+- flaviusapop/jev-router, MIT, 0ada4f883127ea9e5cd0e00521b442ce804b17c9
+- dirien/jev-router, Apache-2.0, f9093109b369b9d01e6b06d1a2da8f3d4652b173
+- 0xNatoshi/jev-codex-router, MIT, 8701ef788aa8cb0948f299538747fb01029d32b8
+
+Kev protocol compatibility references (no source or model weights bundled):
+- jaredpalmer/kev, Apache-2.0, 90512f1c517d977741f2104470a40635408236c9
+  https://github.com/jaredpalmer/kev
+
+Codex is a separate program distributed by OpenAI under its own license.
+Fenjue does not bundle Codex model instructions or user credentials.
+
+The optional interactive status bar uses an externally installed tmux (ISC).
+tmux and its dependencies are not bundled. See https://github.com/tmux/tmux/blob/master/COPYING.
+
+The native App Server gateway uses ws 8.22.0 (MIT), installed through npm.
+Its license is distributed with the dependency. See https://github.com/websockets/ws/blob/master/LICENSE.

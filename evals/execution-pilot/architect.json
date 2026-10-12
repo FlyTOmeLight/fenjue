@@ -1,0 +1,202 @@
+{
+  "version": 1,
+  "strategies": [
+    {
+      "id": "sol-astra-auto",
+      "kind": "expert-auto",
+      "expertModel": "gpt-6-astra"
+    },
+    {
+      "id": "sol-auto",
+      "kind": "sol-auto"
+    },
+    {
+      "id": "sol-self-review",
+      "kind": "advisor-auto",
+      "advisorRoute": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      }
+    },
+    {
+      "id": "sol-astra-review",
+      "kind": "advisor-auto",
+      "advisorRoute": {
+        "model": "gpt-6-astra",
+        "effort": "high"
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "id": "mechanical-doc",
+      "category": "mechanical-doc",
+      "group": "mechanical-doc",
+      "split": "calibration",
+      "origin": "synthetic",
+      "snapshot": "snapshots/mechanical-doc",
+      "prompts": [
+        "README.md 中仅把安装命令 npm install 改为 npm ci；其余文字、空格、换行和运行命令保持原样。请实际修改文件。"
+      ],
+      "acceptance": {
+        "argv": [
+          "node",
+          "{suite}/acceptance.mjs",
+          "mechanical-doc"
+        ],
+        "timeoutMs": 10000
+      },
+      "limits": {
+        "wallMs": 240000,
+        "toolCalls": 30,
+        "tokens": 600000
+      },
+      "reviewCheckpoints": []
+    },
+    {
+      "id": "csv-feature",
+      "category": "csv-feature",
+      "group": "csv-feature",
+      "split": "calibration",
+      "origin": "synthetic",
+      "snapshot": "snapshots/csv-feature",
+      "prompts": [
+        "实现 csv.mjs 的 parseCSV(text)。返回二维字符串数组；支持逗号分隔、双引号字段（其中可包含逗号和换行）、两个双引号转义为一个双引号、CRLF 和 LF 行分隔、空字段。空输入返回 []，单个末尾换行不额外产生一行。非法未闭合引号或引号字段结束后出现普通字符时抛出 Error。无需依赖，保留导出签名。请实际实现并自测。"
+      ],
+      "acceptance": {
+        "argv": [
+          "node",
+          "{suite}/acceptance.mjs",
+          "csv-feature"
+        ],
+        "timeoutMs": 10000
+      },
+      "limits": {
+        "wallMs": 240000,
+        "toolCalls": 30,
+        "tokens": 600000
+      },
+      "reviewCheckpoints": [
+        "repeated-error",
+        "final"
+      ]
+    },
+    {
+      "id": "local-diagnosis",
+      "category": "local-diagnosis",
+      "group": "local-diagnosis",
+      "split": "calibration",
+      "origin": "synthetic",
+      "snapshot": "snapshots/local-diagnosis",
+      "prompts": [
+        "pool.mjs 的 runPool(jobs, limit) 在多个异步任务耗时不同时偶发把返回结果对应到错误输入。请先查明原因再修复：返回 allSettled 风格结果并严格对应原输入次序；并发不超过 limit；一个任务失败不能中止其他任务。limit 必须是正整数，否则抛出 RangeError；空 jobs 返回 []。不新增依赖。"
+      ],
+      "acceptance": {
+        "argv": [
+          "node",
+          "{suite}/acceptance.mjs",
+          "local-diagnosis"
+        ],
+        "timeoutMs": 10000
+      },
+      "limits": {
+        "wallMs": 240000,
+        "toolCalls": 30,
+        "tokens": 600000
+      },
+      "reviewCheckpoints": [
+        "plan",
+        "repeated-error",
+        "final"
+      ]
+    },
+    {
+      "id": "cross-known",
+      "category": "cross-known",
+      "group": "cross-known",
+      "split": "calibration",
+      "origin": "synthetic",
+      "snapshot": "snapshots/cross-known",
+      "prompts": [
+        "有两个独立服务的简化实现：directory-service.mjs 提供游标分页协议，sync-service.mjs 是同步消费者。协议和验收规则已确定，请同时落实：page(records, after, size) 返回 {items,next}，next 为最后一个条目 id，已经到最后一页时为 null；after 未找到应抛 Error；size 必须为正整数。collect(fetchPage,size) 按 next 逐页收集，保留原顺序；空 items 仍有 next 时继续读取；游标重复应抛 Error 防止无限循环；网络异常原样传播。两服务独立部署，不共享内部数据结构，不新增依赖。"
+      ],
+      "acceptance": {
+        "argv": [
+          "node",
+          "{suite}/acceptance.mjs",
+          "cross-known"
+        ],
+        "timeoutMs": 10000
+      },
+      "limits": {
+        "wallMs": 240000,
+        "toolCalls": 30,
+        "tokens": 600000
+      },
+      "reviewCheckpoints": [
+        "plan",
+        "repeated-error",
+        "final"
+      ]
+    },
+    {
+      "id": "cross-unknown",
+      "category": "cross-unknown",
+      "group": "cross-unknown",
+      "split": "calibration",
+      "origin": "synthetic",
+      "snapshot": "snapshots/cross-unknown",
+      "prompts": [
+        "两个独立服务之间的投影结果有故障：source-service.mjs 投递事件可能重复，线上传输还可能乱序；projection-service.mjs 最终值偶尔回到了旧版本，根因未定位。请分析服务交互并修复投影端。事件 {id,version,value}，version 为正整数；每个 id 只应用严格更新的版本，重复和旧版本忽略，校验失败抛 Error 且不污染已有状态；不同 id 独立。保留 apply/get 接口，不修改源端，因为重复投递是其协议。请实际修改并自测。"
+      ],
+      "acceptance": {
+        "argv": [
+          "node",
+          "{suite}/acceptance.mjs",
+          "cross-unknown"
+        ],
+        "timeoutMs": 10000
+      },
+      "limits": {
+        "wallMs": 240000,
+        "toolCalls": 30,
+        "tokens": 600000
+      },
+      "reviewCheckpoints": [
+        "plan",
+        "repeated-error",
+        "final"
+      ]
+    },
+    {
+      "id": "multi-turn",
+      "category": "multi-turn",
+      "group": "multi-turn",
+      "split": "calibration",
+      "origin": "synthetic",
+      "snapshot": "snapshots/multi-turn",
+      "prompts": [
+        "修改 search.mjs：search(items,query) 按 label 做大小写不敏感的子串匹配，保留输入次序，不修改输入数组和对象；空 query 返回全部条目。无需依赖。",
+        "补充同一任务的约束：比较前将 query 和 label 的 Unicode 文本规范化为 NFC；匹配仍不区分大小写。请落实，返回的条目仍必须是原对象。"
+      ],
+      "acceptance": {
+        "argv": [
+          "node",
+          "{suite}/acceptance.mjs",
+          "multi-turn"
+        ],
+        "timeoutMs": 10000
+      },
+      "limits": {
+        "wallMs": 240000,
+        "toolCalls": 30,
+        "tokens": 600000
+      },
+      "reviewCheckpoints": [
+        "repeated-error",
+        "final"
+      ]
+    }
+  ],
+  "baseline": "sol-astra-auto"
+}

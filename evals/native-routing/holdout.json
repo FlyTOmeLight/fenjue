@@ -1,0 +1,438 @@
+[
+  {
+    "id": "scheduler-design",
+    "group": "scheduler",
+    "split": "holdout",
+    "turns": [
+      {
+        "text": "只在一个进程内设计任务调度器。公平性、任务优先级、截止时间和并发上限互相影响。比较两种调度方案，说明取舍。",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "architecture",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "coupled",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6-astra",
+              "effort": "high"
+            }
+          ]
+        },
+        "evidence": "方案已审定：按优先级队列调度，队列内先进先出；并发上限为 4，超时取消尚未启动的任务。"
+      },
+      {
+        "text": "将刚才确定的调度规则整理成四条，不再比较方案。",
+        "features": {
+          "relation": "continue",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ]
+        }
+      },
+      {
+        "text": "继续",
+        "features": {
+          "relation": "continue",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ]
+        }
+      },
+      {
+        "text": "按已确认的规则实现同一项目的队列与 worker，不重新设计调度策略。",
+        "features": {
+          "relation": "continue",
+          "scope": "multifile",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "contract"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ]
+        }
+      },
+      {
+        "text": "负载测试出现任务饥饿：提升优先级会造成超时任务占满名额，直接取消又破坏必须执行的依赖。请结合这三项约束重新定位和设计修复。",
+        "features": {
+          "relation": "correction",
+          "scope": "multifile",
+          "reasoning": "diagnosis",
+          "uncertainty": "unknown_cause",
+          "consequence": "reversible"
+        },
+        "constraints": "coupled",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6-astra",
+              "effort": "high"
+            }
+          ]
+        }
+      },
+      {
+        "text": "它那里再改一下。",
+        "features": {
+          "relation": "uncertain",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "missing",
+          "consequence": "reversible"
+        },
+        "constraints": "coupled",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6-astra",
+              "effort": "high"
+            }
+          ]
+        },
+        "reasons": [
+          "low-confidence"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "protocol-known",
+    "group": "protocol-known-new",
+    "split": "holdout",
+    "turns": [
+      {
+        "text": "两个独立服务已确认协议：请求字段为 id，响应字段为 ok。严格按现有 JSON schema 对接，不需要设计新协议。",
+        "features": {
+          "relation": "new",
+          "scope": "cross_system",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "contract"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6-astra",
+              "effort": "medium"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ]
+        }
+      },
+      {
+        "text": "按这份接口生成两条 curl 示例，仅输出命令，不执行请求。",
+        "features": {
+          "relation": "continue",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ]
+        }
+      },
+      {
+        "text": "列出方案里写明的三个部署步骤，只整理现有文档。",
+        "features": {
+          "relation": "continue",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "local-fault",
+    "group": "formatter",
+    "split": "holdout",
+    "turns": [
+      {
+        "text": "一个日期格式化函数的月份偶尔少一，原因未知。请读代码定位并修复；没有其他业务约束。",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "diagnosis",
+          "uncertainty": "unknown_cause",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ]
+        },
+        "evidence": "已查明原因：getMonth 返回 0 到 11。规则确定为输出月份加一。"
+      },
+      {
+        "text": "按已经定位的原因修复函数并跑现有测试。",
+        "features": {
+          "relation": "continue",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ]
+        }
+      },
+      {
+        "text": "测试机缺少 Node.js，先说明如何安装已有项目要求的版本，本轮不改逻辑。",
+        "features": {
+          "relation": "continue",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ]
+        }
+      },
+      {
+        "text": "测试接口返回 401，日志显示登录凭据缺失。只解释这个错误，不修改授权逻辑。",
+        "features": {
+          "relation": "continue",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "dependency-tradeoff",
+    "group": "cache-design",
+    "split": "holdout",
+    "turns": [
+      {
+        "text": "在同一缓存模块内比较淘汰算法。内存固定，热点会突变，必须同时兼顾命中率、写入延迟与过期一致性；请推导这几项要求如何相互影响。",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "architecture",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "coupled",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6-astra",
+              "effort": "high"
+            }
+          ]
+        }
+      },
+      {
+        "text": "另一个无关任务：把这三个词按字母排序：gamma、alpha、beta。",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ]
+        }
+      },
+      {
+        "text": "那个缓存方案还没讨论完，恢复原来的目标，但此前关键约束现在看不到，先索要缺失信息。",
+        "features": {
+          "relation": "uncertain",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "missing",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ]
+        },
+        "reasons": [
+          "classified"
+        ]
+      }
+    ]
+  }
+]

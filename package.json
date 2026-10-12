@@ -1,0 +1,60 @@
+{
+  "name": "fenjue",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Task-aware model and reasoning routing for Codex",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "bin": {
+    "fenjue": "dist/src/cli.js"
+  },
+  "files": [
+    "dist/src",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "check": "tsc --noEmit",
+    "verify:codex": "npm run build && node dist/scripts/verify-codex.js",
+    "verify:native": "npm run build && node dist/scripts/verify-native-routing.js",
+    "verify:native:terminal": "npm run build && python3 scripts/verify-native-terminal.py",
+    "verify:native:router": "npm run build && python3 scripts/verify-native-terminal.py --router",
+    "verify:native:router:live": "npm run build && node dist/scripts/verify-native-router-live.js",
+    "verify:native:review": "npm run build && node dist/scripts/verify-native-review.js",
+    "verify:native:capacity": "npm run build && node dist/scripts/verify-native-capacity.js",
+    "verify:terminal": "npm run build && python3 scripts/verify-terminal.py",
+    "eval:classifier": "npm run build && node dist/scripts/evaluate-classifier.js",
+    "eval:native:classifier": "npm run build && node dist/scripts/evaluate-native-classifier.js",
+    "eval:compare": "npm run build && node dist/scripts/compare-classifiers.js",
+    "start": "node dist/src/cli.js",
+    "eval:tasks": "npm run build && node dist/scripts/evaluate-tasks.js"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.4",
+    "@types/ws": "8.18.2",
+    "typescript": "7.0.2"
+  },
+  "dependencies": {
+    "ws": "8.22.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FlyTOmeLight/fenjue.git"
+  },
+  "homepage": "https://github.com/FlyTOmeLight/fenjue#readme",
+  "bugs": {
+    "url": "https://github.com/FlyTOmeLight/fenjue/issues"
+  },
+  "keywords": [
+    "codex",
+    "model-routing",
+    "reasoning",
+    "evaluation"
+  ]
+}

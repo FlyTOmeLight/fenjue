@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "auth": "chatgpt",
+  "defaultRoute": "balanced",
+  "routes": {
+    "fast": { "model": "gpt-6.1-sol", "effort": "low" },
+    "balanced": { "model": "gpt-6.1-sol", "effort": "medium" },
+    "deep": { "model": "gpt-6.1-sol", "effort": "high" }
+  },
+  "rules": [{ "prefix": "[deep]", "route": "deep" }],
+  "semantic": {
+    "provider": "kev",
+    "endpoint": "http://127.0.0.1:8009/v1/systemone",
+    "mode": "shadow",
+    "model": "kev-latest",
+    "roles": { "fast": "fast", "balanced": "balanced", "deep": "deep" },
+    "timeoutMs": 30000,
+    "maxInputBytes": 24000,
+    "minConfidence": 0.75
+  }
+}

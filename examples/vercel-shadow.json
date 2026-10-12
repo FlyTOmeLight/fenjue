@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "auth": "chatgpt",
+  "defaultRoute": "balanced",
+  "routes": {
+    "fast": { "model": "gpt-6.1-sol", "effort": "low" },
+    "balanced": { "model": "gpt-6.1-sol", "effort": "medium" },
+    "deep": { "model": "gpt-6.1-sol", "effort": "high" }
+  },
+  "rules": [{ "prefix": "[deep]", "route": "deep" }],
+  "semantic": {
+    "provider": "vercel",
+    "mode": "shadow",
+    "model": "typesafe-ai/jev",
+    "roles": { "fast": "fast", "balanced": "balanced", "deep": "deep" },
+    "timeoutMs": 30000,
+    "maxInputBytes": 24000,
+    "minConfidence": 0.75
+  }
+}

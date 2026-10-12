@@ -1,0 +1,85 @@
+[
+  {
+    "id": "synthetic-cli-stages",
+    "group": "synthetic-cli",
+    "split": "calibration",
+    "turns": [
+      {
+        "text": "给一个本地日志查询工具设计命令行参数，比较子命令和统一选项两种接口。",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "architecture",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ]
+        },
+        "evidence": "已确定使用 search 子命令，参数为 --level 和 --since。"
+      },
+      {
+        "text": "把已确定的两个参数列成两行，不增加新选项。",
+        "features": {
+          "relation": "continue",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ]
+        }
+      },
+      {
+        "text": "另一个独立任务：给一个纯函数增加对负整数输入的检查，非法输入抛出 RangeError。",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "constraints": "independent",
+        "allowed": {
+          "baseline": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "constraints": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

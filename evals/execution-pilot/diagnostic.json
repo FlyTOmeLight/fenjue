@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "strategies": [
+    {
+      "id": "fixed-sol-high",
+      "kind": "fixed",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      }
+    },
+    {
+      "id": "fixed-astra-medium",
+      "kind": "fixed",
+      "route": {
+        "model": "gpt-6-astra",
+        "effort": "medium"
+      }
+    },
+    {
+      "id": "fixed-astra-high",
+      "kind": "fixed",
+      "route": {
+        "model": "gpt-6-astra",
+        "effort": "high"
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "id": "cross-known",
+      "category": "cross-known",
+      "group": "cross-known",
+      "split": "calibration",
+      "origin": "synthetic",
+      "snapshot": "snapshots/cross-known",
+      "prompts": [
+        "有两个独立服务的简化实现：directory-service.mjs 提供游标分页协议，sync-service.mjs 是同步消费者。协议和验收规则已确定，请同时落实：page(records, after, size) 返回 {items,next}，next 为最后一个条目 id，已经到最后一页时为 null；after 未找到应抛 Error；size 必须为正整数。collect(fetchPage,size) 按 next 逐页收集，保留原顺序；空 items 仍有 next 时继续读取；游标重复应抛 Error 防止无限循环；网络异常原样传播。两服务独立部署，不共享内部数据结构，不新增依赖。"
+      ],
+      "acceptance": {
+        "argv": [
+          "node",
+          "{suite}/acceptance.mjs",
+          "cross-known"
+        ],
+        "timeoutMs": 10000
+      },
+      "limits": {
+        "wallMs": 240000,
+        "toolCalls": 30,
+        "tokens": 600000
+      }
+    },
+    {
+      "id": "cross-unknown",
+      "category": "cross-unknown",
+      "group": "cross-unknown",
+      "split": "calibration",
+      "origin": "synthetic",
+      "snapshot": "snapshots/cross-unknown",
+      "prompts": [
+        "两个独立服务之间的投影结果有故障：source-service.mjs 投递事件可能重复，线上传输还可能乱序；projection-service.mjs 最终值偶尔回到了旧版本，根因未定位。请分析服务交互并修复投影端。事件 {id,version,value}，version 为正整数；每个 id 只应用严格更新的版本，重复和旧版本忽略，校验失败抛 Error 且不污染已有状态；不同 id 独立。保留 apply/get 接口，不修改源端，因为重复投递是其协议。请实际修改并自测。"
+      ],
+      "acceptance": {
+        "argv": [
+          "node",
+          "{suite}/acceptance.mjs",
+          "cross-unknown"
+        ],
+        "timeoutMs": 10000
+      },
+      "limits": {
+        "wallMs": 240000,
+        "toolCalls": 30,
+        "tokens": 600000
+      }
+    }
+  ],
+  "purpose": "diagnostic-fixed-models"
+}

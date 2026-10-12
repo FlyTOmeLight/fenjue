@@ -6,7 +6,7 @@ import { mkdtemp, writeFile, readFile, rm, access } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { setTimeout as delay } from "node:timers/promises";
-import { createTmuxDisplay, interactiveCodex, startTmuxSession } from "../src/tmux.js";
+import { createTmuxDisplay, interactiveCodex, startTmuxSession, paneExitCode } from "../src/tmux.js";
 
 const exec = promisify(execFile);
 let tmux = true;
@@ -56,4 +56,11 @@ test("tmux isolates sessions, preserves argv, renders literal route data, and cl
   await first.close();
   await assert.rejects(access(first.socket));
   await command(second.socket, "has-session", "-t", "fenjue");
+});
+
+test("tmux pane exit receipts preserve normal exits and named or numeric signals", () => {
+  for (const [status, signal, expected] of [
+    ["0", "", 0], ["7", "", 7], ["143", "", 143],
+    ["", "term", 143], ["", "TERM", 143], ["", "15", 143], ["", "9", 137],
+  ] as const) assert.equal(paneExitCode(status, signal), expected, `${status}:${signal}`);
 });

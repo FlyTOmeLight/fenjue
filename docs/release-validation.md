@@ -8,7 +8,7 @@
 | --- | --- |
 | `npm ci --ignore-scripts` | 从锁文件安装成功 |
 | `npm run check` | 通过 |
-| `npm test` | 185/185 通过，无跳过 |
+| `npm test` | 186/186 通过，无跳过 |
 | `npm run verify:terminal` | 终端、底栏、复制、滚动、取消与清理通过 |
 | `npm run verify:codex` | 实际 Codex 到本地模拟上游的工具续接与代理协议通过 |
 | `npm run verify:native` | 原生跨模型、审批、中断、恢复及压缩通过 |
@@ -23,3 +23,5 @@
 公开文件已检查个人路径、会话 ID、私钥和常见 token 格式，没有命中；本地 Markdown 文件链接有效。该检查不等于全面的凭据识别保证。真实会话、历史结果、第三方虚拟环境和个人配置不进入 Git 提交。
 
 GitHub CI 对 Node 22 / 24 / 26 运行常规检查及评测预检。远端实际结果以仓库 [Actions](https://github.com/FlyTOmeLight/fenjue/actions) 为准，不将本机检查结果当作远端成功。
+
+首次 Linux CI 发现 tmux 信号字段在 Linux 为数字、macOS 为名称。已修正两种格式的退出码解析，并新增回归测试；修正后本机重新执行类型、全量测试与终端验收。

@@ -54,6 +54,13 @@ export function interactiveCodex(args: string[]): boolean {
   return true;
 }
 
+export function paneExitCode(status: string, signalName: string): number {
+  const signal = `SIG${signalName.toUpperCase()}` as NodeJS.Signals;
+  // tmux uses sys_signame on macOS; Linux builds report the signal number.
+  const signalNumber = /^\d+$/.test(signalName) ? Number(signalName) : constants.signals[signal];
+  return status ? Number(status) : 128 + (signalNumber ?? 1);
+}
+
 export async function startTmuxSession(argv: string[]) {
   try { await exec("tmux", ["-V"], { timeout: 5000 }); }
   catch { throw new Error("底栏需要 tmux；macOS 可运行 brew install tmux，或使用 --no-bar 关闭底栏"); }
@@ -102,8 +109,7 @@ export async function startTmuxSession(argv: string[]) {
           if (code) return code;
           const state = (await command(["display-message", "-p", "-t", "fenjue:0.0", "#{pane_dead}:#{pane_dead_status}:#{pane_dead_signal}"])).stdout.trim().split(":");
           if (state[0] !== "1") return 130; // Client detached before Codex exited.
-          const signal = `SIG${state[2]?.toUpperCase()}` as NodeJS.Signals;
-          const result = state[1] ? Number(state[1]) : 128 + (constants.signals[signal] ?? 1);
+          const result = paneExitCode(state[1] ?? "", state[2] ?? "");
           // Keep startup/CLI errors readable after tmux restores the shell screen.
           if (result > 0 && result < 128) {
             const output = (await command(["capture-pane", "-p", "-t", "fenjue:0.0", "-S", "-20"])).stdout.trimEnd();

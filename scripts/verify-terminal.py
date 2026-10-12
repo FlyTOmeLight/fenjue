@@ -291,7 +291,7 @@ try:
         finally:
             terminal.close()
 
-        # tmux reports pane signals as lowercase names (for example "term").
+        # tmux reports pane signals as names (macOS) or numbers (Linux).
         killed = temp / "killed.mjs"
         killed.write_text('process.kill(process.pid, "SIGTERM");')
         supervisor = temp / "signal-session.mjs"

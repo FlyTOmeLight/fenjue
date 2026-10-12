@@ -52,6 +52,6 @@ npm start -- codex-native --config fenjue.config.json -- resume
 
 ## 可选采集
 
-省略 `capture` 不采集日常 case 和执行快照。需要采集时，先看 [任务评测](task-evaluation.md#从日常任务生成完整执行-case)，明确项目与路径。
+省略 `capture` 不采集日常 case 和执行快照，但原生入口仍保存用于恢复的任务状态与运行日志，其中可能有任务文本和工具证据。需要采集时，先看 [任务评测](task-evaluation.md#从日常任务生成完整执行-case)，明确项目与路径。
 
 运行日志与采集素材应留在本地。发布问题时使用最小合成复现，删除凭据、真实聊天和项目代码；不要直接上传整个 `.fenjue/`。

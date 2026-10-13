@@ -1,0 +1,2226 @@
+{
+  "date": "2026-10-13",
+  "codeBase": "7fd44a2c605b2026114e60f2819a6d3c226cedc4",
+  "dataset": "evals/native-routing/sol-comparison.json",
+  "classifier": "typesafe-ai/jev",
+  "sol": {
+    "model": "gpt-6.1-sol",
+    "effort": "low",
+    "transport": "Codex App Server using ChatGPT login"
+  },
+  "policy": "balanced-native-v6, same categorical projection; actual Jev probability-policy route additionally recorded",
+  "totalAttemptedClassifierCalls": 58,
+  "notes": [
+    "Synthetic declared references frozen before calls; not independent accuracy labels or downstream task execution.",
+    "All 16 unique turns attempted; 15 unique turns yielded complete pairs across runs. Initial and isolated runtime summaries remain separate.",
+    "13 complete pairs among 15 attempted pairs under isolated runtime. Two incomplete pairs remain recorded; successful-pair timing excludes them.",
+    "No fixed-medium baseline. Every turn classified once per provider; no production continuation shortcuts or second task-boundary pass.",
+    "Token counts are provider reports, not monetary or subscription-quota equivalents. Cache is part of input; reasoning is part of output. Missing counts remain null.",
+    "The second and third batches use identical runtime settings. Provider order alternates. The final scenario starts a new App Server.",
+    "No complete two-repeat run; inconsistentRepeats=0 does not establish stability."
+  ],
+  "isolatedAllAttempts": {
+    "jev": {
+      "calls": 15,
+      "successful": 14,
+      "errors": 1,
+      "p50Ms": 732,
+      "p95Ms": 2811,
+      "elapsedMs": 13317,
+      "usage": {
+        "input": null,
+        "output": null,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": null
+      },
+      "featureMatches": {
+        "relation": 13,
+        "scope": 13,
+        "reasoning": 13,
+        "uncertainty": 14,
+        "consequence": 14
+      },
+      "allFeatureMatches": 12,
+      "routeMatches": 14,
+      "nativeRouteMatches": 14,
+      "inconsistentRepeats": 0
+    },
+    "sol": {
+      "calls": 15,
+      "successful": 14,
+      "errors": 1,
+      "p50Ms": 8387,
+      "p95Ms": 30026,
+      "elapsedMs": 154098,
+      "usage": {
+        "input": null,
+        "output": null,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": null
+      },
+      "featureMatches": {
+        "relation": 14,
+        "scope": 14,
+        "reasoning": 13,
+        "uncertainty": 14,
+        "consequence": 14
+      },
+      "allFeatureMatches": 13,
+      "routeMatches": 14,
+      "inconsistentRepeats": 0
+    }
+  },
+  "isolatedCompletePairs": {
+    "jev": {
+      "calls": 13,
+      "successful": 13,
+      "errors": 0,
+      "p50Ms": 732,
+      "p95Ms": 1402,
+      "elapsedMs": 9836,
+      "usage": {
+        "input": 40457,
+        "output": 2896,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 43353
+      },
+      "featureMatches": {
+        "relation": 12,
+        "scope": 12,
+        "reasoning": 12,
+        "uncertainty": 13,
+        "consequence": 13
+      },
+      "allFeatureMatches": 11,
+      "routeMatches": 13,
+      "nativeRouteMatches": 13,
+      "inconsistentRepeats": 0
+    },
+    "sol": {
+      "calls": 13,
+      "successful": 13,
+      "errors": 0,
+      "p50Ms": 8227,
+      "p95Ms": 16205,
+      "elapsedMs": 108147,
+      "usage": {
+        "input": 136669,
+        "output": 516,
+        "cachedInput": 4864,
+        "reasoning": 19,
+        "total": 137185
+      },
+      "featureMatches": {
+        "relation": 13,
+        "scope": 13,
+        "reasoning": 12,
+        "uncertainty": 13,
+        "consequence": 13
+      },
+      "allFeatureMatches": 12,
+      "routeMatches": 13,
+      "inconsistentRepeats": 0
+    }
+  },
+  "runs": [
+    {
+      "name": "pilot-20261013-v2",
+      "runtime": "initial: local skill instructions included",
+      "startedAt": null,
+      "finishedAt": null,
+      "codexVersion": "codex-cli 0.162.1 (verified locally)",
+      "datasetDigest": "34e89ef037385a46edec688da4549b6f9f6738ac46d0190f58bf6347927556e4",
+      "questionnaireDigest": "4e7ad7df2a0ad689a64ad58ca599ebc40621ad081a864108654ca01cb63bcb9f",
+      "actualCalls": 28,
+      "startupMs": 1971,
+      "interruption": "Host idle sleep 2026-10-13 14:32:34 to 14:39:40 +0800: 426 seconds; incomplete pair excluded from latency comparison.",
+      "pairedSummary": {
+        "jev": {
+          "calls": 13,
+          "successful": 13,
+          "errors": 0,
+          "p50Ms": 601,
+          "p95Ms": 725,
+          "elapsedMs": 7329,
+          "usage": {
+            "input": 40708,
+            "output": 2903,
+            "cachedInput": null,
+            "reasoning": null,
+            "total": 43611
+          },
+          "featureMatches": {
+            "relation": 12,
+            "scope": 13,
+            "reasoning": 13,
+            "uncertainty": 13,
+            "consequence": 13
+          },
+          "allFeatureMatches": 12,
+          "routeMatches": 13,
+          "nativeRouteMatches": 13,
+          "inconsistentRepeats": 0
+        },
+        "sol": {
+          "calls": 13,
+          "successful": 13,
+          "errors": 0,
+          "p50Ms": 8636,
+          "p95Ms": 12839,
+          "elapsedMs": 116680,
+          "usage": {
+            "input": 210644,
+            "output": 515,
+            "cachedInput": 0,
+            "reasoning": 15,
+            "total": 211159
+          },
+          "featureMatches": {
+            "relation": 13,
+            "scope": 13,
+            "reasoning": 13,
+            "uncertainty": 13,
+            "consequence": 13
+          },
+          "allFeatureMatches": 13,
+          "routeMatches": 13,
+          "inconsistentRepeats": 0
+        }
+      },
+      "rows": [
+        {
+          "repeat": 1,
+          "case": "service-phases",
+          "turn": 1,
+          "reference": {
+            "relation": "new",
+            "scope": "cross_system",
+            "reasoning": "architecture",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6-astra",
+              "effort": "high"
+            }
+          ],
+          "inputDigest": "06ae922d7a6fa6611913abd59b039b3b7864348483fe0bca1fcac9bded4adcb9",
+          "observations": {
+            "jev": {
+              "elapsedMs": 644,
+              "usage": {
+                "input": 3031,
+                "output": 223,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3254
+              },
+              "features": {
+                "relation": "new",
+                "scope": "cross_system",
+                "reasoning": "architecture",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6-astra",
+                "effort": "high"
+              },
+              "route": {
+                "model": "gpt-6-astra",
+                "effort": "high"
+              }
+            },
+            "sol": {
+              "elapsedMs": 8284,
+              "usage": {
+                "input": 16134,
+                "output": 38,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 16172
+              },
+              "features": {
+                "relation": "new",
+                "scope": "cross_system",
+                "reasoning": "architecture",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6-astra",
+                "effort": "high"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "service-phases",
+          "turn": 2,
+          "reference": {
+            "relation": "continue",
+            "scope": "cross_system",
+            "reasoning": "solution",
+            "uncertainty": "sufficient",
+            "consequence": "contract"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6-astra",
+              "effort": "medium"
+            }
+          ],
+          "inputDigest": "00735f62f1c737f67dde5a9b30a4e52ffd3badd866aa552aa941d6d2683897e0",
+          "observations": {
+            "sol": {
+              "elapsedMs": 8636,
+              "usage": {
+                "input": 16210,
+                "output": 37,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 16247
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "cross_system",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "contract"
+              },
+              "route": {
+                "model": "gpt-6-astra",
+                "effort": "medium"
+              }
+            },
+            "jev": {
+              "elapsedMs": 725,
+              "usage": {
+                "input": 3143,
+                "output": 221,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3364
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "cross_system",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "contract"
+              },
+              "nativeRoute": {
+                "model": "gpt-6-astra",
+                "effort": "medium"
+              },
+              "route": {
+                "model": "gpt-6-astra",
+                "effort": "medium"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "service-phases",
+          "turn": 3,
+          "reference": {
+            "relation": "continue",
+            "scope": "local",
+            "reasoning": "mechanical",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "inputDigest": "f72afe8f6868e7e18151cb927d2fe3aa8f1ab36b19760651aee6dc41d310b0bd",
+          "observations": {
+            "jev": {
+              "elapsedMs": 410,
+              "usage": {
+                "input": 3218,
+                "output": 224,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3442
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            },
+            "sol": {
+              "elapsedMs": 7287,
+              "usage": {
+                "input": 16259,
+                "output": 38,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 16297
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "service-phases",
+          "turn": 4,
+          "reference": {
+            "relation": "new",
+            "scope": "local",
+            "reasoning": "mechanical",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "inputDigest": "2f21489783981c4fc66ee4b17409972e819056b0cc6a66751c8149ed66113c12",
+          "observations": {
+            "sol": {
+              "elapsedMs": 6557,
+              "usage": {
+                "input": 16282,
+                "output": 38,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 16320
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            },
+            "jev": {
+              "elapsedMs": 601,
+              "usage": {
+                "input": 3252,
+                "output": 224,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3476
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "diagnosis-fix",
+          "turn": 1,
+          "reference": {
+            "relation": "new",
+            "scope": "local",
+            "reasoning": "diagnosis",
+            "uncertainty": "unknown_cause",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "inputDigest": "214cf16066eb7d1e8ae1239dbfa89d49390b5147248a5198bc15f643c87e3885",
+          "observations": {
+            "jev": {
+              "elapsedMs": 386,
+              "usage": {
+                "input": 3019,
+                "output": 223,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3242
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "diagnosis",
+                "uncertainty": "unknown_cause",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            },
+            "sol": {
+              "elapsedMs": 6854,
+              "usage": {
+                "input": 16127,
+                "output": 56,
+                "cachedInput": 0,
+                "reasoning": 15,
+                "total": 16183
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "diagnosis",
+                "uncertainty": "unknown_cause",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "diagnosis-fix",
+          "turn": 2,
+          "reference": {
+            "relation": "continue",
+            "scope": "local",
+            "reasoning": "solution",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "inputDigest": "21f25da18359e784e1a0b8458caf53a33500ac43cdeca5031013a466cad69751",
+          "observations": {
+            "sol": {
+              "elapsedMs": 6942,
+              "usage": {
+                "input": 16187,
+                "output": 37,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 16224
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              }
+            },
+            "jev": {
+              "elapsedMs": 672,
+              "usage": {
+                "input": 3102,
+                "output": 222,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3324
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "diagnosis-fix",
+          "turn": 3,
+          "reference": {
+            "relation": "continue",
+            "scope": "local",
+            "reasoning": "mechanical",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "inputDigest": "5fec5e71f4f86fcd9ee3401bc611c0b49288af109effc87fad1baa2744add386",
+          "observations": {
+            "jev": {
+              "elapsedMs": 491,
+              "usage": {
+                "input": 3148,
+                "output": 224,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3372
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            },
+            "sol": {
+              "elapsedMs": 12839,
+              "usage": {
+                "input": 16219,
+                "output": 38,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 16257
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "diagnosis-fix",
+          "turn": 4,
+          "reference": {
+            "relation": "new",
+            "scope": "local",
+            "reasoning": "solution",
+            "uncertainty": "sufficient",
+            "consequence": "sensitive"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "inputDigest": "a68333c2c772c835562cbd9637e8f76e2cdb842c28f40680510499396af2729a",
+          "observations": {
+            "sol": {
+              "elapsedMs": 9460,
+              "usage": {
+                "input": 16262,
+                "output": 37,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 16299
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "sensitive"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            },
+            "jev": {
+              "elapsedMs": 659,
+              "usage": {
+                "input": 3204,
+                "output": 221,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3425
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "sensitive"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "failure-recovery",
+          "turn": 1,
+          "reference": {
+            "relation": "new",
+            "scope": "multifile",
+            "reasoning": "solution",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "inputDigest": "3698381ce8d3d4e3ab35e2739168d00038d3f044621979e189aec9010aea59bc",
+          "observations": {
+            "jev": {
+              "elapsedMs": 462,
+              "usage": {
+                "input": 3030,
+                "output": 224,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3254
+              },
+              "features": {
+                "relation": "new",
+                "scope": "multifile",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              }
+            },
+            "sol": {
+              "elapsedMs": 11394,
+              "usage": {
+                "input": 16133,
+                "output": 39,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 16172
+              },
+              "features": {
+                "relation": "new",
+                "scope": "multifile",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "failure-recovery",
+          "turn": 2,
+          "reference": {
+            "relation": "correction",
+            "scope": "multifile",
+            "reasoning": "diagnosis",
+            "uncertainty": "unknown_cause",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "inputDigest": "1caf1b493cceaaf6a0542f95e65f575ac9f73e4ae81faca8f6536b5c8218aeed",
+          "observations": {
+            "sol": {
+              "elapsedMs": 12767,
+              "usage": {
+                "input": 16177,
+                "output": 42,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 16219
+              },
+              "features": {
+                "relation": "correction",
+                "scope": "multifile",
+                "reasoning": "diagnosis",
+                "uncertainty": "unknown_cause",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            },
+            "jev": {
+              "elapsedMs": 662,
+              "usage": {
+                "input": 3097,
+                "output": 225,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3322
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "multifile",
+                "reasoning": "diagnosis",
+                "uncertainty": "unknown_cause",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "failure-recovery",
+          "turn": 3,
+          "reference": {
+            "relation": "continue",
+            "scope": "multifile",
+            "reasoning": "solution",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "inputDigest": "82c9c0e5fb6bf5866046e000bcaada9e37c44216dad176b9bc4ab011531a2941",
+          "observations": {
+            "jev": {
+              "elapsedMs": 440,
+              "usage": {
+                "input": 3196,
+                "output": 224,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3420
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "multifile",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              }
+            },
+            "sol": {
+              "elapsedMs": 9056,
+              "usage": {
+                "input": 16245,
+                "output": 39,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 16284
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "multifile",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "failure-recovery",
+          "turn": 4,
+          "reference": {
+            "relation": "continue",
+            "scope": "local",
+            "reasoning": "mechanical",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "inputDigest": "06695a9d99d4620efbcccb2d9c36a95184a8ab5f1eb86ebf0c64cc750335d20d",
+          "observations": {
+            "sol": {
+              "elapsedMs": 6465,
+              "usage": {
+                "input": 16283,
+                "output": 38,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 16321
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            },
+            "jev": {
+              "elapsedMs": 701,
+              "usage": {
+                "input": 3250,
+                "output": 224,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3474
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "ambiguity-and-quote",
+          "turn": 1,
+          "reference": {
+            "relation": "new",
+            "scope": "local",
+            "reasoning": "mechanical",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "inputDigest": "6de57d5c341f2d2a52b861c6144c218515607e7eb729dabaf74917fca510e257",
+          "observations": {
+            "jev": {
+              "elapsedMs": 476,
+              "usage": {
+                "input": 3018,
+                "output": 224,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3242
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            },
+            "sol": {
+              "elapsedMs": 10139,
+              "usage": {
+                "input": 16126,
+                "output": 38,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 16164
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "ambiguity-and-quote",
+          "turn": 2,
+          "reference": {
+            "relation": "new",
+            "scope": "local",
+            "reasoning": "architecture",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "inputDigest": "ca8a1bd4272c44fb009b486ac5370cc6e24b3a5eb9dd86ba7663ed34d8f08267",
+          "observations": {
+            "sol": {
+              "elapsedMs": 426327,
+              "usage": {
+                "input": null,
+                "output": null,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": null
+              },
+              "error": "Native event timeout"
+            },
+            "jev": {
+              "elapsedMs": 284,
+              "usage": {
+                "input": null,
+                "output": null,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": null
+              },
+              "error": "unavailable"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "isolated-20261013",
+      "runtime": "isolated: local skills disabled per thread",
+      "startedAt": "2026-10-13T06:44:28.484Z",
+      "finishedAt": "2026-10-13T06:46:16.021Z",
+      "codexVersion": "codex-cli 0.162.1",
+      "datasetDigest": "34e89ef037385a46edec688da4549b6f9f6738ac46d0190f58bf6347927556e4",
+      "questionnaireDigest": "4e7ad7df2a0ad689a64ad58ca599ebc40621ad081a864108654ca01cb63bcb9f",
+      "actualCalls": 22,
+      "startupMs": 1875,
+      "interruption": "Jev unavailable on failure-recovery:3; retained as failure, stopped batch.",
+      "pairedSummary": {
+        "jev": {
+          "calls": 10,
+          "successful": 10,
+          "errors": 0,
+          "p50Ms": 732,
+          "p95Ms": 1402,
+          "elapsedMs": 8109,
+          "usage": {
+            "input": 31244,
+            "output": 2229,
+            "cachedInput": null,
+            "reasoning": null,
+            "total": 33473
+          },
+          "featureMatches": {
+            "relation": 9,
+            "scope": 9,
+            "reasoning": 10,
+            "uncertainty": 10,
+            "consequence": 10
+          },
+          "allFeatureMatches": 9,
+          "routeMatches": 10,
+          "nativeRouteMatches": 10,
+          "inconsistentRepeats": 0
+        },
+        "sol": {
+          "calls": 10,
+          "successful": 10,
+          "errors": 0,
+          "p50Ms": 8227,
+          "p95Ms": 9198,
+          "elapsedMs": 78794,
+          "usage": {
+            "input": 105210,
+            "output": 404,
+            "cachedInput": 4864,
+            "reasoning": 19,
+            "total": 105614
+          },
+          "featureMatches": {
+            "relation": 10,
+            "scope": 10,
+            "reasoning": 10,
+            "uncertainty": 10,
+            "consequence": 10
+          },
+          "allFeatureMatches": 10,
+          "routeMatches": 10,
+          "inconsistentRepeats": 0
+        }
+      },
+      "rows": [
+        {
+          "repeat": 1,
+          "case": "service-phases",
+          "turn": 1,
+          "reference": {
+            "relation": "new",
+            "scope": "cross_system",
+            "reasoning": "architecture",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6-astra",
+              "effort": "high"
+            }
+          ],
+          "inputDigest": "06ae922d7a6fa6611913abd59b039b3b7864348483fe0bca1fcac9bded4adcb9",
+          "observations": {
+            "jev": {
+              "elapsedMs": 1177,
+              "usage": {
+                "input": 3031,
+                "output": 223,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3254
+              },
+              "features": {
+                "relation": "new",
+                "scope": "cross_system",
+                "reasoning": "architecture",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6-astra",
+                "effort": "high"
+              },
+              "route": {
+                "model": "gpt-6-astra",
+                "effort": "high"
+              }
+            },
+            "sol": {
+              "elapsedMs": 7303,
+              "usage": {
+                "input": 10456,
+                "output": 38,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 10494
+              },
+              "features": {
+                "relation": "new",
+                "scope": "cross_system",
+                "reasoning": "architecture",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6-astra",
+                "effort": "high"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "service-phases",
+          "turn": 2,
+          "reference": {
+            "relation": "continue",
+            "scope": "cross_system",
+            "reasoning": "solution",
+            "uncertainty": "sufficient",
+            "consequence": "contract"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6-astra",
+              "effort": "medium"
+            }
+          ],
+          "inputDigest": "00735f62f1c737f67dde5a9b30a4e52ffd3badd866aa552aa941d6d2683897e0",
+          "observations": {
+            "sol": {
+              "elapsedMs": 9198,
+              "usage": {
+                "input": 10532,
+                "output": 37,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 10569
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "cross_system",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "contract"
+              },
+              "route": {
+                "model": "gpt-6-astra",
+                "effort": "medium"
+              }
+            },
+            "jev": {
+              "elapsedMs": 850,
+              "usage": {
+                "input": 3143,
+                "output": 221,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3364
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "cross_system",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "contract"
+              },
+              "nativeRoute": {
+                "model": "gpt-6-astra",
+                "effort": "medium"
+              },
+              "route": {
+                "model": "gpt-6-astra",
+                "effort": "medium"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "service-phases",
+          "turn": 3,
+          "reference": {
+            "relation": "continue",
+            "scope": "local",
+            "reasoning": "mechanical",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "inputDigest": "f72afe8f6868e7e18151cb927d2fe3aa8f1ab36b19760651aee6dc41d310b0bd",
+          "observations": {
+            "jev": {
+              "elapsedMs": 513,
+              "usage": {
+                "input": 3218,
+                "output": 224,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3442
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            },
+            "sol": {
+              "elapsedMs": 8227,
+              "usage": {
+                "input": 10581,
+                "output": 38,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 10619
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "service-phases",
+          "turn": 4,
+          "reference": {
+            "relation": "new",
+            "scope": "local",
+            "reasoning": "mechanical",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "inputDigest": "2f21489783981c4fc66ee4b17409972e819056b0cc6a66751c8149ed66113c12",
+          "observations": {
+            "sol": {
+              "elapsedMs": 7255,
+              "usage": {
+                "input": 10604,
+                "output": 38,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 10642
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            },
+            "jev": {
+              "elapsedMs": 1069,
+              "usage": {
+                "input": 3252,
+                "output": 224,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3476
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "diagnosis-fix",
+          "turn": 1,
+          "reference": {
+            "relation": "new",
+            "scope": "local",
+            "reasoning": "diagnosis",
+            "uncertainty": "unknown_cause",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "inputDigest": "214cf16066eb7d1e8ae1239dbfa89d49390b5147248a5198bc15f643c87e3885",
+          "observations": {
+            "jev": {
+              "elapsedMs": 372,
+              "usage": {
+                "input": 3019,
+                "output": 223,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3242
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "diagnosis",
+                "uncertainty": "unknown_cause",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            },
+            "sol": {
+              "elapsedMs": 8824,
+              "usage": {
+                "input": 10449,
+                "output": 39,
+                "cachedInput": 4864,
+                "reasoning": 0,
+                "total": 10488
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "diagnosis",
+                "uncertainty": "unknown_cause",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "diagnosis-fix",
+          "turn": 2,
+          "reference": {
+            "relation": "continue",
+            "scope": "local",
+            "reasoning": "solution",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "inputDigest": "21f25da18359e784e1a0b8458caf53a33500ac43cdeca5031013a466cad69751",
+          "observations": {
+            "sol": {
+              "elapsedMs": 9178,
+              "usage": {
+                "input": 10509,
+                "output": 58,
+                "cachedInput": 0,
+                "reasoning": 19,
+                "total": 10567
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              }
+            },
+            "jev": {
+              "elapsedMs": 951,
+              "usage": {
+                "input": 3102,
+                "output": 222,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3324
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "diagnosis-fix",
+          "turn": 3,
+          "reference": {
+            "relation": "continue",
+            "scope": "local",
+            "reasoning": "mechanical",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "inputDigest": "5fec5e71f4f86fcd9ee3401bc611c0b49288af109effc87fad1baa2744add386",
+          "observations": {
+            "jev": {
+              "elapsedMs": 575,
+              "usage": {
+                "input": 3148,
+                "output": 224,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3372
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            },
+            "sol": {
+              "elapsedMs": 8387,
+              "usage": {
+                "input": 10541,
+                "output": 38,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 10579
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "diagnosis-fix",
+          "turn": 4,
+          "reference": {
+            "relation": "new",
+            "scope": "local",
+            "reasoning": "solution",
+            "uncertainty": "sufficient",
+            "consequence": "sensitive"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "inputDigest": "a68333c2c772c835562cbd9637e8f76e2cdb842c28f40680510499396af2729a",
+          "observations": {
+            "sol": {
+              "elapsedMs": 6369,
+              "usage": {
+                "input": 10584,
+                "output": 37,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 10621
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "sensitive"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            },
+            "jev": {
+              "elapsedMs": 732,
+              "usage": {
+                "input": 3204,
+                "output": 221,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3425
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "sensitive"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "failure-recovery",
+          "turn": 1,
+          "reference": {
+            "relation": "new",
+            "scope": "multifile",
+            "reasoning": "solution",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "inputDigest": "3698381ce8d3d4e3ab35e2739168d00038d3f044621979e189aec9010aea59bc",
+          "observations": {
+            "jev": {
+              "elapsedMs": 468,
+              "usage": {
+                "input": 3030,
+                "output": 224,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3254
+              },
+              "features": {
+                "relation": "new",
+                "scope": "multifile",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              }
+            },
+            "sol": {
+              "elapsedMs": 5545,
+              "usage": {
+                "input": 10455,
+                "output": 39,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 10494
+              },
+              "features": {
+                "relation": "new",
+                "scope": "multifile",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "failure-recovery",
+          "turn": 2,
+          "reference": {
+            "relation": "correction",
+            "scope": "multifile",
+            "reasoning": "diagnosis",
+            "uncertainty": "unknown_cause",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "inputDigest": "1caf1b493cceaaf6a0542f95e65f575ac9f73e4ae81faca8f6536b5c8218aeed",
+          "observations": {
+            "sol": {
+              "elapsedMs": 8508,
+              "usage": {
+                "input": 10499,
+                "output": 42,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 10541
+              },
+              "features": {
+                "relation": "correction",
+                "scope": "multifile",
+                "reasoning": "diagnosis",
+                "uncertainty": "unknown_cause",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            },
+            "jev": {
+              "elapsedMs": 1402,
+              "usage": {
+                "input": 3097,
+                "output": 223,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3320
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "diagnosis",
+                "uncertainty": "unknown_cause",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "failure-recovery",
+          "turn": 3,
+          "reference": {
+            "relation": "continue",
+            "scope": "multifile",
+            "reasoning": "solution",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "inputDigest": "82c9c0e5fb6bf5866046e000bcaada9e37c44216dad176b9bc4ab011531a2941",
+          "observations": {
+            "jev": {
+              "elapsedMs": 2811,
+              "usage": {
+                "input": null,
+                "output": null,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": null
+              },
+              "error": "unavailable"
+            },
+            "sol": {
+              "elapsedMs": 15925,
+              "usage": {
+                "input": 10567,
+                "output": 39,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 10606
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "multifile",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ambiguity-20261013",
+      "runtime": "isolated: local skills disabled per thread",
+      "startedAt": "2026-10-13T06:50:03.676Z",
+      "finishedAt": "2026-10-13T06:51:07.629Z",
+      "codexVersion": "codex-cli 0.162.1",
+      "datasetDigest": "b631839e3e308a39edb7867f2de4a32f4a9110ef2b5c151ea2c33c5906a02ada",
+      "questionnaireDigest": "4e7ad7df2a0ad689a64ad58ca599ebc40621ad081a864108654ca01cb63bcb9f",
+      "actualCalls": 8,
+      "startupMs": 2157,
+      "interruption": "Sol exceeded 30-second deadline on ambiguity-and-quote:4; retained as failure.",
+      "pairedSummary": {
+        "jev": {
+          "calls": 3,
+          "successful": 3,
+          "errors": 0,
+          "p50Ms": 632,
+          "p95Ms": 744,
+          "elapsedMs": 1727,
+          "usage": {
+            "input": 9213,
+            "output": 667,
+            "cachedInput": null,
+            "reasoning": null,
+            "total": 9880
+          },
+          "featureMatches": {
+            "relation": 3,
+            "scope": 3,
+            "reasoning": 2,
+            "uncertainty": 3,
+            "consequence": 3
+          },
+          "allFeatureMatches": 2,
+          "routeMatches": 3,
+          "nativeRouteMatches": 3,
+          "inconsistentRepeats": 0
+        },
+        "sol": {
+          "calls": 3,
+          "successful": 3,
+          "errors": 0,
+          "p50Ms": 8008,
+          "p95Ms": 16205,
+          "elapsedMs": 29353,
+          "usage": {
+            "input": 31459,
+            "output": 112,
+            "cachedInput": 0,
+            "reasoning": 0,
+            "total": 31571
+          },
+          "featureMatches": {
+            "relation": 3,
+            "scope": 3,
+            "reasoning": 2,
+            "uncertainty": 3,
+            "consequence": 3
+          },
+          "allFeatureMatches": 2,
+          "routeMatches": 3,
+          "inconsistentRepeats": 0
+        }
+      },
+      "rows": [
+        {
+          "repeat": 1,
+          "case": "ambiguity-and-quote",
+          "turn": 1,
+          "reference": {
+            "relation": "new",
+            "scope": "local",
+            "reasoning": "mechanical",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "low"
+            }
+          ],
+          "inputDigest": "6de57d5c341f2d2a52b861c6144c218515607e7eb729dabaf74917fca510e257",
+          "observations": {
+            "jev": {
+              "elapsedMs": 744,
+              "usage": {
+                "input": 3018,
+                "output": 224,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3242
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            },
+            "sol": {
+              "elapsedMs": 8008,
+              "usage": {
+                "input": 10448,
+                "output": 38,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 10486
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "mechanical",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "low"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "ambiguity-and-quote",
+          "turn": 2,
+          "reference": {
+            "relation": "new",
+            "scope": "local",
+            "reasoning": "architecture",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "inputDigest": "ca8a1bd4272c44fb009b486ac5370cc6e24b3a5eb9dd86ba7663ed34d8f08267",
+          "observations": {
+            "sol": {
+              "elapsedMs": 16205,
+              "usage": {
+                "input": 10487,
+                "output": 37,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 10524
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "architecture",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            },
+            "jev": {
+              "elapsedMs": 632,
+              "usage": {
+                "input": 3073,
+                "output": 222,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3295
+              },
+              "features": {
+                "relation": "new",
+                "scope": "local",
+                "reasoning": "architecture",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "ambiguity-and-quote",
+          "turn": 3,
+          "reference": {
+            "relation": "uncertain",
+            "scope": "local",
+            "reasoning": "solution",
+            "uncertainty": "missing",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "high"
+            }
+          ],
+          "inputDigest": "81c20f4c9603519be4176acee3f6f37b3b71d06570bb3c25372310ca7afef144",
+          "observations": {
+            "jev": {
+              "elapsedMs": 351,
+              "usage": {
+                "input": 3122,
+                "output": 221,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3343
+              },
+              "features": {
+                "relation": "uncertain",
+                "scope": "local",
+                "reasoning": "architecture",
+                "uncertainty": "missing",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            },
+            "sol": {
+              "elapsedMs": 5140,
+              "usage": {
+                "input": 10524,
+                "output": 37,
+                "cachedInput": 0,
+                "reasoning": 0,
+                "total": 10561
+              },
+              "features": {
+                "relation": "uncertain",
+                "scope": "local",
+                "reasoning": "architecture",
+                "uncertainty": "missing",
+                "consequence": "reversible"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "high"
+              }
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "case": "ambiguity-and-quote",
+          "turn": 4,
+          "reference": {
+            "relation": "continue",
+            "scope": "local",
+            "reasoning": "solution",
+            "uncertainty": "sufficient",
+            "consequence": "reversible"
+          },
+          "allowed": [
+            {
+              "model": "gpt-6.1-sol",
+              "effort": "medium"
+            }
+          ],
+          "inputDigest": "b8912ecb6ee5dd5e7f600f8708f8fdb47c7aa7adcfac49d3e947f218c20f5f09",
+          "observations": {
+            "sol": {
+              "elapsedMs": 30026,
+              "usage": {
+                "input": null,
+                "output": null,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": null
+              },
+              "error": "Native event timeout"
+            },
+            "jev": {
+              "elapsedMs": 670,
+              "usage": {
+                "input": 3194,
+                "output": 222,
+                "cachedInput": null,
+                "reasoning": null,
+                "total": 3416
+              },
+              "features": {
+                "relation": "continue",
+                "scope": "local",
+                "reasoning": "solution",
+                "uncertainty": "sufficient",
+                "consequence": "reversible"
+              },
+              "nativeRoute": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              },
+              "route": {
+                "model": "gpt-6.1-sol",
+                "effort": "medium"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

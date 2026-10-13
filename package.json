@@ -32,6 +32,7 @@
     "eval:classifier": "npm run build && node dist/scripts/evaluate-classifier.js",
     "eval:native:classifier": "npm run build && node dist/scripts/evaluate-native-classifier.js",
     "eval:compare": "npm run build && node dist/scripts/compare-classifiers.js",
+    "eval:compare:sol": "npm run build && node dist/scripts/compare-sol-routing.js",
     "start": "node dist/src/cli.js",
     "eval:tasks": "npm run build && node dist/scripts/evaluate-tasks.js"
   },

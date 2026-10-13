@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { AUTO_MODEL, record, type Config, type Route } from "./config.js";
-import { ClassificationError, createClassifier, type Classify, type Classification } from "./classification.js";
+import { ClassificationError, createClassifier, type Classify, type Classification, createDemandClassifier, classifierUsage, QUESTIONS, CONSTRAINT_QUESTION, DEMAND_POLICY, DEMAND_QUESTION, type ClassifyDemand, type ClassificationObservation } from "./classification.js";
 import { confidentNewTask } from "./policy.js";
 import { advanceTask, fingerprint, isContinuation, type TaskView, type TaskState } from "./task-state.js";
 import { mainRoute, nativeSelection, nativePolicy, type NativeSelection } from "./native-policy.js";
@@ -16,6 +16,7 @@ interface Pending {
   message: NativeMessage; controller: AbortController; sent: boolean;
   state?: NativeState; decision?: Record<string, unknown>; text?: string; incomplete?: boolean;
   automatic?: boolean;
+  decisionId?: string; receivedAt?: string;
   capacityRetry?: { previousError: any; parentTurnId: string };
 }
 interface ActiveTurn {
@@ -66,10 +67,13 @@ export class NativeSession {
   private closed = false;
   private classify: Classify;
   private policy: string;
+  private classifyDemand: ClassifyDemand;
+  private demandJobs = new Set<AbortController>();
   constructor(private config: Config, private records: NativeRecords,
     private sendServer: (message: NativeMessage) => void, private sendClient: (message: NativeMessage) => void,
-    private onEvent: (event: NativeEvent) => void = () => {}, classify?: Classify, private initialManual = false) {
+    private onEvent: (event: NativeEvent) => void = () => {}, classify?: Classify, private initialManual = false, classifyDemand?: ClassifyDemand) {
     this.classify = classify ?? createClassifier(config.semantic!, undefined, undefined, config.native?.expertPolicy === "constraints");
+    this.classifyDemand = classifyDemand ?? createDemandClassifier(config.semantic!);
     this.reviewer = new NativeReviewer(sendServer);
     this.policy = nativePolicy(config) + ":" + fingerprint({ routes: config.routes, native: config.native, semantic: config.semantic,
       classifierContext: CLASSIFIER_CONTEXT_POLICY });
@@ -97,11 +101,12 @@ export class NativeSession {
     const threadId = this.foreground, state = this.states.get(threadId)!;
     if (mode !== "auto") this.reviewJobs.get(threadId)?.abort(new Error("已停止自动审查"));
     this.cancel(threadId, "路由模式已改变，请重新提交本轮");
+    const fromMode = state.mode;
     state.mode = mode;
     const submitted = this.pending.get(threadId)?.state;
     if (submitted) submitted.mode = mode;
     if (mode === "auto") state.suggestion = undefined;
-    this.records.save(threadId, state); this.emit("mode", threadId, { reason: "user-control" });
+    this.records.save(threadId, state); this.emit("mode", threadId, { reason: "user-control", fromMode, toMode: mode, fromRoute: { ...state.route }, toRoute: { ...state.route }, turnId: state.activeTurnId ?? state.lastTurnId });
   }
   async fromClient(message: NativeMessage): Promise<void> {
     if (this.closed) return;
@@ -183,13 +188,13 @@ export class NativeSession {
         }
         const input = inputText(p.input);
         if (input.text || input.incomplete) {
-          const job: Pending = { message, controller: new AbortController(), sent: false, ...input };
-          this.pending.set(threadId, job); this.emit(state.mode === "manual" ? "submitting" : "classifying", threadId);
+          const job: Pending = { message, controller: new AbortController(), sent: false, ...input, decisionId: randomUUID(), receivedAt: new Date().toISOString() };
+          this.pending.set(threadId, job); this.emit(state.mode === "manual" ? "submitting" : "classifying", threadId, { decisionId: job.decisionId, receivedAt: job.receivedAt });
           try {
             if (state.mode !== "manual" && !/^\s*\[new\](?:\s|$)/.test(input.text) && this.historyNeeded.has(threadId)) {
               await this.recoverHistory(threadId, job.controller.signal);
             }
-            const result = await this.plan(state, input, p, job.controller.signal);
+            const result = await this.plan(state, input, p, job.controller.signal, job.decisionId!);
             job.state = result.state;
             if (!result.state.task.incomplete && (state.task.messages.length === 0 || state.taskId !== result.state.taskId)) {
               await this.records.prepareExecution(threadId, result.state, p.cwd ?? this.directories.get(threadId), input.text, job.controller.signal);
@@ -338,8 +343,9 @@ export class NativeSession {
     } else if (request.method === "thread/settings/update" && threadId && !response.error) {
       const state = this.states.get(threadId);
       if (state && (p.model != null || p.effort != null)) {
+        const fromRoute = { ...state.route }, fromMode = state.mode;
         state.mode = "manual"; state.route = effective(p, state.route);
-        this.records.save(threadId, state); this.emit("mode", threadId, { reason: "native-model-picker" });
+        this.records.save(threadId, state); this.emit("mode", threadId, { reason: "native-model-picker", fromRoute, toRoute: { ...state.route }, fromMode, toMode: state.mode, turnId: state.activeTurnId ?? state.lastTurnId });
       }
     } else if (request.method === "thread/rollback" && threadId && !response.error) {
       const state = this.states.get(threadId);
@@ -367,7 +373,7 @@ export class NativeSession {
     this.records.save(threadId, state);
     this.resumedContexts.delete(threadId);
     this.initialInputs.set(threadId + ":" + turnId, job.text!);
-    this.emit("accepted", threadId, { turnId, ...job.decision });
+    this.emit("accepted", threadId, { turnId, receivedAt: job.receivedAt, ...job.decision });
   }
   private retryCapacity(threadId: string, turn: any, active: ActiveTurn): boolean {
     const attempt = active.retry, state = this.states.get(threadId);
@@ -525,13 +531,36 @@ export class NativeSession {
         { turnId, itemId: item.id, itemType: item.type, phase: item.phase, exitCode: item.exitCode });
     }
   }
-  private async plan(previous: NativeState, input: { text: string; incomplete: boolean }, params: any, signal: AbortSignal): Promise<{ state: NativeState; decision: Record<string, unknown> }> {
+  private async plan(previous: NativeState, input: { text: string; incomplete: boolean }, params: any, signal: AbortSignal, decisionId: string): Promise<{ state: NativeState; decision: Record<string, unknown> }> {
     const state = structuredClone(previous), explicitNew = /^\s*\[new\](?:\s|$)/.test(input.text);
     const view: TaskView = { currentTask: explicitNew ? { messages: [], evidence: [], incomplete: false } : previous.task,
       newMessages: [input.text], evidence: [], incomplete: input.incomplete };
     let newTask = explicitNew, reason = "manual", classification: Classification | undefined, boundaryClassification: Classification | undefined;
     let selection: NativeSelection | undefined;
     let suggestion = explicitNew ? mainRoute(this.config) : previous.suggestion ?? previous.route;
+    const classifierCalls: Record<string, unknown>[] = [];
+    let demandView: TaskView | undefined;
+    const classify = async (context: TaskView, phase: "initial" | "new-task") => {
+      const call = await this.measuredClassification(params.threadId, previous.taskId, decisionId, phase, context,
+        signal, observe => this.classify(context, signal, observe));
+      classifierCalls.push(call.measurement);
+      if (call.error) throw call.error;
+      return call.result!;
+    };
+    const prepare = (inputView: TaskView, phase: "initial" | "new-task") => {
+      const started = performance.now();
+      try { return this.classifierView(inputView); }
+      catch (error) {
+        const questions = this.config.native?.expertPolicy === "constraints" ? { ...QUESTIONS, constraints: CONSTRAINT_QUESTION } : QUESTIONS;
+        const measurement = { callId: randomUUID(), decisionId, phase, elapsedMs: Math.round(performance.now() - started),
+          httpAttempted: false, usage: classifierUsage(null), inputPrepared: false, inputDigest: fingerprint(inputView),
+          questionnaireDigest: fingerprint(questions), contextPolicy: CLASSIFIER_CONTEXT_POLICY,
+          error: error instanceof ClassificationError ? error.code : "unavailable" };
+        classifierCalls.push(measurement);
+        this.emit("classification-call", params.threadId, { taskId: previous.taskId, ...measurement, input: inputView });
+        throw error;
+      }
+    };
     const current = effective(params, previous.route);
     if (previous.mode !== "manual") {
       const s = this.config.semantic!, text = input.text.trimStart();
@@ -543,12 +572,14 @@ export class NativeSession {
       } else if (!explicitNew && previous.task.messages.length && isContinuation(input.text)) reason = "continuation";
       else {
         try {
-          const context = this.classifierView(view);
-          classification = await this.classify(context, signal); signal.throwIfAborted();
+          const context = prepare(view, "initial");
+          classification = await classify(context, "initial");
+          demandView = context; signal.throwIfAborted();
           newTask ||= confidentNewTask(classification, s.minConfidence);
           if (newTask && !explicitNew && previous.task.messages.length) {
             boundaryClassification = classification;
-            classification = await this.classify({ ...view, currentTask: { messages: [], evidence: [], incomplete: false } }, signal);
+            demandView = prepare({ ...view, currentTask: { messages: [], evidence: [], incomplete: false } }, "new-task");
+            classification = await classify(demandView, "new-task");
             signal.throwIfAborted();
           }
           selection = nativeSelection(this.config, classification, newTask ? undefined : previous.suggestion ?? previous.route);
@@ -564,8 +595,37 @@ export class NativeSession {
     if (newTask) delete state.review;
     state.policy = this.policy; state.suggestion = suggestion; state.task = advanceTask(view, newTask);
     if (newTask) state.taskId = randomUUID();
-    return { state, decision: { reason, suggestion, classification, boundaryClassification, policy: this.policy,
+    if (classification && selection && demandView && this.config.native?.reasoningDemand === "shadow") {
+      this.startDemandShadow(params.threadId, state.taskId, decisionId, structuredClone(demandView), signal);
+    }
+    return { state, decision: { decisionId, classifierCalls, reason, suggestion, classification, boundaryClassification, policy: this.policy,
       ...(selection ? { routeSupport: selection.support, held: selection.held } : {}) } };
+  }
+  private async measuredClassification<T>(threadId: string, taskId: string, decisionId: string, phase: string,
+    view: TaskView, signal: AbortSignal, run: (observe: (o: ClassificationObservation) => void) => Promise<T>, inputPrepared = true) {
+    const started = performance.now(), callId = randomUUID();
+    this.emit("classification-started", threadId, { taskId, callId, decisionId, phase });
+    let observation: { httpAttempted: boolean | null; usage: ReturnType<typeof classifierUsage> } = { httpAttempted: null, usage: classifierUsage(null) };
+    let result: T | undefined, error: Error | undefined;
+    try { result = await run(o => { observation = o; }); signal.throwIfAborted(); }
+    catch (e) { error = e instanceof Error ? e : new Error(String(e)); }
+    const questions = phase === "demand-shadow" ? { demand: DEMAND_QUESTION } :
+      this.config.native?.expertPolicy === "constraints" ? { ...QUESTIONS, constraints: CONSTRAINT_QUESTION } : QUESTIONS;
+    const measurement = { callId, decisionId, phase, elapsedMs: Math.round(performance.now() - started),
+      ...observation, inputPrepared, inputDigest: fingerprint(view), questionnaireDigest: fingerprint(questions), contextPolicy: CLASSIFIER_CONTEXT_POLICY,
+      ...(error ? { error: error instanceof ClassificationError ? error.code : signal.aborted ? "cancelled" : "unavailable" } : {}) };
+    this.emit("classification-call", threadId, { taskId, ...measurement, input: view,
+      ...(phase === "demand-shadow" ? { demandPolicy: DEMAND_POLICY } : {}) });
+    return { result, error, measurement };
+  }
+  private startDemandShadow(threadId: string, taskId: string, decisionId: string, view: TaskView, parent: AbortSignal): void {
+    const controller = new AbortController(); this.demandJobs.add(controller);
+    const signal = AbortSignal.any([parent, controller.signal]);
+    void this.measuredClassification(threadId, taskId, decisionId, "demand-shadow", view, signal,
+      observe => this.classifyDemand(view, signal, observe)).then(call => {
+        if (!call.error && !this.closed) this.emit("demand-shadow", threadId, { taskId, decisionId,
+          callId: call.measurement.callId, demandPolicy: DEMAND_POLICY, ...call.result });
+      }).finally(() => this.demandJobs.delete(controller));
   }
   private classifierView(view: TaskView): TaskView {
     return classifierContext(view, this.config.semantic!, this.config.native?.expertPolicy === "constraints");
@@ -573,6 +633,8 @@ export class NativeSession {
   close(): void {
     if (this.closed) return;
     this.closed = true;
+    for (const job of this.demandJobs) job.abort(new Error("Native connection closed"));
+    this.demandJobs.clear();
     for (const job of this.reviewJobs.values()) job.abort(new Error("Native connection closed"));
     this.reviewJobs.clear(); this.workItems.clear();
     for (const [threadId, job] of this.pending) {

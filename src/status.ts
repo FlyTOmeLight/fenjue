@@ -18,7 +18,7 @@ export class NativeRouteStatus {
   private reported?: string;
   time?: string;
   update(event: NativeEvent): boolean {
-    if (["usage", "evidence", "final-answer", "planned"].includes(event.type)) return false;
+    if (["usage", "evidence", "final-answer", "planned", "classification-call", "classification-started", "demand-shadow"].includes(event.type)) return false;
     if (!["bound", "classifying", "submitting"].includes(event.type) && this.latest?.threadId && event.threadId !== this.latest.threadId) return false;
     this.latest = event; this.time = typeof event.time === "string" ? event.time : undefined;
     if (event.type === "bound" || event.type === "accepted") this.reported = undefined;

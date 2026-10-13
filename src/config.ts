@@ -36,7 +36,7 @@ export interface Config {
   rules: { prefix: string; route: string }[];
   semantic?: SemanticConfig;
   capture?: { directory: string; execution?: ExecutionCaptureConfig };
-  native?: { expertModel?: string; expertPolicy?: "constraints"; review?: NativeReviewConfig; rules?: NativeRule[] };
+  native?: { expertModel?: string; expertPolicy?: "constraints"; reasoningDemand?: "shadow"; review?: NativeReviewConfig; rules?: NativeRule[] };
 }
 export const AUTO_MODEL = "fenjue-auto";
 export const PROXY_HEADER = "x-fenjue-token";
@@ -81,6 +81,9 @@ export function parseConfig(value: unknown): Config {
     throw new Error("native.expertModel 必须为真实模型名；省略时只自动选择主模型的三档 effort");
   }
   let native = value.native;
+  if (record(native) && native.reasoningDemand !== undefined && native.reasoningDemand !== "shadow") {
+    throw new Error("native.reasoningDemand 仅支持 shadow；省略时关闭");
+  }
   if (record(native) && native.rules !== undefined && (!Array.isArray(native.rules) || native.rules.some(r =>
     !record(r) || typeof r.prefix !== "string" || !r.prefix.trim() || !validRoute(r)))) {
     throw new Error("native.rules 需要非空 prefix、真实 model 和有效 effort");

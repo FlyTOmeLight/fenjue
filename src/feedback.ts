@@ -4,21 +4,37 @@ import { dirname, join, resolve } from "node:path";
 import { record, type Route } from "./config.js";
 import { redactCapture } from "./capture.js";
 import { captureFrames } from "./cases.js";
+import { routingCalls, routingCost, type RoutingCall } from "./routing-observations.js";
+import { DEMAND_QUESTION, type DemandChoice, type Features } from "./classification.js";
 import { fingerprint } from "./task-state.js";
 
 export type Outcome = "accepted" | "rework" | "blocked";
 export type FailureCause = "reasoning" | "implementation" | "requirements" | "environment" | "unknown";
+export interface RoutingFeedback {
+  assessment?: "appropriate" | "insufficient" | "excessive";
+  switchCause?: "latency" | "quality" | "tokens" | "capacity" | "other";
+  demand?: DemandChoice;
+}
+function validRouting(value: unknown): value is RoutingFeedback {
+  return record(value) && Object.keys(value).length > 0 &&
+    Object.keys(value).every(k => ["assessment", "switchCause", "demand"].includes(k)) &&
+    (value.assessment === undefined || ["appropriate", "insufficient", "excessive"].includes(String(value.assessment))) &&
+    (value.switchCause === undefined || ["latency", "quality", "tokens", "capacity", "other"].includes(String(value.switchCause))) &&
+    (value.demand === undefined || Object.hasOwn(DEMAND_QUESTION.criteria, String(value.demand)));
+}
 export interface TaskFeedback {
   version: 1; id: string; time: string; threadId: string; taskId: string; turnId?: string;
-  outcome: Outcome; cause: FailureCause; reviewer: string; reason: string; evidence?: string;
+  outcome: Outcome; cause: FailureCause; reviewer: string; reason: string; evidence?: string; routing?: RoutingFeedback;
 }
 export interface ObservedTask {
   taskId: string; threadId: string; firstSeen: string; lastSeen: string; preview?: string;
   captures: string[]; logs: string[]; policies: string[];
-  turns: { turnId: string; time: string; route: Route; reason: string; status?: string; elapsedMs?: number }[];
+  turns: { turnId: string; time: string; route: Route; reason: string; status?: string; elapsedMs?: number; receivedAt?: string; totalElapsedMs?: number; decisionId?: string; features?: Features }[];
   observedTokens: number | null;
   reviews: { parentTurnId: string; time: string; route: Route; status: string; tokens: number | null;
     elapsedMs?: number; advice?: string; error?: string }[];
+  demandSignals?: { time: string; decisionId: string; turnId: string; choice: DemandChoice; suggestedEffort?: string }[];
+  interventions?: { time: string; turnId?: string; fromRoute: Route; toRoute: Route; reason: string }[];
   feedback: TaskFeedback[];
 }
 async function names(directory: string): Promise<string[]> {
@@ -42,7 +58,8 @@ export async function readFeedback(directory: string): Promise<TaskFeedback[]> {
         !["reasoning", "implementation", "requirements", "environment", "unknown"].includes(String(v.cause)) ||
         !["id", "time", "threadId", "taskId", "reviewer", "reason"].every(k => typeof v[k] === "string" && String(v[k]).trim()) ||
         !Number.isFinite(Date.parse(String(v.time))) || (v.turnId !== undefined && typeof v.turnId !== "string") ||
-        (v.evidence !== undefined && typeof v.evidence !== "string")) throw new Error(`无效反馈记录：${name}`);
+        (v.evidence !== undefined && typeof v.evidence !== "string") ||
+        (v.routing !== undefined && (!v.turnId || !validRouting(v.routing)))) throw new Error(`无效反馈记录：${name}`);
     rows.push(v as unknown as TaskFeedback);
   }
   return rows.sort((a, b) => a.time.localeCompare(b.time) || a.id.localeCompare(b.id));
@@ -59,7 +76,7 @@ export async function observedTasks(directory: string, captureDirectory = join(d
   }
   rows.sort((a, b) => a.event.time.localeCompare(b.event.time));
   for (const { event: e, path } of rows) {
-    if (typeof e.taskId !== "string" || typeof e.threadId !== "string" || !e.turnId) continue;
+    if (typeof e.taskId !== "string" || typeof e.threadId !== "string" || (!e.turnId && e.type !== "mode")) continue;
     let task = tasks.get(e.taskId);
     if (!task && e.type === "accepted") {
       task = { taskId: e.taskId, threadId: e.threadId, firstSeen: e.time, lastSeen: e.time,
@@ -70,6 +87,10 @@ export async function observedTasks(directory: string, captureDirectory = join(d
     if (task.threadId !== e.threadId) throw new Error("taskId 对应多个会话，无法关联反馈");
     if (!task.logs.includes(path)) task.logs.push(path);
     task.lastSeen = e.time;
+    if (e.type === "mode" && e.fromRoute && e.toRoute) {
+      task.interventions ??= [];
+      task.interventions.push({ time: e.time, turnId: e.turnId, fromRoute: e.fromRoute, toRoute: e.toRoute, reason: e.reason });
+    }
     if (typeof e.policy === "string" && !task.policies.includes(e.policy)) task.policies.push(e.policy);
     if (e.type === "review-started" && record(e.reviewRoute) && !task.reviews.some(r => r.parentTurnId === e.turnId)) {
       task.reviews.push({ parentTurnId: e.turnId, time: e.time, route: e.reviewRoute as unknown as Route, status: "running-or-unobserved", tokens: null });
@@ -81,18 +102,29 @@ export async function observedTasks(directory: string, captureDirectory = join(d
     let turn = task.turns.find(t => t.turnId === e.turnId);
     if (e.type === "accepted" && !turn) {
       if (!record(e.route) || typeof e.route.model !== "string" || typeof e.route.effort !== "string") throw new Error("提交记录缺少 model/effort");
-      turn = { turnId: e.turnId, time: e.time, route: e.route as unknown as Route, reason: e.reason ?? "unknown" };
+      turn = { turnId: e.turnId, time: e.time, route: e.route as unknown as Route, reason: e.reason ?? "unknown", decisionId: e.decisionId, receivedAt: e.receivedAt, features: e.classification?.features };
       task.turns.push(turn);
     }
     if (!turn) continue;
     if (e.type === "completed") {
       turn.status = e.status;
       turn.elapsedMs = Math.max(0, Date.parse(e.time) - Date.parse(turn.time));
+      if (turn.receivedAt && Number.isFinite(Date.parse(turn.receivedAt))) turn.totalElapsedMs = Math.max(0, Date.parse(e.time) - Date.parse(turn.receivedAt));
     }
     if (e.type === "usage" && Number.isSafeInteger(e.tokenUsage?.last?.totalTokens) && e.tokenUsage.last.totalTokens >= 0 &&
         Number.isSafeInteger(e.tokenUsage?.total?.totalTokens)) {
       const key = `${e.threadId}:${e.turnId}:${e.tokenUsage.total.totalTokens}`;
       if (!seenUsage.has(key)) { task.observedTokens = (task.observedTokens ?? 0) + e.tokenUsage.last.totalTokens; seenUsage.add(key); }
+    }
+  }
+  // Shadow may finish before accepted: join after all accepted decisions are known.
+  for (const { event: e } of rows) {
+    if (e.type !== "demand-shadow") continue;
+    const task = tasks.get(e.taskId), turn = task?.turns.find(t => t.decisionId === e.decisionId);
+    if (task && turn) {
+      task.demandSignals ??= [];
+      task.demandSignals.push({ time: e.time, decisionId: e.decisionId, turnId: turn.turnId,
+        choice: e.demand.choice, suggestedEffort: e.suggestedEffort });
     }
   }
   for (const name of (await names(captureDirectory)).filter(n => /^capture-\d+-\d+\.jsonl$/.test(n)).sort()) {
@@ -115,7 +147,8 @@ export async function addFeedback(directory: string, input: Omit<TaskFeedback, "
   now = new Date()): Promise<TaskFeedback> {
   if (!["accepted", "rework", "blocked"].includes(input.outcome) ||
       !["reasoning", "implementation", "requirements", "environment", "unknown"].includes(input.cause) ||
-      !input.reviewer?.trim() || !input.reason?.trim()) throw new Error("反馈需要有效 outcome/cause、reviewer 和具体 reason");
+      !input.reviewer?.trim() || !input.reason?.trim() ||
+      (input.routing !== undefined && (!input.turnId || !validRouting(input.routing)))) throw new Error("反馈需要有效 outcome/cause、reviewer 和具体 reason；routing 需指定 turnId 和有效标签");
   const task = (await observedTasks(directory)).find(t => t.taskId === input.taskId);
   if (!task) throw new Error("未找到已提交的原生 taskId；请先运行 feedback list");
   if (input.turnId && !task.turns.some(t => t.turnId === input.turnId)) throw new Error("turnId 不属于该任务");
@@ -128,7 +161,7 @@ export async function addFeedback(directory: string, input: Omit<TaskFeedback, "
   return feedback;
 }
 
-export function iterationReport(tasks: ObservedTask[], days = 7, now = new Date()) {
+export function iterationReport(tasks: ObservedTask[], days = 7, now = new Date(), calls?: RoutingCall[]) {
   if (!Number.isSafeInteger(days) || days < 1 || days > 365) throw new Error("days 范围为 1–365");
   const until = now.toISOString(), since = new Date(now.getTime() - days * 86400000).toISOString();
   const selected = tasks.flatMap(task => {
@@ -154,15 +187,37 @@ export function iterationReport(tasks: ObservedTask[], days = 7, now = new Date(
       ...(t.turns.some(r => r.status && r.status !== "completed") ? ["原生执行未完成"] : []),
       ...(t.turns.some(r => r.reason === "low-confidence") ? ["分类低置信度"] : []),
       ...(t.outcome === "unknown" ? ["缺少任务反馈"] : [])])],
-    logs: t.logs, captures: t.captures, policies: t.policies, reviews: t.reviews }));
+    logs: t.logs, captures: t.captures, policies: t.policies, reviews: t.reviews, interventions: t.interventions?.filter(i => i.time >= since && i.time <= until),
+    decisions: t.turns.map(r => ({ turnId: r.turnId, decisionId: r.decisionId, features: r.features })),
+    demandSignals: t.demandSignals?.filter(d => d.time <= until && t.turns.some(r => r.turnId === d.turnId)) }));
   const mainTokens = selected.length && selected.every(t => t.periodObservedTokens !== null) ? selected.reduce((n, t) => n + t.periodObservedTokens!, 0) : null;
   const reviewTokens = selected.every(t => t.periodReviewTokens !== null) ? selected.reduce((n, t) => n + t.periodReviewTokens!, 0) : null;
   const reviews = selected.flatMap(t => t.reviews.filter(r => r.time >= since && r.time <= until));
-  return { version: 1, since, until, summary: { tasks: selected.length, turns: turns.length,
-    outcomes: count(selected.map(t => t.outcome)), statuses: count(turns.map(t => t.status ?? "running-or-unobserved")),
+  const signals = selected.flatMap(t => (t.demandSignals ?? []).filter(d => d.time <= until && t.turns.some(r => r.turnId === d.turnId)));
+  const labeled = selected.flatMap(t => (t.demandSignals ?? []).filter(d => d.time <= until && t.turns.some(r => r.turnId === d.turnId)).flatMap(d => {
+    const label = t.feedback.filter(f => f.turnId === d.turnId && f.routing?.demand).at(-1)?.routing?.demand;
+    return label ? [{ predicted: d.choice, reference: label }] : [];
+  }));
+  const mismatchedEfforts = selected.reduce((n, t) => n + (t.demandSignals ?? []).filter(d => d.time <= until &&
+    d.suggestedEffort && t.turns.some(r => r.turnId === d.turnId && r.route.effort !== d.suggestedEffort)).length, 0);
+  const periodCalls = calls?.filter(c => c.time >= since && c.time <= until);
+  const classification = periodCalls ? routingCost(periodCalls.filter(c => c.phase !== "demand-shadow")) : null;
+  const demandShadow = periodCalls ? routingCost(periodCalls.filter(c => c.phase === "demand-shadow")) : null;
+  const acceptedDecisions = new Set(tasks.flatMap(t => t.turns.filter(r => r.time <= until).map(r => r.decisionId).filter(Boolean)));
+  const missingDecisionIds = turns.filter(t => !t.decisionId).length;
+  const fullTokens = !missingDecisionIds && mainTokens !== null && reviewTokens !== null && classification?.usage.total !== null &&
+    demandShadow?.usage.total !== null && classification && demandShadow ? mainTokens + reviewTokens + classification.usage.total + demandShadow.usage.total : null;
+  return { version: 1, since, until, routing: { classification, demandShadow,
+    missingDecisionIds,
+    unacceptedCalls: periodCalls?.filter(c => !acceptedDecisions.has(c.decisionId)).length ?? null }, summary: { tasks: selected.length, turns: turns.length,
+    outcomes: count(selected.map(t => t.outcome)),
+    stages: count(turns.map(t => t.features?.reasoning ?? "unclassified")), demandChoices: count(signals.map(d => d.choice)),
+    demandEffortDifferences: mismatchedEfforts, humanDemandLabels: labeled.length, humanDemandMatches: labeled.filter(l => l.predicted === l.reference).length, statuses: count(turns.map(t => t.status ?? "running-or-unobserved")),
     routes: count(turns.map(t => `${t.route.model}/${t.route.effort}`)), reasons: count(turns.map(t => t.reason)),
     recordedExecutionMs: turns.reduce((n, t) => n + (t.elapsedMs ?? 0), 0), timedTurns: turns.filter(t => t.elapsedMs !== undefined).length,
     observedTokens: mainTokens !== null && reviewTokens !== null ? mainTokens + reviewTokens : null,
+    endToEndObservedTokens: fullTokens,
+    recordedTotalTurnMs: turns.reduce((n, t) => n + (t.totalElapsedMs ?? 0), 0), totalTimedTurns: turns.filter(t => t.totalElapsedMs !== undefined).length,
     mainObservedTokens: mainTokens, reviewObservedTokens: reviewTokens, reviews: reviews.length,
     reviewStatuses: count(reviews.map(r => r.status)), recordedReviewMs: reviews.reduce((n, r) => n + (r.elapsedMs ?? 0), 0),
     automaticRevisions: turns.filter(t => t.reason === "architect-revision").length },
@@ -175,6 +230,9 @@ export function reportMarkdown(report: ReturnType<typeof iterationReport>): stri
     `任务：${report.summary.tasks}；执行轮次：${report.summary.turns}（含自动修正 ${report.summary.automaticRevisions} 轮）。\n\n` +
     `反馈：${JSON.stringify(report.summary.outcomes)}。已记录执行耗时：${report.summary.recordedExecutionMs} ms（${report.summary.timedTurns} 轮）。已记录 token：${report.summary.observedTokens ?? "未知"}。\n\n` +
     `专家审查：${report.summary.reviews} 次；已记录耗时：${report.summary.recordedReviewMs} ms；专家 token：${report.summary.reviewObservedTokens ?? "未知"}。总 token 包含主会话及专家。\n\n` +
+    `分类：${report.routing.classification ? JSON.stringify(report.routing.classification) : "旧记录未测量"}。推理需求影子调用：${report.routing.demandShadow ? JSON.stringify(report.routing.demandShadow) : "旧记录未测量"}。\n\n` +
+    `影子需求分布：${JSON.stringify(report.summary.demandChoices)}；与实际档位不同 ${report.summary.demandEffortDifferences} 次；人工需求标签一致 ${report.summary.humanDemandMatches}/${report.summary.humanDemandLabels}。这些差异不是质量错误结论。\n\n` +
+    `含分类等待的轮次总耗时：${report.summary.recordedTotalTurnMs} ms（${report.summary.totalTimedTurns} 轮）；含分类及影子调用的已记录总 token：${report.summary.endToEndObservedTokens ?? "未知"}。\n\n` +
     `| taskId | 请求预览 | 结果 | 待审核原因 |\n| --- | --- | --- | --- |\n` +
     report.candidates.map(c => `| ${clean(c.taskId)} | ${clean(c.preview)} | ${clean(c.outcome)} | ${clean(c.reasons.join("、"))} |`).join("\n") +
     `\n\n${report.note}\n\n下一步：选择普通成功案例和偏差案例；一次检验一个假设。使用 cases 标注分类，使用 tasks 补齐快照及独立验收。\n`;
@@ -182,7 +240,7 @@ export function reportMarkdown(report: ReturnType<typeof iterationReport>): stri
 
 export async function feedbackCommand(args: string[]): Promise<void> {
   const command = args.shift(), flags = new Map<string, string>();
-  const allowed = command === "add" ? ["--dir", "--task", "--turn", "--outcome", "--cause", "--reviewer", "--reason", "--evidence"] :
+  const allowed = command === "add" ? ["--dir", "--task", "--turn", "--outcome", "--cause", "--reviewer", "--reason", "--evidence", "--route-assessment", "--switch-cause", "--demand"] :
     command === "list" ? ["--dir"] : command === "report" ? ["--dir", "--capture-dir", "--days", "--out"] : [];
   if (!allowed.length) throw new Error("用法：fenjue feedback list|add|report；详见 docs/continuous-iteration.md");
   while (args.length) {
@@ -193,14 +251,19 @@ export async function feedbackCommand(args: string[]): Promise<void> {
   const directory = resolve(flags.get("--dir") ?? ".fenjue");
   if (command === "add") {
     const required = (key: string) => { const value = flags.get(key); if (!value) throw new Error(`需要 ${key}`); return value; };
+    const routing: RoutingFeedback = {
+      ...(flags.has("--route-assessment") ? { assessment: flags.get("--route-assessment") as RoutingFeedback["assessment"] } : {}),
+      ...(flags.has("--switch-cause") ? { switchCause: flags.get("--switch-cause") as RoutingFeedback["switchCause"] } : {}),
+      ...(flags.has("--demand") ? { demand: flags.get("--demand") as DemandChoice } : {}),
+    };
     const feedback = await addFeedback(directory, { taskId: required("--task"), turnId: flags.get("--turn"),
       outcome: required("--outcome") as Outcome, cause: (flags.get("--cause") ?? "unknown") as FailureCause,
-      reviewer: required("--reviewer"), reason: required("--reason"), evidence: flags.get("--evidence") });
+      reviewer: required("--reviewer"), reason: required("--reason"), evidence: flags.get("--evidence"), ...(Object.keys(routing).length ? { routing } : {}) });
     process.stdout.write(JSON.stringify(feedback, null, 2) + "\n"); return;
   }
   const tasks = await observedTasks(directory, flags.has("--capture-dir") ? resolve(flags.get("--capture-dir")!) : undefined);
   if (command === "list") { process.stdout.write(JSON.stringify({ directory, tasks }, null, 2) + "\n"); return; }
-  const report = iterationReport(tasks, Number(flags.get("--days") ?? 7));
+  const report = iterationReport(tasks, Number(flags.get("--days") ?? 7), new Date(), await routingCalls(directory));
   if (flags.has("--out")) {
     const output = resolve(flags.get("--out")!);
     await mkdir(dirname(output), { recursive: true, mode: 0o700 });

@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "auth": "chatgpt",
+  "defaultRoute": "balanced",
+  "routes": {
+    "fast": {
+      "model": "gpt-6.1-sol",
+      "effort": "low"
+    },
+    "balanced": {
+      "model": "gpt-6.1-sol",
+      "effort": "medium"
+    },
+    "deep": {
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    }
+  },
+  "rules": [
+    {
+      "prefix": "[deep]",
+      "route": "deep"
+    }
+  ],
+  "native": {
+    "expertModel": "gpt-6-astra",
+    "rules": [
+      {
+        "prefix": "[sol-xhigh]",
+        "model": "gpt-6.1-sol",
+        "effort": "xhigh"
+      },
+      {
+        "prefix": "[astra-xhigh]",
+        "model": "gpt-6-astra",
+        "effort": "xhigh"
+      }
+    ],
+    "reasoningDemand": "shadow"
+  },
+  "semantic": {
+    "provider": "vercel",
+    "model": "typesafe-ai/jev",
+    "mode": "shadow",
+    "roles": {
+      "fast": "fast",
+      "balanced": "balanced",
+      "deep": "deep"
+    },
+    "minConfidence": 0.75
+  }
+}

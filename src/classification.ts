@@ -47,7 +47,34 @@ export interface Classification {
   inputTokens: number;
   constraints?: ConstraintScore;
 }
-export type Classify = (view: TaskView, signal: AbortSignal) => Promise<Classification>;
+export interface ClassifierUsage {
+  input: number | null; output: number | null; cachedInput: number | null; reasoning: number | null; total: number | null;
+}
+export interface ClassificationObservation { httpAttempted: boolean; usage: ClassifierUsage }
+export type ObserveClassification = (observation: ClassificationObservation) => void;
+export type Classify = (view: TaskView, signal: AbortSignal, observe?: ObserveClassification) => Promise<Classification>;
+export function classifierUsage(raw: any): ClassifierUsage {
+  const count = (v: unknown) => typeof v === "number" && Number.isSafeInteger(v) && v >= 0 ? Number(v) : null;
+  const input = count(raw?.input_tokens), output = count(raw?.output_tokens);
+  return { input, output, cachedInput: count(raw?.input_tokens_details?.cached_tokens),
+    reasoning: count(raw?.output_tokens_details?.reasoning_tokens),
+    total: count(raw?.total_tokens) ?? (input !== null && output !== null ? input + output : null) };
+}
+export const DEMAND_POLICY = "reasoning-demand-shadow-v1";
+export const DEMAND_QUESTION = {
+  type: "choice", instructions: instruction + "只判断当前阶段的推理需求，不执行任务。按步骤之间的依赖、验证和搜索判断，不按题目长度、文件数、工具数、敏感操作或信息是否齐全判断。查询不自动等于简单；规则齐全不自动等于容易。已完成复杂工作后的摘要按本轮摘要判断。",
+  criteria: {
+    routine: "直接查取一个已明确对象、提取或转换文字，或按已经确定的规则与方案做局部常规实施；不需要串联推导、交叉验证或比较候选解。",
+    multi_step: "需要连接多步推导、检索、计算或验证；前一步结果决定下一步，需跨来源核对或处理多个分支；总体方法和求解路径清楚。",
+    complex: "需要探索多种候选路径或假设、推导非直接可得的算法或证明，或同时解决相互影响的约束；方法未确定，需搜索、权衡和验证才能收敛。",
+  },
+} as const;
+export type DemandChoice = keyof typeof DEMAND_QUESTION.criteria;
+export interface DemandClassification {
+  model: string; demand: { choice: DemandChoice; confidence: number; probabilities: Record<DemandChoice, number> };
+  suggestedEffort?: "low" | "medium" | "high";
+}
+export type ClassifyDemand = (view: TaskView, signal: AbortSignal, observe?: ObserveClassification) => Promise<DemandClassification>;
 export class ClassificationError extends Error {
   constructor(public code: string) { super(code); }
 }
@@ -100,24 +127,58 @@ export function parseClassification(value: unknown, model: string, constraints =
     ...(constraintScore ? { constraints: constraintScore } : {}) };
 }
 
+async function requestAnswers<T>(config: SemanticConfig, body: string, apiKey: string | undefined,
+  fetcher: typeof fetch, signal: AbortSignal, parse: (raw: unknown) => T, observe?: ObserveClassification): Promise<T> {
+  if (config.apiKeyEnv && !apiKey) throw new ClassificationError("missing-key");
+  const timeout = AbortSignal.timeout(config.timeoutMs);
+  try {
+    observe?.({ httpAttempted: true, usage: classifierUsage(null) });
+    const response = await fetcher(config.endpoint, {
+      method: "POST", headers: { "content-type": "application/json", ...(apiKey ? { authorization: `Bearer ${apiKey}` } : {}) },
+      body, signal: AbortSignal.any([signal, timeout]), redirect: "error",
+    });
+    if (!response.ok) { await response.body?.cancel(); throw new ClassificationError(`http-${response.status}`); }
+    const raw: unknown = await response.json();
+    observe?.({ httpAttempted: true, usage: classifierUsage(record(raw) ? raw.usage : null) });
+    return parse(raw);
+  } catch (error) {
+    if (signal.aborted) throw signal.reason;
+    if (timeout.aborted) throw new ClassificationError("timeout");
+    if (error instanceof ClassificationError) throw error;
+    throw new ClassificationError("unavailable");
+  }
+}
 export function createClassifier(config: SemanticConfig, apiKey = config.apiKeyEnv ? process.env[config.apiKeyEnv] : undefined,
   fetcher: typeof fetch = fetch, constraints = false): Classify {
-  return async (view, signal) => {
-    const body = classificationPayload(view, config, constraints);
-    if (config.apiKeyEnv && !apiKey) throw new ClassificationError("missing-key");
-    const timeout = AbortSignal.timeout(config.timeoutMs);
-    try {
-      const response = await fetcher(config.endpoint, {
-        method: "POST", headers: { "content-type": "application/json", ...(apiKey ? { authorization: `Bearer ${apiKey}` } : {}) },
-        body, signal: AbortSignal.any([signal, timeout]), redirect: "error",
-      });
-      if (!response.ok) { await response.body?.cancel(); throw new ClassificationError(`http-${response.status}`); }
-      return parseClassification(await response.json(), config.model, constraints);
-    } catch (error) {
-      if (signal.aborted) throw signal.reason;
-      if (timeout.aborted) throw new ClassificationError("timeout");
-      if (error instanceof ClassificationError) throw error;
-      throw new ClassificationError("unavailable");
-    }
+  return async (view, signal, observe) => {
+    observe?.({ httpAttempted: false, usage: classifierUsage(null) });
+    return requestAnswers(config, classificationPayload(view, config, constraints), apiKey, fetcher, signal,
+      raw => parseClassification(raw, config.model, constraints), observe);
+  };
+}
+// Independent shadow request: never changes baseline questions, context budget or confidence.
+export function createDemandClassifier(config: SemanticConfig, apiKey = config.apiKeyEnv ? process.env[config.apiKeyEnv] : undefined,
+  fetcher: typeof fetch = fetch): ClassifyDemand {
+  return async (view, signal, observe) => {
+    observe?.({ httpAttempted: false, usage: classifierUsage(null) });
+    if (view.incomplete) throw new ClassificationError("incomplete-context");
+    const body = JSON.stringify({ model: config.model, state: view, questions: { demand: DEMAND_QUESTION } });
+    if (Buffer.byteLength(body) > config.maxInputBytes) throw new ClassificationError("input-budget");
+    return requestAnswers(config, body, apiKey, fetcher, signal, raw => {
+      if (!record(raw) || raw.model !== config.model || !record(raw.answers) || !record(raw.usage) ||
+          !Number.isSafeInteger(raw.usage.input_tokens) || Number(raw.usage.input_tokens) < 0) throw new ClassificationError("invalid-response");
+      if (raw.truncated !== undefined && typeof raw.truncated !== "boolean") throw new ClassificationError("invalid-response");
+      if (raw.truncated === true) throw new ClassificationError("truncated-context");
+      if (raw.usage.state_tokens !== undefined || raw.usage.state_tokens_used !== undefined) {
+        const total = raw.usage.state_tokens, used = raw.usage.state_tokens_used;
+        if (!Number.isSafeInteger(total) || !Number.isSafeInteger(used) || Number(used) < 0 || Number(total) < Number(used)) throw new ClassificationError("invalid-response");
+        if (total !== used) throw new ClassificationError("truncated-context");
+      }
+      const demand = choiceAnswer(raw.answers.demand, Object.keys(DEMAND_QUESTION.criteria)) as DemandClassification["demand"];
+      const support = demand.probabilities[demand.choice];
+      return { model: config.model, demand, ...(support >= config.minConfidence ? {
+        suggestedEffort: ({ routine: "low", multi_step: "medium", complex: "high" } as const)[demand.choice],
+      } : {}) };
+    }, observe);
   };
 }

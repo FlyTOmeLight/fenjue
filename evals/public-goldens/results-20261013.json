@@ -1,0 +1,5929 @@
+{
+  "date": "2026-10-13",
+  "status": "complete",
+  "manifest": {
+    "version": 1,
+    "mode": "live",
+    "startedAt": "2026-10-13T07:43:50.473Z",
+    "seed": "fenjue-public-goldens-v1",
+    "sources": {
+      "cruxeval": {
+        "repo": "cruxeval-org/cruxeval",
+        "revision": "b96af0450242eb4da433032b90998f25588a5d0f",
+        "count": 800,
+        "sha256": "8368b81047dc5014e4caf5a2f97604eff7644e0ecd7415e3ceeb184bbc2e0c96",
+        "license": "MIT"
+      },
+      "humanevalplus": {
+        "repo": "evalplus/humanevalplus",
+        "revision": "d32357cf319e50e9c8d8dab5ea876c72b0fd321b",
+        "count": 164,
+        "sha256": "908377f1daf28dcb36846db73a5662b2e05a9907407c2696c89ad9d3b0b04492",
+        "license": "Apache-2.0"
+      }
+    },
+    "policy": "balanced-native-v6",
+    "questionnaireDigest": "4e7ad7df2a0ad689a64ad58ca599ebc40621ad081a864108654ca01cb63bcb9f",
+    "classifier": "typesafe-ai/jev",
+    "routes": {
+      "fast": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "balanced": {
+        "model": "gpt-6.1-sol",
+        "effort": "medium"
+      },
+      "deep": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      }
+    },
+    "expertModel": "gpt-6-astra",
+    "minConfidence": 0.75,
+    "sampling": "SHA256(seed:dataset:id) ascending; first 24 per dataset classify, first 6 per dataset execute; no difficulty strata",
+    "candidates": "selected route plus main-model low and high, deduplicated; no universal fixed-medium baseline",
+    "plannedClassifierCalls": 48,
+    "maxPlannedModelCalls": 36,
+    "modelDeadlineMs": 120000,
+    "tools": "disabled; fresh ephemeral thread; no benchmark gold or tests in model input; Python output literal or full module in JSON answer",
+    "verifier": "CRUXEval Python literal equality (stricter format than official expression grader); HumanEval+ pinned HF check(candidate)",
+    "evaluation": "single-turn categorical route selection using actual Jev scores; no task execution tools or expert review; no gold route labels",
+    "tasks": [
+      {
+        "dataset": "cruxeval",
+        "id": "sample_330",
+        "execute": true,
+        "goldDigest": "f80f714e21ae58995bebf32a90ea128e7ea9efad48ae83fd811fb24e4d3be87f"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_360",
+        "execute": true,
+        "goldDigest": "79401675cc03612fe410a09058d7060ce9aacab17815b88c7c855243ce363f51"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_286",
+        "execute": true,
+        "goldDigest": "7403ac55c551b3e160bafe319bca6d4350ad898273989e71deba20a3ad9096fb"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_12",
+        "execute": true,
+        "goldDigest": "55312fa7b5270003bd2447a1e664b9bb7574baee87527f874293a70407db8431"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_795",
+        "execute": true,
+        "goldDigest": "ea856a6e309c78d9322d39581c170b9a69c2ad8e63d9974408ad7087aba7a648"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_211",
+        "execute": true,
+        "goldDigest": "c0bc88323f0d9ffca34e4aca5b351a8c3f1a74a59e2a3fd723b2af2bb3624e36"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_743",
+        "execute": false,
+        "goldDigest": "9e195c205e69e0823a30b5ac8b4a3bb0d3cc474abef6630985ece545fc242ecf"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_99",
+        "execute": false,
+        "goldDigest": "bc6eeafb79009188e8661dd8aa24342921c83726dd025e15b5e3149426d08a9c"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_275",
+        "execute": false,
+        "goldDigest": "0ddc34422c6f897e360ce7ab0c929e9f3065f0fba287cfbcf532f3fc29d53622"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_77",
+        "execute": false,
+        "goldDigest": "8e9b3f71c08e64da64549aca67fd4e3b04f3964ce27c2df703f731425262d7a6"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_325",
+        "execute": false,
+        "goldDigest": "9a0a7d56260c04b23ae669b04688b36771d33c2cfa4b9d7643741d800f44e99f"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_198",
+        "execute": false,
+        "goldDigest": "4492a32f147a3a7634f56de1c8d288db21fa5bfc4b14bf12f10d22ac6b572c21"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_395",
+        "execute": false,
+        "goldDigest": "a45a43e8a5cf5fbdb142ff45e4f7dbe812c368a2e4d48a2652a166ed7455c7e6"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_164",
+        "execute": false,
+        "goldDigest": "6ab60f9512cefa09e3f5971b2452c7419c515ddad0140d7e4289bb57c82e1f51"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_103",
+        "execute": false,
+        "goldDigest": "8de5c0c68e5c3183da6546033402dbcbe9cf1989ea273d955baa6bc3ec603245"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_641",
+        "execute": false,
+        "goldDigest": "54a20187d85a96d984c90041ecd836f3e4b113cb25dd087fd44931077d8a9040"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_664",
+        "execute": false,
+        "goldDigest": "4291222111bce63a76dabc3fb99b5d4975a209db0ac374904d94218233f2e641"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_243",
+        "execute": false,
+        "goldDigest": "75a8ab48ce215a8aa24631849a13092a722eb91aaa4e3f72fd5bf6f3652ea9a1"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_713",
+        "execute": false,
+        "goldDigest": "c99a72182135cfff5124b863797d5f98540c4324119f6d8fed2f404651427586"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_602",
+        "execute": false,
+        "goldDigest": "6839f6956fab1770f7d2fd28f5a45de2532d9f8093eec969d9f4b04602c90249"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_375",
+        "execute": false,
+        "goldDigest": "47db91947a7f8eb0da0b0668fbb3d89ba399331a24f97a70c7a01404581db946"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_662",
+        "execute": false,
+        "goldDigest": "6de753bfec771683b14f86ada23f91058e2ad805fabaa9446f47a79a86b66005"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_493",
+        "execute": false,
+        "goldDigest": "400f4866f1a83137bc724b22754af9e62396682514847eae5e791fc131bf7ba0"
+      },
+      {
+        "dataset": "cruxeval",
+        "id": "sample_439",
+        "execute": false,
+        "goldDigest": "8866cae7466ca9a5baca4d7082da3640e7ccd2dd3f4b2c2587550d489a1908ae"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/13",
+        "execute": true,
+        "goldDigest": "eb5807d2dfada961538743687f0eeab26ec36e67e8b9c461a4241c26ee11e1f7"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/132",
+        "execute": true,
+        "goldDigest": "daa530160f38b53c9c7d7f8e08162984171e69b25c79d64e6b7dd0e859c319e0"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/68",
+        "execute": true,
+        "goldDigest": "e36a6eb658ac10664f35f1a29ac342126d74cedd78bad2c8bdcfd8679f142ea3"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/67",
+        "execute": true,
+        "goldDigest": "86ce8ed4a42adf95d281e69bad4ff9283d17802e234de59ece130741593a3a63"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/87",
+        "execute": true,
+        "goldDigest": "dd0f74a38bf131c1188b6c08caa6b3e3d2d9ed7eccae91fec7f9ccffb7e8667d"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/141",
+        "execute": true,
+        "goldDigest": "f5ebc5aeda5a147338008c92515c91f647032ffde019db6b1273767f333a88dc"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/69",
+        "execute": false,
+        "goldDigest": "c16346f51c2f65f3431393f0a82f6cf1e528d4532bb4a9384688f4bd0a1b63c6"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/74",
+        "execute": false,
+        "goldDigest": "a9b07ebec7bd7ba10322fc599904849ad33242a5c5a354059ae5f26b99942c4c"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/21",
+        "execute": false,
+        "goldDigest": "487122a045c3aad1848db8f459ee4acd45df7331fe72475da2261d51b84a7510"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/10",
+        "execute": false,
+        "goldDigest": "ca130695cc25dcf7bec13bd6341e8363555098305798b51de1703fc6acf8aea2"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/52",
+        "execute": false,
+        "goldDigest": "a87de95afc1b35f15679b66d09125b374c2953c582e7242a2be6083372d4ad5d"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/31",
+        "execute": false,
+        "goldDigest": "1be7efbcbc3f93f3d44a2b53ce9069659c41711e5a1c5faa065dcd049f9f8485"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/9",
+        "execute": false,
+        "goldDigest": "c32b40ffce9952432020eec777bdb122792acec1ff29f5213b9a8b03036d59b4"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/133",
+        "execute": false,
+        "goldDigest": "e9d74f0bd43bad6f720fdb855033cdd43a1d5665ed55abf25601a1c6b5ba8321"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/26",
+        "execute": false,
+        "goldDigest": "db5f03a0b86ee2ad791564df419df47e287f3258b5bbb56a616f9359ad4655c1"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/85",
+        "execute": false,
+        "goldDigest": "1b30572717a0292283875c7d3647b89b9890b09a62cae946a627da7d4a4f7336"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/98",
+        "execute": false,
+        "goldDigest": "dc3d5d5a8859b15e14c5dbdad8dfce51637f95cf6503fc4d8d35cd88f0e15738"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/105",
+        "execute": false,
+        "goldDigest": "c2c05bb2c3eba13a6d5782297887c7558be830f36e5f7735b454860e625787b4"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/162",
+        "execute": false,
+        "goldDigest": "2d7e89e325968413a070bb98be595e8074591cbb0f018bd8949190e2e7ac51e5"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/55",
+        "execute": false,
+        "goldDigest": "6fa7538099612d82d8475e2d4913c52ceb5b72382f0f5c554452fc3955493ae8"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/45",
+        "execute": false,
+        "goldDigest": "d683115ed50d22904660f8c9b03a38dcea3a2092c2332dd042048b517e2ed153"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/72",
+        "execute": false,
+        "goldDigest": "b856b566aafefc3bdf67d6d05d5978e037a7c2392f370a2c562a2e3e2e2e4088"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/156",
+        "execute": false,
+        "goldDigest": "d4aad0f6c4260736ac1510e25e0e8d0938660d5b17de95771bd9ac10f2390d31"
+      },
+      {
+        "dataset": "humanevalplus",
+        "id": "HumanEval/145",
+        "execute": false,
+        "goldDigest": "45f8306056872676844099164a338684e747f6bb48d4872cd6d198a45dbc6975"
+      }
+    ],
+    "runtime": {
+      "codexVersion": "codex-cli 0.162.1",
+      "pythonVersion": "Python 3.14.8",
+      "numpyVersion": "2.4.6",
+      "setupMs": 1615,
+      "settings": {
+        "model_provider": "openai",
+        "project_doc_max_bytes": 0,
+        "web_search": "disabled",
+        "shell_environment_policy.inherit": "none",
+        "tools.view_image": false,
+        "features.skip_host_skill_discovery": true,
+        "features.multi_agent": false,
+        "features.memories": false,
+        "features.hooks": false,
+        "features.plugins": false,
+        "features.apps": false,
+        "features.remote_plugin": false,
+        "features.shell_snapshot": false,
+        "features.shell_tool": false,
+        "features.exec_tool": false,
+        "features.code_mode_host": false,
+        "features.sleep_tool": false,
+        "features.skill_search": false,
+        "features.tool_suggest": false,
+        "features.unified_exec": false,
+        "features.reasoning_effort_override": false
+      }
+    }
+  },
+  "accounting": {
+    "classifierAttempts": 49,
+    "modelAttempts": 35,
+    "gradedModelAnswers": 31,
+    "knownUsageCalls": 80,
+    "unknownUsageCalls": 4,
+    "observedTotalTokens": 436927,
+    "note": "Observed total is a lower bound; unknown failure usage is not zero. Input includes cache, output includes reasoning."
+  },
+  "findings": [
+    {
+      "id": "HumanEval/132",
+      "type": "specification-ambiguity",
+      "input": "[][][]",
+      "gold": false,
+      "allTestedAnswers": true,
+      "explanation": "Prompt says subsequence; all three candidates implement a non-contiguous [ [] ] subsequence, whereas gold requires nesting in the original sequence."
+    },
+    {
+      "id": "HumanEval/141",
+      "type": "specification-gold-conflict",
+      "input": "éxample.exe",
+      "gold": "Yes",
+      "allTestedAnswers": "No",
+      "explanation": "Prompt explicitly permits a-z/A-Z as first character. Gold accepts accented é through isalpha(). Raw scores retained."
+    }
+  ],
+  "accountingNotes": [
+    "One Jev unavailable attempt, one harness false rejection of userMessage, one unclassified incomplete model turn, two confirmed serverOverloaded turns. All retained; resumed successes are separate observations.",
+    "Comparison uses first valid graded completion per task/route and excludes unavailable attempts from task-correctness scores. Therefore this is conditional correctness, not first-attempt availability.",
+    "Fresh ephemeral thread per call, benchmark tool use disabled, local skills disabled. Latency includes thread creation and archive, excluding verifier and App Server startup; selected route adds successful Jev classification latency.",
+    "Each task/route graded once. Hash sample is not difficulty-stratified; this is a diagnostic pilot, not an overall benchmark score or proof of optimal routing. Astra, long tasks, phase changes, and automatic expert review were not exercised."
+  ],
+  "summaries": {
+    "cruxeval": {
+      "classification": {
+        "successful": 24,
+        "routeCounts": {
+          "gpt-6.1-sol/low": 23,
+          "gpt-6.1-sol/medium": 1
+        },
+        "p50Ms": 462,
+        "p95Ms": 1258,
+        "usage": {
+          "input": 73321,
+          "output": 5376,
+          "total": 78697,
+          "cachedInput": null,
+          "reasoning": null
+        }
+      },
+      "comparison": {
+        "selected": {
+          "tasks": 6,
+          "passed": 6,
+          "elapsedMs": 45218,
+          "includingRoutingElapsedMs": 48148,
+          "modelUsage": {
+            "input": 50938,
+            "output": 301,
+            "total": 51239,
+            "cachedInput": 4736,
+            "reasoning": 146
+          },
+          "includingRoutingUsage": {
+            "input": 69346,
+            "output": 1645,
+            "total": 70991,
+            "cachedInput": null,
+            "reasoning": null
+          }
+        },
+        "low": {
+          "tasks": 6,
+          "passed": 6,
+          "elapsedMs": 46584,
+          "includingRoutingElapsedMs": 46584,
+          "modelUsage": {
+            "input": 50938,
+            "output": 305,
+            "total": 51243,
+            "cachedInput": 0,
+            "reasoning": 150
+          },
+          "includingRoutingUsage": {
+            "input": 50938,
+            "output": 305,
+            "total": 51243,
+            "cachedInput": 0,
+            "reasoning": 150
+          }
+        },
+        "high": {
+          "tasks": 6,
+          "passed": 6,
+          "elapsedMs": 60591,
+          "includingRoutingElapsedMs": 60591,
+          "modelUsage": {
+            "input": 50938,
+            "output": 458,
+            "total": 51396,
+            "cachedInput": 4736,
+            "reasoning": 301
+          },
+          "includingRoutingUsage": {
+            "input": 50938,
+            "output": 458,
+            "total": 51396,
+            "cachedInput": 4736,
+            "reasoning": 301
+          }
+        }
+      }
+    },
+    "humanevalplus": {
+      "classification": {
+        "successful": 24,
+        "routeCounts": {
+          "gpt-6.1-sol/medium": 24
+        },
+        "p50Ms": 510,
+        "p95Ms": 965,
+        "usage": {
+          "input": 75513,
+          "output": 5328,
+          "total": 80841,
+          "cachedInput": null,
+          "reasoning": null
+        }
+      },
+      "comparison": {
+        "selected": {
+          "tasks": 6,
+          "passed": 4,
+          "elapsedMs": 80707,
+          "includingRoutingElapsedMs": 83917,
+          "modelUsage": {
+            "input": 51752,
+            "output": 923,
+            "total": 52675,
+            "cachedInput": 28416,
+            "reasoning": 385
+          },
+          "includingRoutingUsage": {
+            "input": 70992,
+            "output": 2255,
+            "total": 73247,
+            "cachedInput": null,
+            "reasoning": null
+          }
+        },
+        "low": {
+          "tasks": 6,
+          "passed": 4,
+          "elapsedMs": 77213,
+          "includingRoutingElapsedMs": 77213,
+          "modelUsage": {
+            "input": 51752,
+            "output": 567,
+            "total": 52319,
+            "cachedInput": 13056,
+            "reasoning": 65
+          },
+          "includingRoutingUsage": {
+            "input": 51752,
+            "output": 567,
+            "total": 52319,
+            "cachedInput": 13056,
+            "reasoning": 65
+          }
+        },
+        "high": {
+          "tasks": 6,
+          "passed": 4,
+          "elapsedMs": 67225,
+          "includingRoutingElapsedMs": 67225,
+          "modelUsage": {
+            "input": 51752,
+            "output": 925,
+            "total": 52677,
+            "cachedInput": 0,
+            "reasoning": 376
+          },
+          "includingRoutingUsage": {
+            "input": 51752,
+            "output": 925,
+            "total": 52677,
+            "cachedInput": 0,
+            "reasoning": 376
+          }
+        }
+      }
+    }
+  },
+  "preflight": [
+    {
+      "dataset": "cruxeval",
+      "id": "sample_330",
+      "good": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      },
+      "bad": {
+        "valid": true,
+        "passed": false,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_360",
+      "good": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      },
+      "bad": {
+        "valid": true,
+        "passed": false,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_286",
+      "good": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      },
+      "bad": {
+        "valid": true,
+        "passed": false,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_12",
+      "good": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      },
+      "bad": {
+        "valid": true,
+        "passed": false,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_795",
+      "good": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      },
+      "bad": {
+        "valid": true,
+        "passed": false,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_211",
+      "good": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      },
+      "bad": {
+        "valid": true,
+        "passed": false,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/13",
+      "good": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      },
+      "bad": {
+        "valid": true,
+        "passed": false,
+        "reason": "execution-failed",
+        "exitCode": 1,
+        "detail": "Traceback (most recent call last):\n  File \"<verifier>/run.py\", line 2, in <module>\n    tests.check(getattr(candidate, 'greatest_common_divisor'))\n                ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'candidate' has no attribute 'greatest_common_divisor'\n"
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/132",
+      "good": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      },
+      "bad": {
+        "valid": true,
+        "passed": false,
+        "reason": "execution-failed",
+        "exitCode": 1,
+        "detail": "Traceback (most recent call last):\n  File \"<verifier>/run.py\", line 2, in <module>\n    tests.check(getattr(candidate, 'is_nested'))\n                ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'candidate' has no attribute 'is_nested'\n"
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/68",
+      "good": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      },
+      "bad": {
+        "valid": true,
+        "passed": false,
+        "reason": "execution-failed",
+        "exitCode": 1,
+        "detail": "Traceback (most recent call last):\n  File \"<verifier>/run.py\", line 2, in <module>\n    tests.check(getattr(candidate, 'pluck'))\n                ~~~~~~~^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'candidate' has no attribute 'pluck'\n"
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/67",
+      "good": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      },
+      "bad": {
+        "valid": true,
+        "passed": false,
+        "reason": "execution-failed",
+        "exitCode": 1,
+        "detail": "Traceback (most recent call last):\n  File \"<verifier>/run.py\", line 2, in <module>\n    tests.check(getattr(candidate, 'fruit_distribution'))\n                ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'candidate' has no attribute 'fruit_distribution'\n"
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/87",
+      "good": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      },
+      "bad": {
+        "valid": true,
+        "passed": false,
+        "reason": "execution-failed",
+        "exitCode": 1,
+        "detail": "Traceback (most recent call last):\n  File \"<verifier>/run.py\", line 2, in <module>\n    tests.check(getattr(candidate, 'get_row'))\n                ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'candidate' has no attribute 'get_row'\n"
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/141",
+      "good": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      },
+      "bad": {
+        "valid": true,
+        "passed": false,
+        "reason": "execution-failed",
+        "exitCode": 1,
+        "detail": "Traceback (most recent call last):\n  File \"<verifier>/run.py\", line 2, in <module>\n    tests.check(getattr(candidate, 'file_name_check'))\n                ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'candidate' has no attribute 'file_name_check'\n"
+      }
+    }
+  ],
+  "classifications": [
+    {
+      "dataset": "cruxeval",
+      "id": "sample_330",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.85,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.85,
+            "probabilities": {
+              "mechanical": 0.89,
+              "solution": 0.11,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3062
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.89,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 695,
+      "usage": {
+        "input": 3062,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3286
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_360",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.75,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.75,
+            "probabilities": {
+              "mechanical": 0.81,
+              "solution": 0.19,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3076
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.81,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 564,
+      "usage": {
+        "input": 3076,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3300
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_286",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.69,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.69,
+            "probabilities": {
+              "mechanical": 0.77,
+              "solution": 0.23,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3091
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.77,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 462,
+      "usage": {
+        "input": 3091,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3315
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_12",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.69,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.69,
+            "probabilities": {
+              "mechanical": 0.77,
+              "solution": 0.23,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3077
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.77,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 402,
+      "usage": {
+        "input": 3077,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3301
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_795",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.95,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.97,
+            "probabilities": {
+              "new": 0.98,
+              "continue": 0.02,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.95,
+            "probabilities": {
+              "mechanical": 0.96,
+              "solution": 0.04,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3044
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.96,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 419,
+      "usage": {
+        "input": 3044,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3268
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_211",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.61,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.61,
+            "probabilities": {
+              "mechanical": 0.71,
+              "solution": 0.29,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3058
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.71,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 388,
+      "usage": {
+        "input": 3058,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3282
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_743",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.88,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.88,
+            "probabilities": {
+              "mechanical": 0.91,
+              "solution": 0.09,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3048
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.91,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 376,
+      "usage": {
+        "input": 3048,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3272
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_99",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.8,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.97,
+            "probabilities": {
+              "new": 0.98,
+              "continue": 0.02,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.8,
+            "probabilities": {
+              "mechanical": 0.85,
+              "solution": 0.15,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 0.83,
+            "probabilities": {
+              "sufficient": 0.89,
+              "missing": 0.11,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3047
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.85,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 785,
+      "usage": {
+        "input": 3047,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3271
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_275",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.8,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.8,
+            "probabilities": {
+              "mechanical": 0.85,
+              "solution": 0.15,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3054
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.85,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 388,
+      "usage": {
+        "input": 3054,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3278
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_77",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.79,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.97,
+            "probabilities": {
+              "new": 0.98,
+              "continue": 0.02,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.79,
+            "probabilities": {
+              "mechanical": 0.84,
+              "solution": 0.16,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3051
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.84,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 420,
+      "usage": {
+        "input": 3051,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3275
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_325",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.72,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.97,
+            "probabilities": {
+              "new": 0.98,
+              "continue": 0.02,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.72,
+            "probabilities": {
+              "mechanical": 0.79,
+              "solution": 0.21,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3059
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.79,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 405,
+      "usage": {
+        "input": 3059,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3283
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_198",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.84,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.97,
+            "probabilities": {
+              "new": 0.98,
+              "continue": 0.02,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.84,
+            "probabilities": {
+              "mechanical": 0.88,
+              "solution": 0.12,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3045
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.88,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 444,
+      "usage": {
+        "input": 3045,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3269
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_395",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.67,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.97,
+            "probabilities": {
+              "new": 0.98,
+              "continue": 0.02,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.67,
+            "probabilities": {
+              "mechanical": 0.75,
+              "solution": 0.25,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3070
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.75,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 393,
+      "usage": {
+        "input": 3070,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3294
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_164",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.95,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.95,
+            "probabilities": {
+              "mechanical": 0.96,
+              "solution": 0.04,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3046
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.96,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 464,
+      "usage": {
+        "input": 3046,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3270
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_103",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.88,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.88,
+            "probabilities": {
+              "mechanical": 0.91,
+              "solution": 0.09,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3041
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.91,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 789,
+      "usage": {
+        "input": 3041,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3265
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_641",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.84,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.84,
+            "probabilities": {
+              "mechanical": 0.88,
+              "solution": 0.12,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3037
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.88,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 716,
+      "usage": {
+        "input": 3037,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3261
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_664",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.81,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.81,
+            "probabilities": {
+              "mechanical": 0.86,
+              "solution": 0.14,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 0.94,
+            "probabilities": {
+              "sufficient": 0.96,
+              "missing": 0.04,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3048
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.86,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 441,
+      "usage": {
+        "input": 3048,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3272
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_243",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.84,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.84,
+            "probabilities": {
+              "mechanical": 0.88,
+              "solution": 0.12,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3040
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.88,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 414,
+      "usage": {
+        "input": 3040,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3264
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_713",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.69,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.69,
+            "probabilities": {
+              "mechanical": 0.77,
+              "solution": 0.23,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3067
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.77,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 1734,
+      "usage": {
+        "input": 3067,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3291
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_602",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.87,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.87,
+            "probabilities": {
+              "mechanical": 0.9,
+              "solution": 0.1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3043
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.9,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 1258,
+      "usage": {
+        "input": 3043,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3267
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_375",
+      "error": "Error: unavailable",
+      "elapsedMs": 2258,
+      "usage": {
+        "input": null,
+        "output": null,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": null
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_375",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.67,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.96,
+            "probabilities": {
+              "new": 0.97,
+              "continue": 0.03,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.67,
+            "probabilities": {
+              "mechanical": 0.75,
+              "solution": 0.25,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3056
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.75,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 926,
+      "usage": {
+        "input": 3056,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3280
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_662",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.95,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.97,
+            "probabilities": {
+              "new": 0.98,
+              "continue": 0.02,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.95,
+            "probabilities": {
+              "mechanical": 0.96,
+              "solution": 0.04,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3056
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.96,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 1042,
+      "usage": {
+        "input": 3056,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3280
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_493",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.91,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.97,
+            "probabilities": {
+              "new": 0.98,
+              "continue": 0.02,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.91,
+            "probabilities": {
+              "mechanical": 0.93,
+              "solution": 0.07,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 0.98,
+            "probabilities": {
+              "sufficient": 0.99,
+              "missing": 0.01,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3063
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.93,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 547,
+      "usage": {
+        "input": 3063,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3287
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_439",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "mechanical",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.85,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.97,
+            "probabilities": {
+              "new": 0.98,
+              "continue": 0.02,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.85,
+            "probabilities": {
+              "mechanical": 0.89,
+              "solution": 0.11,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 1,
+            "probabilities": {
+              "reversible": 1,
+              "contract": 0,
+              "sensitive": 0
+            }
+          }
+        },
+        "inputTokens": 3042
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.89,
+            "ordinary": 1,
+            "high": 0
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 482,
+      "usage": {
+        "input": 3042,
+        "output": 224,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3266
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/13",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.67,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.67,
+            "probabilities": {
+              "reversible": 0.78,
+              "contract": 0.21,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3074
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 455,
+      "usage": {
+        "input": 3074,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3296
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/132",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.76,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.76,
+            "probabilities": {
+              "reversible": 0.84,
+              "contract": 0.15,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3138
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 683,
+      "usage": {
+        "input": 3138,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3360
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/68",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.72,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.72,
+            "probabilities": {
+              "reversible": 0.81,
+              "contract": 0.18,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3322
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 587,
+      "usage": {
+        "input": 3322,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3544
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/67",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.77,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.77,
+            "probabilities": {
+              "reversible": 0.85,
+              "contract": 0.13,
+              "sensitive": 0.02
+            }
+          }
+        },
+        "inputTokens": 3229
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.98,
+            "high": 0.02
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 563,
+      "usage": {
+        "input": 3229,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3451
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/87",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.77,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.77,
+            "probabilities": {
+              "reversible": 0.85,
+              "contract": 0.14,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3261
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 485,
+      "usage": {
+        "input": 3261,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3483
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/141",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.79,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.79,
+            "probabilities": {
+              "reversible": 0.86,
+              "contract": 0.13,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3216
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 437,
+      "usage": {
+        "input": 3216,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3438
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/69",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.72,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.72,
+            "probabilities": {
+              "reversible": 0.81,
+              "contract": 0.17,
+              "sensitive": 0.02
+            }
+          }
+        },
+        "inputTokens": 3167
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.98,
+            "high": 0.02
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 639,
+      "usage": {
+        "input": 3167,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3389
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/74",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.82,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.82,
+            "probabilities": {
+              "reversible": 0.88,
+              "contract": 0.11,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3197
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 505,
+      "usage": {
+        "input": 3197,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3419
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/21",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.74,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.74,
+            "probabilities": {
+              "reversible": 0.83,
+              "contract": 0.16,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3131
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 703,
+      "usage": {
+        "input": 3131,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3353
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/10",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.73,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.96,
+            "probabilities": {
+              "new": 0.97,
+              "continue": 0.03,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 0.98,
+            "probabilities": {
+              "sufficient": 0.99,
+              "missing": 0.01,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.73,
+            "probabilities": {
+              "reversible": 0.82,
+              "contract": 0.17,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3149
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 431,
+      "usage": {
+        "input": 3149,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3371
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/52",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.77,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.77,
+            "probabilities": {
+              "reversible": 0.85,
+              "contract": 0.14,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3086
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 480,
+      "usage": {
+        "input": 3086,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3308
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/31",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.77,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.77,
+            "probabilities": {
+              "reversible": 0.85,
+              "contract": 0.14,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3108
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 739,
+      "usage": {
+        "input": 3108,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3330
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/9",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.72,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.72,
+            "probabilities": {
+              "reversible": 0.81,
+              "contract": 0.17,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3102
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 1082,
+      "usage": {
+        "input": 3102,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3324
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/133",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.74,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 0.98,
+            "probabilities": {
+              "sufficient": 0.99,
+              "missing": 0.01,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.74,
+            "probabilities": {
+              "reversible": 0.83,
+              "contract": 0.15,
+              "sensitive": 0.02
+            }
+          }
+        },
+        "inputTokens": 3164
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.98,
+            "high": 0.02
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 564,
+      "usage": {
+        "input": 3164,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3386
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/26",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.77,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.77,
+            "probabilities": {
+              "reversible": 0.85,
+              "contract": 0.14,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3086
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 965,
+      "usage": {
+        "input": 3086,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3308
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/85",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.79,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.79,
+            "probabilities": {
+              "reversible": 0.86,
+              "contract": 0.13,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3057
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 495,
+      "usage": {
+        "input": 3057,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3279
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/98",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.89,
+        "questionScores": {
+          "relation": {
+            "confidence": 1,
+            "probabilities": {
+              "new": 1,
+              "continue": 0,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.89,
+            "probabilities": {
+              "reversible": 0.93,
+              "contract": 0.06,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3075
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 468,
+      "usage": {
+        "input": 3075,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3297
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/105",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.79,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 0.99,
+            "probabilities": {
+              "mechanical": 0.01,
+              "solution": 0.99,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.79,
+            "probabilities": {
+              "reversible": 0.86,
+              "contract": 0.13,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3282
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0.01,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 505,
+      "usage": {
+        "input": 3282,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3504
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/162",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.79,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.79,
+            "probabilities": {
+              "reversible": 0.86,
+              "contract": 0.13,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3089
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 510,
+      "usage": {
+        "input": 3089,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3311
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/55",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.7,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.7,
+            "probabilities": {
+              "reversible": 0.8,
+              "contract": 0.19,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3057
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 547,
+      "usage": {
+        "input": 3057,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3279
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/45",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.69,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.69,
+            "probabilities": {
+              "reversible": 0.79,
+              "contract": 0.2,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3048
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 378,
+      "usage": {
+        "input": 3048,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3270
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/72",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.76,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.76,
+            "probabilities": {
+              "reversible": 0.84,
+              "contract": 0.15,
+              "sensitive": 0.01
+            }
+          }
+        },
+        "inputTokens": 3237
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.99,
+            "high": 0.01
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 522,
+      "usage": {
+        "input": 3237,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3459
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/156",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.67,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.67,
+            "probabilities": {
+              "reversible": 0.78,
+              "contract": 0.2,
+              "sensitive": 0.02
+            }
+          }
+        },
+        "inputTokens": 3114
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.98,
+            "high": 0.02
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 622,
+      "usage": {
+        "input": 3114,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3336
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/145",
+      "classification": {
+        "model": "typesafe-ai/jev",
+        "features": {
+          "relation": "new",
+          "scope": "local",
+          "reasoning": "solution",
+          "uncertainty": "sufficient",
+          "consequence": "reversible"
+        },
+        "confidence": 0.73,
+        "questionScores": {
+          "relation": {
+            "confidence": 0.99,
+            "probabilities": {
+              "new": 0.99,
+              "continue": 0.01,
+              "correction": 0,
+              "uncertain": 0
+            }
+          },
+          "scope": {
+            "confidence": 1,
+            "probabilities": {
+              "local": 1,
+              "multifile": 0,
+              "cross_system": 0
+            }
+          },
+          "reasoning": {
+            "confidence": 1,
+            "probabilities": {
+              "mechanical": 0,
+              "solution": 1,
+              "diagnosis": 0,
+              "architecture": 0
+            }
+          },
+          "uncertainty": {
+            "confidence": 1,
+            "probabilities": {
+              "sufficient": 1,
+              "missing": 0,
+              "unknown_cause": 0
+            }
+          },
+          "consequence": {
+            "confidence": 0.73,
+            "probabilities": {
+              "reversible": 0.82,
+              "contract": 0.16,
+              "sensitive": 0.02
+            }
+          }
+        },
+        "inputTokens": 3124
+      },
+      "selection": {
+        "route": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        "reason": "classified",
+        "support": {
+          "model": {
+            "main": 1,
+            "expert": 0
+          },
+          "effort": {
+            "low": 0,
+            "ordinary": 0.98,
+            "high": 0.02
+          }
+        },
+        "held": []
+      },
+      "elapsedMs": 482,
+      "usage": {
+        "input": 3124,
+        "output": 222,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": 3346
+      }
+    }
+  ],
+  "executions": [
+    {
+      "dataset": "cruxeval",
+      "id": "sample_330",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8482,
+        "output": 33,
+        "cachedInput": 0,
+        "reasoning": 12,
+        "total": 8515
+      },
+      "error": "Error: Unexpected tool or item",
+      "elapsedMs": 12698
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_330",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8484,
+        "output": 46,
+        "cachedInput": 0,
+        "reasoning": 25,
+        "total": 8530
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "' 4 2 '",
+      "elapsedMs": 10558,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_330",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8484,
+        "output": 72,
+        "cachedInput": 0,
+        "reasoning": 51,
+        "total": 8556
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "' 4 2 '",
+      "elapsedMs": 10240,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_360",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8498,
+        "output": 41,
+        "cachedInput": 4736,
+        "reasoning": 23,
+        "total": 8539
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "'g'",
+      "elapsedMs": 9211,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_360",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8498,
+        "output": 16,
+        "cachedInput": 0,
+        "reasoning": 0,
+        "total": 8514
+      },
+      "itemTypes": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "answer": "'g'",
+      "elapsedMs": 5106,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_286",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": true,
+      "usage": {
+        "input": null,
+        "output": null,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": null
+      },
+      "error": "Error: Incomplete turn: failed",
+      "elapsedMs": 3717
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_286",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8512,
+        "output": 64,
+        "cachedInput": 0,
+        "reasoning": 18,
+        "total": 8576
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "[1, 2, 3, 4, 11, 6, 7, 8, 9, 10]",
+      "elapsedMs": 8543,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_286",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8512,
+        "output": 69,
+        "cachedInput": 0,
+        "reasoning": 23,
+        "total": 8581
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "[1, 2, 3, 4, 11, 6, 7, 8, 9, 10]",
+      "elapsedMs": 6744,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_12",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8500,
+        "output": 73,
+        "cachedInput": 0,
+        "reasoning": 46,
+        "total": 8573
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "'If you want to live a happy life! Daniel'",
+      "elapsedMs": 12916,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_12",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8500,
+        "output": 40,
+        "cachedInput": 0,
+        "reasoning": 13,
+        "total": 8540
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "'If you want to live a happy life! Daniel'",
+      "elapsedMs": 5385,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_795",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": true,
+      "usage": {
+        "input": null,
+        "output": null,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": null
+      },
+      "turnError": {
+        "message": "Selected model is at capacity. Please try a different model.",
+        "codexErrorInfo": "serverOverloaded",
+        "additionalDetails": null,
+        "misalignment": null
+      },
+      "error": "Error: Incomplete turn: failed",
+      "elapsedMs": 3067
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_795",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8465,
+        "output": 50,
+        "cachedInput": 0,
+        "reasoning": 22,
+        "total": 8515
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "'Fu,Ux Zfujijabji Pfu.'",
+      "elapsedMs": 6590,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_795",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8465,
+        "output": 98,
+        "cachedInput": 0,
+        "reasoning": 70,
+        "total": 8563
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "'Fu,Ux Zfujijabji Pfu.'",
+      "elapsedMs": 10298,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_211",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8479,
+        "output": 105,
+        "cachedInput": 0,
+        "reasoning": 88,
+        "total": 8584
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "10",
+      "elapsedMs": 11182,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_211",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "medium"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8479,
+        "output": 85,
+        "cachedInput": 4736,
+        "reasoning": 68,
+        "total": 8564
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "10",
+      "elapsedMs": 9036,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "cruxeval",
+      "id": "sample_211",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8479,
+        "output": 89,
+        "cachedInput": 0,
+        "reasoning": 72,
+        "total": 8568
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "10",
+      "elapsedMs": 10402,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "literal-equality"
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/13",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "medium"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8495,
+        "output": 120,
+        "cachedInput": 4736,
+        "reasoning": 0,
+        "total": 8615
+      },
+      "itemTypes": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "answer": "def greatest_common_divisor(a: int, b: int) -> int:\n    \"\"\"Return the greatest common divisor of two integers a and b.\n\n    >>> greatest_common_divisor(3, 5)\n    1\n    >>> greatest_common_divisor(25, 15)\n    5\n    \"\"\"\n    a, b = abs(a), abs(b)\n    while b:\n        a, b = b, a % b\n    return a\n",
+      "elapsedMs": 23210,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/13",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8495,
+        "output": 82,
+        "cachedInput": 8320,
+        "reasoning": 0,
+        "total": 8577
+      },
+      "itemTypes": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "answer": "def greatest_common_divisor(a: int, b: int) -> int:\n    \"\"\"Return the nonnegative greatest common divisor of a and b.\"\"\"\n    a, b = abs(a), abs(b)\n    while b:\n        a, b = b, a % b\n    return a\n",
+      "elapsedMs": 31462,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/13",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8495,
+        "output": 145,
+        "cachedInput": 0,
+        "reasoning": 23,
+        "total": 8640
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "def greatest_common_divisor(a: int, b: int) -> int:\n    \"\"\"Return the nonnegative greatest common divisor of a and b.\n\n    >>> greatest_common_divisor(3, 5)\n    1\n    >>> greatest_common_divisor(25, 15)\n    5\n    \"\"\"\n    a, b = abs(a), abs(b)\n    while b:\n        a, b = b, a % b\n    return a\n",
+      "elapsedMs": 11993,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/132",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8558,
+        "output": 142,
+        "cachedInput": 0,
+        "reasoning": 65,
+        "total": 8700
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "def is_nested(string):\n    target = '[[]]'\n    matched = 0\n    for bracket in string:\n        if bracket == target[matched]:\n            matched += 1\n            if matched == len(target):\n                return True\n    return False\n",
+      "elapsedMs": 13399,
+      "verdict": {
+        "valid": true,
+        "passed": false,
+        "reason": "execution-failed",
+        "exitCode": 1,
+        "detail": "Traceback (most recent call last):\n  File \"<verifier>/run.py\", line 2, in <module>\n    tests.check(getattr(candidate, 'is_nested'))\n    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<verifier>/tests.py\", line 31, in check\n    assertion(candidate(*inp), exp, 0)\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<verifier>/tests.py\", line 24, in assertion\n    assert exact_match\n           ^^^^^^^^^^^\nAssertionError\n"
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/132",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8558,
+        "output": 281,
+        "cachedInput": 0,
+        "reasoning": 203,
+        "total": 8839
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "def is_nested(string):\n    pattern = \"[[]]\"\n    matched = 0\n    for bracket in string:\n        if bracket == pattern[matched]:\n            matched += 1\n            if matched == len(pattern):\n                return True\n    return False\n",
+      "elapsedMs": 13419,
+      "verdict": {
+        "valid": true,
+        "passed": false,
+        "reason": "execution-failed",
+        "exitCode": 1,
+        "detail": "Traceback (most recent call last):\n  File \"<verifier>/run.py\", line 2, in <module>\n    tests.check(getattr(candidate, 'is_nested'))\n    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<verifier>/tests.py\", line 31, in check\n    assertion(candidate(*inp), exp, 0)\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<verifier>/tests.py\", line 24, in assertion\n    assert exact_match\n           ^^^^^^^^^^^\nAssertionError\n"
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/132",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "medium"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8558,
+        "output": 462,
+        "cachedInput": 4736,
+        "reasoning": 385,
+        "total": 9020
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "def is_nested(string):\n    pattern = '[[]]'\n    matched = 0\n    for bracket in string:\n        if bracket == pattern[matched]:\n            matched += 1\n            if matched == len(pattern):\n                return True\n    return False\n",
+      "elapsedMs": 24894,
+      "verdict": {
+        "valid": true,
+        "passed": false,
+        "reason": "execution-failed",
+        "exitCode": 1,
+        "detail": "Traceback (most recent call last):\n  File \"<verifier>/run.py\", line 2, in <module>\n    tests.check(getattr(candidate, 'is_nested'))\n    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<verifier>/tests.py\", line 31, in check\n    assertion(candidate(*inp), exp, 0)\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<verifier>/tests.py\", line 24, in assertion\n    assert exact_match\n           ^^^^^^^^^^^\nAssertionError\n"
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/68",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8737,
+        "output": 96,
+        "cachedInput": 0,
+        "reasoning": 21,
+        "total": 8833
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "def pluck(arr):\n    result = []\n    for index, value in enumerate(arr):\n        if value % 2 == 0 and (not result or value < result[0]):\n            result = [value, index]\n    return result\n",
+      "elapsedMs": 8172,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/68",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "medium"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8737,
+        "output": 73,
+        "cachedInput": 4736,
+        "reasoning": 0,
+        "total": 8810
+      },
+      "itemTypes": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "answer": "def pluck(arr):\n    result = []\n    for index, value in enumerate(arr):\n        if value % 2 == 0 and (not result or value < result[0]):\n            result = [value, index]\n    return result\n",
+      "elapsedMs": 8061,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/68",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8737,
+        "output": 73,
+        "cachedInput": 0,
+        "reasoning": 0,
+        "total": 8810
+      },
+      "itemTypes": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "answer": "def pluck(arr):\n    result = []\n    for index, value in enumerate(arr):\n        if value % 2 == 0 and (not result or value < result[0]):\n            result = [value, index]\n    return result\n",
+      "elapsedMs": 8346,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/67",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "medium"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8635,
+        "output": 42,
+        "cachedInput": 4736,
+        "reasoning": 0,
+        "total": 8677
+      },
+      "itemTypes": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "answer": "def fruit_distribution(s, n):\n    return n - sum(int(word) for word in s.split() if word.isdigit())",
+      "elapsedMs": 5303,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/67",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8635,
+        "output": 44,
+        "cachedInput": 0,
+        "reasoning": 0,
+        "total": 8679
+      },
+      "itemTypes": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "answer": "def fruit_distribution(s, n):\n    return n - sum(int(word) for word in s.split() if word.isdigit())\n",
+      "elapsedMs": 5676,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/67",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8635,
+        "output": 108,
+        "cachedInput": 0,
+        "reasoning": 62,
+        "total": 8743
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "def fruit_distribution(s, n):\n    return n - sum(int(word) for word in s.split() if word.isdigit())\n",
+      "elapsedMs": 10383,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/87",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8684,
+        "output": 79,
+        "cachedInput": 4736,
+        "reasoning": 0,
+        "total": 8763
+      },
+      "itemTypes": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "answer": "def get_row(lst, x):\n    return [\n        (row_index, column_index)\n        for row_index, row in enumerate(lst)\n        for column_index in range(len(row) - 1, -1, -1)\n        if row[column_index] == x\n    ]",
+      "elapsedMs": 5929,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/87",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8684,
+        "output": 79,
+        "cachedInput": 0,
+        "reasoning": 0,
+        "total": 8763
+      },
+      "itemTypes": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "answer": "def get_row(lst, x):\n    return [\n        (row_index, column_index)\n        for row_index, row in enumerate(lst)\n        for column_index in range(len(row) - 1, -1, -1)\n        if row[column_index] == x\n    ]",
+      "elapsedMs": 12460,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/87",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "medium"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8684,
+        "output": 79,
+        "cachedInput": 4736,
+        "reasoning": 0,
+        "total": 8763
+      },
+      "itemTypes": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "answer": "def get_row(lst, x):\n    return [\n        (row_index, col_index)\n        for row_index, row in enumerate(lst)\n        for col_index in range(len(row) - 1, -1, -1)\n        if row[col_index] == x\n    ]",
+      "elapsedMs": 10202,
+      "verdict": {
+        "valid": true,
+        "passed": true,
+        "reason": "official-tests",
+        "exitCode": 0,
+        "detail": ""
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/141",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": null,
+        "output": null,
+        "cachedInput": null,
+        "reasoning": null,
+        "total": null
+      },
+      "turnError": {
+        "message": "Selected model is at capacity. Please try a different model.",
+        "codexErrorInfo": "serverOverloaded",
+        "additionalDetails": null,
+        "misalignment": null
+      },
+      "error": "Error: Incomplete turn: failed",
+      "elapsedMs": 9126
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/141",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8643,
+        "output": 216,
+        "cachedInput": 0,
+        "reasoning": 67,
+        "total": 8859
+      },
+      "itemTypes": [
+        "userMessage",
+        "reasoning",
+        "agentMessage"
+      ],
+      "answer": "def file_name_check(file_name):\n    if file_name.count('.') != 1:\n        return 'No'\n    name, extension = file_name.split('.')\n    if not name or not ('a' <= name[0] <= 'z' or 'A' <= name[0] <= 'Z'):\n        return 'No'\n    if extension not in ('txt', 'exe', 'dll'):\n        return 'No'\n    if sum('0' <= char <= '9' for char in file_name) > 3:\n        return 'No'\n    return 'Yes'\n",
+      "elapsedMs": 10798,
+      "verdict": {
+        "valid": true,
+        "passed": false,
+        "reason": "execution-failed",
+        "exitCode": 1,
+        "detail": "Traceback (most recent call last):\n  File \"<verifier>/run.py\", line 2, in <module>\n    tests.check(getattr(candidate, 'file_name_check'))\n    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<verifier>/tests.py\", line 31, in check\n    assertion(candidate(*inp), exp, 0)\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<verifier>/tests.py\", line 24, in assertion\n    assert exact_match\n           ^^^^^^^^^^^\nAssertionError\n"
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/141",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "medium"
+      },
+      "selected": true,
+      "usage": {
+        "input": 8643,
+        "output": 147,
+        "cachedInput": 4736,
+        "reasoning": 0,
+        "total": 8790
+      },
+      "itemTypes": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "answer": "def file_name_check(file_name):\n    if file_name.count('.') != 1:\n        return 'No'\n    name, extension = file_name.split('.')\n    if not name or not ('a' <= name[0] <= 'z' or 'A' <= name[0] <= 'Z'):\n        return 'No'\n    if extension not in ('txt', 'exe', 'dll'):\n        return 'No'\n    if sum('0' <= char <= '9' for char in file_name) > 3:\n        return 'No'\n    return 'Yes'\n",
+      "elapsedMs": 9037,
+      "verdict": {
+        "valid": true,
+        "passed": false,
+        "reason": "execution-failed",
+        "exitCode": 1,
+        "detail": "Traceback (most recent call last):\n  File \"<verifier>/run.py\", line 2, in <module>\n    tests.check(getattr(candidate, 'file_name_check'))\n    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<verifier>/tests.py\", line 31, in check\n    assertion(candidate(*inp), exp, 0)\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<verifier>/tests.py\", line 24, in assertion\n    assert exact_match\n           ^^^^^^^^^^^\nAssertionError\n"
+      }
+    },
+    {
+      "dataset": "humanevalplus",
+      "id": "HumanEval/141",
+      "route": {
+        "model": "gpt-6.1-sol",
+        "effort": "low"
+      },
+      "selected": false,
+      "usage": {
+        "input": 8643,
+        "output": 147,
+        "cachedInput": 0,
+        "reasoning": 0,
+        "total": 8790
+      },
+      "itemTypes": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "answer": "def file_name_check(file_name):\n    if file_name.count('.') != 1:\n        return 'No'\n    name, extension = file_name.split('.')\n    if not name or not ('a' <= name[0] <= 'z' or 'A' <= name[0] <= 'Z'):\n        return 'No'\n    if extension not in ('txt', 'exe', 'dll'):\n        return 'No'\n    if sum('0' <= char <= '9' for char in file_name) > 3:\n        return 'No'\n    return 'Yes'\n",
+      "elapsedMs": 12401,
+      "verdict": {
+        "valid": true,
+        "passed": false,
+        "reason": "execution-failed",
+        "exitCode": 1,
+        "detail": "Traceback (most recent call last):\n  File \"<verifier>/run.py\", line 2, in <module>\n    tests.check(getattr(candidate, 'file_name_check'))\n    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<verifier>/tests.py\", line 31, in check\n    assertion(candidate(*inp), exp, 0)\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<verifier>/tests.py\", line 24, in assertion\n    assert exact_match\n           ^^^^^^^^^^^\nAssertionError\n"
+      }
+    }
+  ]
+}

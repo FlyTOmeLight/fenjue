@@ -13,6 +13,14 @@ import { readConfig, PROXY_HEADER } from "../src/config.js";
 import { startProxy } from "../src/proxy.js";
 import { config, catalog, models, request, classification, serve } from "./fixtures.js";
 
+test("redaction handles long ordinary words without blocking the native gateway", async () => {
+  const script = `import assert from 'node:assert/strict';
+    import { redactCapture } from './dist/src/capture.js';
+    const word = 'a'.repeat(200000);
+    assert.equal(redactCapture(word + ' API_KEY="private-value"'), word + ' API_KEY="[REDACTED]"');`;
+  await promisify(execFile)(process.execPath, ["--input-type=module", "-e", script], { timeout: 3000 });
+});
+
 test("daily capture deduplicates history, redacts private text and creates blind drafts without future evidence", async t => {
   const temp = await mkdtemp(join(tmpdir(), "fenjue-capture-")); t.after(() => rm(temp, { recursive: true, force: true }));
   const capture = createCapture(join(temp, "daily"), "123-1", ["known-gateway-secret"], () => assert.fail("Unexpected write failure"));

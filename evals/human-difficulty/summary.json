@@ -1,0 +1,240 @@
+{
+  "version": 1,
+  "datasets": [
+    {
+      "dataset": "swe",
+      "sources": [
+        {
+          "dataset": "swe",
+          "revision": "78f471bf655a3137b2e8a75af1501690ec009ec3",
+          "sha256": "030cfd7f2a704c4c0226e7f104c725a3b41230b1d3517f9c915ad7ea5be3fa25",
+          "total": 500,
+          "eligible": 500,
+          "counts": {
+            "15 min - 1 hour": 261,
+            "1-4 hours": 42,
+            "<15 min fix": 194,
+            ">4 hours": 3
+          }
+        }
+      ],
+      "policy": "balanced-native-v6",
+      "questionnaireDigest": "c507033d7296d96be1abfc415dbfec6ad0387b61e39f3b1a3d25a0c3114a53e4",
+      "inputDigest": "81e2954a9765bf677b616cb62a020bf50f274c59a8b7dfaad51ea95afec0e98a",
+      "repeats": 2,
+      "tasks": 63,
+      "evaluations": 126,
+      "httpAttempts": 124,
+      "successful": 124,
+      "errors": {
+        "input-budget": 2
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "level": "<15 min fix",
+          "evaluations": 40,
+          "routes": {
+            "gpt-6.1-sol/high": 4,
+            "gpt-6.1-sol/medium": 36
+          },
+          "errors": {},
+          "held": {
+            "effort": 12
+          }
+        },
+        {
+          "rank": 1,
+          "level": "15 min - 1 hour",
+          "evaluations": 40,
+          "routes": {
+            "gpt-6.1-sol/medium": 28,
+            "gpt-6.1-sol/high": 10
+          },
+          "errors": {
+            "input-budget": 2
+          },
+          "held": {
+            "effort": 13
+          }
+        },
+        {
+          "rank": 2,
+          "level": "1-4 hours",
+          "evaluations": 40,
+          "routes": {
+            "gpt-6.1-sol/medium": 27,
+            "gpt-6.1-sol/high": 13
+          },
+          "errors": {},
+          "held": {
+            "effort": 17
+          }
+        },
+        {
+          "rank": 3,
+          "level": ">4 hours",
+          "evaluations": 6,
+          "routes": {
+            "gpt-6.1-sol/medium": 6
+          },
+          "errors": {},
+          "held": {
+            "effort": 2
+          }
+        }
+      ],
+      "pairs": {
+        "concordant": 596,
+        "discordant": 326,
+        "tied": 1752
+      },
+      "stability": {
+        "completeTasks": 62,
+        "changedRoutes": 1,
+        "changedFeatures": 2
+      },
+      "latency": {
+        "p50Ms": 492,
+        "p95Ms": 907,
+        "sumMs": 69744
+      },
+      "usage": {
+        "input": {
+          "knownCalls": 124,
+          "knownSum": 432112,
+          "total": 432112
+        },
+        "output": {
+          "knownCalls": 124,
+          "knownSum": 27276,
+          "total": 27276
+        },
+        "total": {
+          "knownCalls": 124,
+          "knownSum": 459388,
+          "total": 459388
+        },
+        "cachedInput": {
+          "knownCalls": 0,
+          "knownSum": 0,
+          "total": null
+        },
+        "reasoning": {
+          "knownCalls": 0,
+          "knownSum": 0,
+          "total": null
+        }
+      }
+    },
+    {
+      "dataset": "gaia",
+      "sources": [
+        {
+          "dataset": "gaia",
+          "revision": "682dd723ee1e1697e00360edccf2366dc8418dd9",
+          "sha256": "d9141bad0081af438d1ee36d188c5197035dc22a01f64e3f2ee17e45469518e9",
+          "total": 165,
+          "eligible": 127,
+          "counts": {
+            "1": 42,
+            "2": 66,
+            "3": 19
+          }
+        }
+      ],
+      "policy": "balanced-native-v6",
+      "questionnaireDigest": "c507033d7296d96be1abfc415dbfec6ad0387b61e39f3b1a3d25a0c3114a53e4",
+      "inputDigest": "225c9c1eeea46dd2641c8d547643ecad07e297c48c08bec32359e6c3e3ad78c4",
+      "repeats": 2,
+      "tasks": 59,
+      "evaluations": 118,
+      "httpAttempts": 118,
+      "successful": 117,
+      "errors": {
+        "invalid-response": 1
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "level": "1",
+          "evaluations": 40,
+          "routes": {
+            "gpt-6.1-sol/low": 38,
+            "gpt-6.1-sol/medium": 2
+          },
+          "errors": {},
+          "held": {}
+        },
+        {
+          "rank": 1,
+          "level": "2",
+          "evaluations": 40,
+          "routes": {
+            "gpt-6.1-sol/low": 35,
+            "gpt-6.1-sol/medium": 4
+          },
+          "errors": {
+            "invalid-response": 1
+          },
+          "held": {}
+        },
+        {
+          "rank": 2,
+          "level": "3",
+          "evaluations": 38,
+          "routes": {
+            "gpt-6.1-sol/low": 32,
+            "gpt-6.1-sol/medium": 6
+          },
+          "errors": {},
+          "held": {
+            "effort": 2
+          }
+        }
+      ],
+      "pairs": {
+        "concordant": 295,
+        "discordant": 131,
+        "tied": 1855
+      },
+      "stability": {
+        "completeTasks": 58,
+        "changedRoutes": 0,
+        "changedFeatures": 2
+      },
+      "latency": {
+        "p50Ms": 434,
+        "p95Ms": 997,
+        "sumMs": 64816
+      },
+      "usage": {
+        "input": {
+          "knownCalls": 118,
+          "knownSum": 359910,
+          "total": 359910
+        },
+        "output": {
+          "knownCalls": 118,
+          "knownSum": 26260,
+          "total": 26260
+        },
+        "total": {
+          "knownCalls": 118,
+          "knownSum": 386170,
+          "total": 386170
+        },
+        "cachedInput": {
+          "knownCalls": 0,
+          "knownSum": 0,
+          "total": null
+        },
+        "reasoning": {
+          "knownCalls": 0,
+          "knownSum": 0,
+          "total": null
+        }
+      }
+    }
+  ]
+}

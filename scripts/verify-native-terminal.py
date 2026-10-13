@@ -293,13 +293,15 @@ try:
                 before_resume = len(classifications)
                 enter("/exit")
                 terminal.until(lambda: app_state().get("phase") == 2, "launcher restarts with resume")
+                terminal.until(lambda: terminal.contains("1 / 1 · 100%"), "resume picker loads saved session")
+                terminal.send("\r")
                 terminal.until(lambda: len([e for e in app_state()["trace"] if e["type"] == "bound"]) == 2, "native resumed thread binds", timeout=20)
                 assert [e for e in app_state()["trace"] if e["type"] == "bound"][-1]["reason"] == "ready", "Saved task cursor must reconcile with native history"
                 enter("继续")
                 terminal.until(lambda: len(completed_turns()) >= 7, "resumed manual turn completes")
                 assert seen[-1] == ("gpt-6-astra", "high"), "Resume must preserve manual model and effort"
                 assert len(classifications) == before_resume
-                checks.append("real TUI process restart preserves manual mode and Astra/high")
+                checks.append("real TUI resume picker reconnects and preserves manual mode and Astra/high")
                 captures = [json.loads(p.read_text()) for p in Path(app_state()["executionCases"]).glob("daily-*/capture.json")]
                 assert sum(len(c["prompts"]) for c in captures) == 7, "Resume must append to existing execution case"
                 checks.append("execution case preserves its initial snapshot and appends resumed task input")

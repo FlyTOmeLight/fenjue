@@ -36,7 +36,7 @@ try {
     session = await startTmuxSession([fileURLToPath(new URL("../src/cli.js", import.meta.url)), phase === 3 ? "codex" : "codex-native",
       "--config", phase === 3 ? legacyConfig : config, "--log-dir", logDir, "--",
       "-C", temp, ...(fresh ? ["-s", "read-only", "-a", "never"] : []), ...Object.entries(settings).flatMap(([k, v]) => ["-c", `${k}=${JSON.stringify(v)}`]),
-      ...(fresh ? ["Implement a bounded feature"] : ["resume", "--last"])]);
+      ...(fresh ? ["Implement a bounded feature"] : phase === 2 ? ["resume"] : ["resume", "--last"])]);
     await writeFile(stateFile + ".tmp", JSON.stringify({ temp, socket: session.socket, logDir, capture, executionCases: join(temp, "execution-cases"), phase }));
     await rename(stateFile + ".tmp", stateFile);
     process.exitCode = await session.attach();

@@ -28,6 +28,13 @@ test("CLI reports both versions and configured routing without launching a sessi
   const { stdout } = await promisify(execFile)(process.execPath,
     [resolve("dist/src/cli.js"), "--version", "--config", configPath], { cwd, env, timeout: 5000 });
   for (const text of ["auto / balanced-native-v6", "gpt-6.1-sol", "gpt-6-astra", "上下文 task", "bidirectional / until-available", "shadow（影子建议不改变选档）"]) assert.ok(stdout.includes(text), text);
+  config.native.reasoningDemand = "auto";
+  await writeFile(configPath, JSON.stringify(config));
+  const automatic = await promisify(execFile)(process.execPath,
+    [resolve("dist/src/cli.js"), "--version", "--config", configPath], { cwd, env, timeout: 5000 });
+  assert.match(automatic.stdout, /balanced-native-v6-demand-v1/);
+  assert.match(automatic.stdout, /auto（合入主分类并参与选档）/);
+  assert.match(automatic.stdout, /复杂推理用 high/);
   await assert.rejects(() => promisify(execFile)(process.execPath, [resolve("dist/src/cli.js"), "--version"],
     { cwd, env: { ...env, FENJUE_CODEX_BIN: join(cwd, "missing-codex") }, timeout: 5000 }),
     (error: any) => error.code === 1 && /无法读取 Codex 版本.*ENOENT/.test(error.stderr));

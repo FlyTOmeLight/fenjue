@@ -6,6 +6,21 @@ import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { NativeRouteStatus, RouteStatus, createTitleDisplay, latestLog, showStatus } from "../src/status.js";
 
+test("native status explains effort demand, holds and actual implementation upgrades", () => {
+  const status = new NativeRouteStatus();
+  for (const [decision, held, expected] of [
+    [{ reason: "demand", to: "high" }, [], /推理需求支持 high/],
+    [{ reason: "low-confidence", to: "medium" }, ["effort"], /支持度不足，沿用 medium/],
+    [{ reason: "implementation-floor", from: "low", to: "medium" }, ["effort"], /实施最低档：low → medium/],
+    [{ reason: "context-floor", from: "low", to: "high" }, ["effort"], /上下文未明确，保留 high/],
+  ] as const) {
+    status.update({ type: "accepted", threadId: "thread", reason: "classified", route: { model: "sol", effort: decision.to },
+      effortDecision: decision, held: [...held], classification: { features: { reasoning: "solution", scope: "multifile" } } });
+    assert.match(status.line(), expected);
+    assert.doesNotMatch(status.line(), /保留思考强度/);
+  }
+});
+
 test("native status separates failure cause from classification and shows capacity retry outcomes", () => {
   const status = new NativeRouteStatus();
   const common = { threadId: "thread", mode: "auto" as const, route: { model: "sol", effort: "high" } };

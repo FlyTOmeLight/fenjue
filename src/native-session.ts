@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { AUTO_MODEL, record, type Config, type Route } from "./config.js";
-import { ClassificationError, createClassifier, type Classify, type Classification, createDemandClassifier, classifierUsage, QUESTIONS, CONSTRAINT_QUESTION, DEMAND_POLICY, DEMAND_QUESTION, type ClassifyDemand, type ClassificationObservation } from "./classification.js";
+import { ClassificationError, createClassifier, type Classify, type Classification, createDemandClassifier, classifierUsage, classificationQuestions, DEMAND_POLICY, DEMAND_QUESTION, type ClassifyDemand, type ClassificationObservation } from "./classification.js";
 import { confidentNewTask } from "./policy.js";
 import { advanceTask, fingerprint, isContinuation, type TaskView, type TaskState } from "./task-state.js";
 import { mainRoute, nativeSelection, nativePolicy, type NativeSelection } from "./native-policy.js";
@@ -75,7 +75,7 @@ export class NativeSession {
   constructor(private config: Config, private records: NativeRecords,
     private sendServer: (message: NativeMessage) => void, private sendClient: (message: NativeMessage) => void,
     private onEvent: (event: NativeEvent) => void = () => {}, classify?: Classify, private initialManual = false, classifyDemand?: ClassifyDemand) {
-    this.classify = classify ?? createClassifier(config.semantic!, undefined, undefined, config.native?.expertPolicy === "constraints");
+    this.classify = classify ?? createClassifier(config.semantic!, undefined, undefined, config.native?.expertPolicy === "constraints", config.native?.reasoningDemand === "auto");
     this.classifyDemand = classifyDemand ?? createDemandClassifier(config.semantic!);
     this.reviewer = new NativeReviewer(sendServer);
     this.policy = nativePolicy(config) + ":" + fingerprint({ routes: config.routes, native: config.native, semantic: config.semantic,
@@ -611,7 +611,7 @@ export class NativeSession {
       const started = performance.now();
       try { return this.classifierView(inputView); }
       catch (error) {
-        const questions = this.config.native?.expertPolicy === "constraints" ? { ...QUESTIONS, constraints: CONSTRAINT_QUESTION } : QUESTIONS;
+        const questions = classificationQuestions(this.config.native?.expertPolicy === "constraints", this.config.native?.reasoningDemand === "auto");
         const measurement = { callId: randomUUID(), decisionId, phase, elapsedMs: Math.round(performance.now() - started),
           httpAttempted: false, usage: classifierUsage(null), inputPrepared: false, inputDigest: fingerprint(inputView),
           questionnaireDigest: fingerprint(questions), contextPolicy: CLASSIFIER_CONTEXT_POLICY,
@@ -659,7 +659,7 @@ export class NativeSession {
       this.startDemandShadow(params.threadId, state.taskId, decisionId, structuredClone(demandView), signal);
     }
     return { state, decision: { decisionId, classifierCalls, reason, suggestion, classification, boundaryClassification, policy: this.policy,
-      ...(selection ? { routeSupport: selection.support, held: selection.held } : {}) } };
+      ...(selection ? { routeSupport: selection.support, held: selection.held, effortDecision: selection.effortDecision } : {}) } };
   }
   private async measuredClassification<T>(threadId: string, taskId: string, decisionId: string, phase: string,
     view: TaskView, signal: AbortSignal, run: (observe: (o: ClassificationObservation) => void) => Promise<T>, inputPrepared = true) {
@@ -670,7 +670,7 @@ export class NativeSession {
     try { result = await run(o => { observation = o; }); signal.throwIfAborted(); }
     catch (e) { error = e instanceof Error ? e : new Error(String(e)); }
     const questions = phase === "demand-shadow" ? { demand: DEMAND_QUESTION } :
-      this.config.native?.expertPolicy === "constraints" ? { ...QUESTIONS, constraints: CONSTRAINT_QUESTION } : QUESTIONS;
+      classificationQuestions(this.config.native?.expertPolicy === "constraints", this.config.native?.reasoningDemand === "auto");
     const measurement = { callId, decisionId, phase, elapsedMs: Math.round(performance.now() - started),
       ...observation, inputPrepared, inputDigest: fingerprint(view), questionnaireDigest: fingerprint(questions), contextPolicy: CLASSIFIER_CONTEXT_POLICY,
       ...(error ? { error: error instanceof ClassificationError ? error.code : signal.aborted ? "cancelled" : "unavailable" } : {}) };
@@ -688,7 +688,7 @@ export class NativeSession {
       }).finally(() => this.demandJobs.delete(controller));
   }
   private classifierView(view: TaskView): TaskView {
-    return classifierContext(view, this.config.semantic!, this.config.native?.expertPolicy === "constraints", this.config.native?.classifierContext);
+    return classifierContext(view, this.config.semantic!, this.config.native?.expertPolicy === "constraints", this.config.native?.classifierContext, this.config.native?.reasoningDemand === "auto");
   }
   close(): void {
     if (this.closed) return;

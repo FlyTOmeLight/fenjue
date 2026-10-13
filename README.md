@@ -4,7 +4,7 @@ Task-aware model and reasoning routing for the Codex CLI.
 
 Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型和思考强度。它保留原生工具、审批和会话恢复流程，并提供路由日志、合成任务评测与 Codex Judge 判分入口。
 
-**状态：实验性 [0.3.2](https://github.com/FlyTOmeLight/fenjue/releases/tag/v0.3.2)。** 当前提供源码安装，尚未发布 npm 包。模型名称是配置示例，是否可用由你的账号和 Codex 模型目录决定。合成任务结果见下文，日常质量与费用收益仍需实测。
+**状态：实验性 [0.4.0](https://github.com/FlyTOmeLight/fenjue/releases/tag/v0.4.0)。** 当前提供源码安装，尚未发布 npm 包。模型名称是配置示例，是否可用由你的账号和 Codex 模型目录决定。合成任务结果见下文，日常质量与费用收益仍需实测。
 
 ## 能做什么
 
@@ -23,7 +23,7 @@ Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型
 ```bash
 git clone https://github.com/FlyTOmeLight/fenjue.git
 cd fenjue
-git checkout v0.3.2
+git checkout v0.4.0
 npm ci --ignore-scripts
 npm run build
 npm start -- --help
@@ -73,7 +73,7 @@ npm start -- status --watch
 
 `capacityFallback=main-to-expert` 只允许主模型切到专家，持续模式之后只重试专家；`bidirectional` 允许双向轮换。manual、shadow 和显式 xhigh 路线不恢复。详见 [容量备用策略](docs/daily-use.md#容量不足时的备用策略)。
 
-需要观察任务的推理需求时，可额外设置 `native.reasoningDemand=shadow`。它发起独立后台分类，不改变现有选档；调用成本和人工反馈可在周报核对。配置和行为见 [推理需求与路由记录](docs/routing-upgrade.md)。
+设置 `native.reasoningDemand=auto` 后，主分类会同时判断推理需求：常规任务 low、多步骤任务 medium、复杂推理 high；实施至少 medium，诊断和敏感逻辑等 high 要求继续保留。总体方案已定但实施仍需解决规则冲突或边界取舍，可以升到 high。每次分类只增加一题，不额外调用分类器。设为 `shadow` 则使用独立后台分类，仅观察建议。配置改动需重启生效，配置和行为见 [推理需求与路由记录](docs/routing-upgrade.md)。
 
 ## 不使用语义分类器的入口
 

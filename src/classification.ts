@@ -46,6 +46,7 @@ export interface Classification {
   questionScores: QuestionScores;
   inputTokens: number;
   constraints?: ConstraintScore;
+  demand?: DemandScore;
 }
 export interface ClassifierUsage {
   input: number | null; output: number | null; cachedInput: number | null; reasoning: number | null; total: number | null;
@@ -62,16 +63,17 @@ export function classifierUsage(raw: any): ClassifierUsage {
 }
 export const DEMAND_POLICY = "reasoning-demand-shadow-v1";
 export const DEMAND_QUESTION = {
-  type: "choice", instructions: instruction + "只判断当前阶段的推理需求，不执行任务。按步骤之间的依赖、验证和搜索判断，不按题目长度、文件数、工具数、敏感操作或信息是否齐全判断。查询不自动等于简单；规则齐全不自动等于容易。已完成复杂工作后的摘要按本轮摘要判断。",
+  type: "choice", instructions: instruction + "只判断当前阶段的推理需求，不执行任务。按步骤之间的依赖、验证和搜索判断，不按关键词、题目长度、文件数、工具数、敏感操作或信息是否齐全判断。查询不自动等于简单；规则齐全不自动等于容易。总体方案已确定，不代表实施中的内容决策已经完成；仍需筛选规则、消解冲突、划定职责边界，并验证这些相互影响的决定是否一致时，属于 complex。普通跨来源核对、按已确定规则逐项实施仍属于 multi_step。已完成复杂工作后的摘要按本轮摘要判断。",
   criteria: {
     routine: "直接查取一个已明确对象、提取或转换文字，或按已经确定的规则与方案做局部常规实施；不需要串联推导、交叉验证或比较候选解。",
     multi_step: "需要连接多步推导、检索、计算或验证；前一步结果决定下一步，需跨来源核对或处理多个分支；总体方法和求解路径清楚。",
-    complex: "需要探索多种候选路径或假设、推导非直接可得的算法或证明，或同时解决相互影响的约束；方法未确定，需搜索、权衡和验证才能收敛。",
+    complex: "需要探索多种候选路径或假设、推导非直接可得的算法或证明，或同时解决相互影响的约束；包括总体方案已定但实施时仍需综合规则、解决冲突、确定边界和检查一致性，需搜索、权衡和验证才能收敛。",
   },
 } as const;
 export type DemandChoice = keyof typeof DEMAND_QUESTION.criteria;
+export interface DemandScore { choice: DemandChoice; confidence: number; probabilities: Record<DemandChoice, number> }
 export interface DemandClassification {
-  model: string; demand: { choice: DemandChoice; confidence: number; probabilities: Record<DemandChoice, number> };
+  model: string; demand: DemandScore;
   suggestedEffort?: "low" | "medium" | "high";
 }
 export type ClassifyDemand = (view: TaskView, signal: AbortSignal, observe?: ObserveClassification) => Promise<DemandClassification>;
@@ -79,10 +81,13 @@ export class ClassificationError extends Error {
   constructor(public code: string) { super(code); }
 }
 
-export function classificationPayload(view: TaskView, config: SemanticConfig, constraints = false): string {
+export function classificationQuestions(constraints = false, demand = false) {
+  return { ...QUESTIONS, ...(constraints ? { constraints: CONSTRAINT_QUESTION } : {}), ...(demand ? { demand: DEMAND_QUESTION } : {}) };
+}
+export function classificationPayload(view: TaskView, config: SemanticConfig, constraints = false, demand = false): string {
   if (view.incomplete) throw new ClassificationError("incomplete-context");
   const body = JSON.stringify({ model: config.model, state: view,
-    questions: constraints ? { ...QUESTIONS, constraints: CONSTRAINT_QUESTION } : QUESTIONS });
+    questions: classificationQuestions(constraints, demand) });
   // Count the complete UTF-8 request, including all questions. This is a conservative
   // byte budget, not a tokenizer estimate; never silently trim user constraints.
   if (Buffer.byteLength(body) > config.maxInputBytes) throw new ClassificationError("input-budget");
@@ -100,7 +105,7 @@ function choiceAnswer(answer: unknown, options: string[]): { choice: string; con
       options.some(o => Number(probabilities[o]) > Number(probabilities[String(answer.choice)]) + 1e-6)) throw new ClassificationError("invalid-response");
   return { choice: String(answer.choice), confidence: answer.confidence, probabilities: { ...probabilities } as Record<string, number> };
 }
-export function parseClassification(value: unknown, model: string, constraints = false): Classification {
+export function parseClassification(value: unknown, model: string, constraints = false, demand = false): Classification {
   if (!record(value) || value.model !== model || !record(value.answers) || !record(value.usage) ||
       !Number.isSafeInteger(value.usage.input_tokens) || Number(value.usage.input_tokens) < 0) throw new ClassificationError("invalid-response");
   // Kev can opt into truncation on the server. A successful HTTP response does
@@ -122,9 +127,10 @@ export function parseClassification(value: unknown, model: string, constraints =
     confidence = Math.min(confidence, answer.confidence);
   }
   const constraintScore = constraints ? choiceAnswer(value.answers.constraints, Object.keys(CONSTRAINT_QUESTION.criteria)) as ConstraintScore : undefined;
+  const demandScore = demand ? choiceAnswer(value.answers.demand, Object.keys(DEMAND_QUESTION.criteria)) as DemandScore : undefined;
   if (constraintScore) confidence = Math.min(confidence, constraintScore.confidence);
   return { model, features, confidence, questionScores, inputTokens: Number(value.usage.input_tokens),
-    ...(constraintScore ? { constraints: constraintScore } : {}) };
+    ...(constraintScore ? { constraints: constraintScore } : {}), ...(demandScore ? { demand: demandScore } : {}) };
 }
 
 async function requestAnswers<T>(config: SemanticConfig, body: string, apiKey: string | undefined,
@@ -149,11 +155,11 @@ async function requestAnswers<T>(config: SemanticConfig, body: string, apiKey: s
   }
 }
 export function createClassifier(config: SemanticConfig, apiKey = config.apiKeyEnv ? process.env[config.apiKeyEnv] : undefined,
-  fetcher: typeof fetch = fetch, constraints = false): Classify {
+  fetcher: typeof fetch = fetch, constraints = false, demand = false): Classify {
   return async (view, signal, observe) => {
     observe?.({ httpAttempted: false, usage: classifierUsage(null) });
-    return requestAnswers(config, classificationPayload(view, config, constraints), apiKey, fetcher, signal,
-      raw => parseClassification(raw, config.model, constraints), observe);
+    return requestAnswers(config, classificationPayload(view, config, constraints, demand), apiKey, fetcher, signal,
+      raw => parseClassification(raw, config.model, constraints, demand), observe);
   };
 }
 // Independent shadow request: never changes baseline questions, context budget or confidence.

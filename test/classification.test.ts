@@ -1,10 +1,52 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { setTimeout as delay } from "node:timers/promises";
-import { createClassifier, parseClassification, classificationPayload } from "../src/classification.js";
+import { createClassifier, parseClassification, classificationPayload, classificationQuestions } from "../src/classification.js";
+import { classifierContext } from "../src/classifier-context.js";
 import { taskView, readTaskInput } from "../src/task-state.js";
 import { classification, jevResponse, request, semanticConfig, kevConfig } from "./fixtures.js";
 import { parseConfig } from "../src/config.js";
+
+test("integrated demand uses one request and retains independent feature confidence", async () => {
+  const s = semanticConfig().semantic!, view = taskView(readTaskInput(request("按总体方案整合规则并解决冲突")));
+  const demand = { type: "choice", choice: "complex", confidence: 0.6,
+    probabilities: { routine: 0.1, multi_step: 0.2, complex: 0.7 } };
+  const response = { ...jevResponse(), answers: { ...jevResponse().answers, demand } };
+  let calls = 0;
+  const classify = createClassifier(s, "fixture", async (_url, init) => {
+    calls++;
+    const body = JSON.parse(String(init!.body));
+    assert.deepEqual(body.questions, classificationQuestions(false, true));
+    assert.equal(Object.keys(body.questions).length, 6);
+    assert.deepEqual(body.state, view);
+    assert.match(body.questions.demand.instructions, /消解冲突/);
+    return Response.json(response);
+  }, false, true);
+  const result = await classify(view, new AbortController().signal);
+  assert.equal(calls, 1);
+  assert.deepEqual(result.demand, { choice: "complex", confidence: 0.6, probabilities: demand.probabilities });
+  assert.equal(result.confidence, classification().confidence);
+  assert.equal(parseClassification(response, s.model).demand, undefined);
+  assert.equal(Object.keys(classificationQuestions(true, true)).length, 7);
+});
+
+test("integrated demand rejects absent or invalid answers and budgets the complete questionnaire", () => {
+  const s = semanticConfig().semantic!, view = taskView(readTaskInput(request("核对规则")));
+  const good = jevResponse();
+  for (const demand of [undefined,
+    { type: "choice", choice: "invented", confidence: 0.9, probabilities: { routine: 0, multi_step: 0, complex: 1 } },
+    { type: "choice", choice: "complex", confidence: 0.9, probabilities: { routine: 0.9, multi_step: 0, complex: 0.1 } },
+    { type: "choice", choice: "complex", confidence: 0.9, probabilities: { routine: 0.5, multi_step: 0.5, complex: 0.9 } },
+  ]) assert.throws(() => parseClassification({ ...good, answers: { ...good.answers, demand } }, s.model, false, true), /invalid-response/);
+  const baseBytes = Buffer.byteLength(classificationPayload(view, s));
+  assert.throws(() => classificationPayload(view, { ...s, maxInputBytes: baseBytes }, false, true), /input-budget/);
+  const historical = { ...view, currentTask: { messages: ["原始目标".repeat(500)], evidence: [], incomplete: false } };
+  const limited = { ...s, maxInputBytes: Buffer.byteLength(classificationPayload(view, s, false, true)) + 600 };
+  const selected = classifierContext(historical, limited, false, "task", true);
+  assert.ok(Buffer.byteLength(classificationPayload(selected, limited, false, true)) <= limited.maxInputBytes);
+  assert.equal(selected.currentTask.incomplete, true);
+  assert.deepEqual(historical.currentTask.messages, ["原始目标".repeat(500)]);
+});
 
 test("constraint candidates request and validate the sixth answer without changing the baseline contract", async () => {
   const s = semanticConfig().semantic!, view = taskView(readTaskInput(request("比较内存、延迟和一致性的取舍")));

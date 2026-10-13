@@ -36,8 +36,17 @@ export class NativeRouteStatus {
         const labels: Record<string, string> = { mechanical: "机械处理", solution: "实施", diagnosis: "诊断", architecture: "方案权衡",
           local: "局部工作", multifile: "项目内协作", cross_system: "跨系统协作", missing: "需求待补充", unknown_cause: "根因未明" };
         this.explanation = f ? [f.reasoning, f.scope, f.uncertainty].map(v => labels[String(v)]).filter(Boolean).join(" · ") : undefined;
-        if (Array.isArray(event.held) && event.held.length) this.explanation = [this.explanation,
-          `证据不足，保留${event.held.map(v => v === "model" ? "模型" : "思考强度").join("和")}`].filter(Boolean).join("；");
+        const decision = record(event.effortDecision) ? event.effortDecision : undefined;
+        const effortLabels: Record<string, string> = {
+          demand: `推理需求支持 ${decision?.to}`, risk: `工作类型或风险要求 ${decision?.to}`,
+          "implementation-floor": `实施最低档：${decision?.from} → ${decision?.to}`,
+          "low-confidence": `支持度不足，沿用 ${decision?.to}`,
+          "context-floor": `上下文未明确，保留 ${decision?.to}`,
+        };
+        const holds = Array.isArray(event.held) ? event.held.filter(v => !decision || v !== "effort") : [];
+        this.explanation = [this.explanation, decision ? effortLabels[String(decision.reason)] : undefined,
+          holds.length ? `证据不足，保留${holds.map(v => v === "model" ? "模型" : "思考强度").join("和")}` : undefined,
+        ].filter(Boolean).join("；") || undefined;
       }
     }
     if (event.type === "rerouted" && typeof event.toModel === "string") this.reported = event.toModel;

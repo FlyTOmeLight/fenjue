@@ -90,11 +90,12 @@ async function main(): Promise<number> {
           `分类器：${semantic.model}；支持度阈值 ${semantic.minConfidence}；上下文 ${native.classifierContext ?? "task"}`,
           `主模型：${mainRoute(config).model}；专家模型：${native.expertModel ?? "未配置"}`,
           !native.expertModel ? "模型选择：仅使用主模型" : native.expertPolicy === "constraints" ? "模型选择：独立约束用主模型，耦合约束用专家" : "模型选择：局部/同项目多文件用主模型，跨独立系统用专家",
+          native.reasoningDemand === "auto" ? "思考强度：常规用 low；多步骤用 medium；复杂推理用 high；实施至少 medium，诊断/架构/根因未知/敏感逻辑至少 high" :
           "思考强度：机械且可逆用 low；实施用 medium；诊断/架构/根因未知/敏感逻辑用 high",
           "保留规则：支持度不足保留已有模型或档位；指代不清或缺少条件时不降档；首轮默认主模型 medium",
           ...(native.rules?.length ? [`显式路线：${native.rules.map(rule => `${rule.prefix} → ${rule.model} / ${rule.effort}`).join("；")}`] : []),
           `容量恢复：${native.capacityFallback ?? "off"} / ${native.capacityRetry ?? "once"}`,
-          `推理需求：${native.reasoningDemand ?? "关闭"}（影子建议不改变选档）`,
+          `推理需求：${native.reasoningDemand ?? "关闭"}${native.reasoningDemand === "auto" ? "（合入主分类并参与选档）" : native.reasoningDemand === "shadow" ? "（影子建议不改变选档）" : ""}`,
           `专家审查：${native.review ? `${native.review.model} / ${native.review.effort}，每任务最多 ${native.review.maxReviewsPerTask} 次` : "关闭"}`,
           "运行中手动切换以会话状态为准；配置改动需重启生效",
         ].join("\n") + "\n");

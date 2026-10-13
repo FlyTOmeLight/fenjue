@@ -38,7 +38,7 @@ export interface Config {
   rules: { prefix: string; route: string }[];
   semantic?: SemanticConfig;
   capture?: { directory: string; execution?: ExecutionCaptureConfig };
-  native?: { expertModel?: string; expertPolicy?: "constraints"; reasoningDemand?: "shadow"; capacityFallback?: CapacityFallback; capacityRetry?: CapacityRetry;
+  native?: { expertModel?: string; expertPolicy?: "constraints"; reasoningDemand?: "auto" | "shadow"; capacityFallback?: CapacityFallback; capacityRetry?: CapacityRetry;
     classifierContext?: "task" | "latest-message"; review?: NativeReviewConfig; rules?: NativeRule[] };
 }
 export const AUTO_MODEL = "fenjue-auto";
@@ -96,8 +96,8 @@ export function parseConfig(value: unknown): Config {
         (native.capacityFallback !== "off" && typeof native.expertModel !== "string"))) {
     throw new Error("native.capacityFallback 支持 off/main-to-expert/bidirectional；开启时需要 expertModel");
   }
-  if (record(native) && native.reasoningDemand !== undefined && native.reasoningDemand !== "shadow") {
-    throw new Error("native.reasoningDemand 仅支持 shadow；省略时关闭");
+  if (record(native) && native.reasoningDemand !== undefined && native.reasoningDemand !== "auto" && native.reasoningDemand !== "shadow") {
+    throw new Error("native.reasoningDemand 仅支持 auto/shadow；省略时关闭");
   }
   if (record(native) && native.rules !== undefined && (!Array.isArray(native.rules) || native.rules.some(r =>
     !record(r) || typeof r.prefix !== "string" || !r.prefix.trim() || !validRoute(r)))) {

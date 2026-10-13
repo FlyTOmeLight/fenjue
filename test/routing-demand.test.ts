@@ -10,7 +10,7 @@ import { observedTasks, addFeedback, iterationReport } from "../src/feedback.js"
 import { parseConfig } from "../src/config.js";
 import { NativeRouteStatus } from "../src/status.js";
 import { routingCalls, routingCost } from "../src/routing-observations.js";
-import { classification, jevResponse, semanticConfig } from "./fixtures.js";
+import { classification, jevResponse, semanticConfig, serve, readJSON } from "./fixtures.js";
 
 const view = { currentTask: { messages: [], evidence: [], incomplete: false }, newMessages: ["查询多个来源并核对结果，再计算差异"], evidence: [], incomplete: false };
 const demandResponse = { model: "jev-1.13.0", usage: { input_tokens: 50, output_tokens: 10 }, answers: { demand: {
@@ -49,14 +49,14 @@ test("baseline questions remain five and usage is recorded before invalid classi
   assert.equal(classifierUsage({ input_tokens: 100 }).total, null);
 });
 
-async function fixture(t: any, demand: ClassifyDemand, enabled = true) {
+async function fixture(t: any, demand: ClassifyDemand, enabled: boolean | "auto" = true, result = classification()) {
   const dir = await mkdtemp(join(tmpdir(), "fenjue-demand-")), events: NativeEvent[] = [], server: NativeMessage[] = [];
   const config = semanticConfig(); config.routes.deep = { model: "fixture-fast", effort: "high" };
-  config.native = enabled ? { reasoningDemand: "shadow" } : {};
+  config.native = enabled ? { reasoningDemand: enabled === "auto" ? "auto" : "shadow" } : {};
   const records = new NativeRecords(dir, undefined, [], msg => assert.fail(msg));
   const session = new NativeSession(config, records, m => server.push(m), () => {}, e => events.push(e), async (_v, _s, observe) => {
     observe?.({ httpAttempted: true, usage: classifierUsage({ input_tokens: 100, output_tokens: 20 }) });
-    return classification();
+    return result;
   }, false, demand);
   t.after(async () => { session.close(); await rm(dir, { recursive: true, force: true }); });
   await session.fromClient({ id: 1, method: "thread/start", params: { threadSource: "user", cwd: dir } });
@@ -176,8 +176,97 @@ test("new-task boundary counts both baseline calls, one shadow, and preserves ma
   assert.equal((await observedTasks(f.dir)).find(t => t.taskId === accepted.taskId)!.interventions!.length, 1);
 });
 
-test("reasoning demand configuration enables shadow only", () => {
+test("reasoning demand configuration enables auto and shadow", () => {
   const config = semanticConfig();
-  assert.throws(() => parseConfig({ ...config, native: { reasoningDemand: "auto" } }), /仅支持 shadow/);
+  assert.equal(parseConfig({ ...config, native: { reasoningDemand: "auto" } }).native!.reasoningDemand, "auto");
+  assert.throws(() => parseConfig({ ...config, native: { reasoningDemand: "other" } }), /auto.*shadow/);
   assert.equal(parseConfig({ ...config, native: { reasoningDemand: "shadow" } }).native!.reasoningDemand, "shadow");
+});
+
+
+test("integrated demand upgrades complex implementation in one classification and pins active turns", async t => {
+  const result = { ...classification({ reasoning: "solution", scope: "multifile" }),
+    demand: { choice: "complex" as const, confidence: 0.9, probabilities: { routine: 0.02, multi_step: 0.08, complex: 0.9 } } };
+  const f = await fixture(t, async () => assert.fail("auto must not make a shadow request"), "auto", result);
+  await f.start();
+  const request = f.server.find(m => m.method === "turn/start")!;
+  assert.equal(request.params.model, "fixture-fast");
+  assert.equal(request.params.effort, "high");
+  f.session.fromServer({ id: request.id, result: { turn: { id: "turn" } } });
+  const accepted = f.events.find(e => e.type === "accepted")!;
+  assert.equal((accepted.classification as any).demand.choice, "complex");
+  assert.equal((accepted.effortDecision as any).reason, "demand");
+  assert.equal((accepted.classifierCalls as any[]).length, 1);
+  assert.equal((await routingCalls(f.dir)).length, 1);
+  assert.equal(routingCost(await routingCalls(f.dir)).usage.total, 120);
+  await f.session.fromClient({ id: 3, method: "turn/start", params: {
+    threadId: "thread", effort: "low", input: [{ type: "text", text: "补充一个要求" }] } });
+  assert.equal(f.server.find(m => m.id === 3)!.params.effort, "high");
+  assert.equal(f.events.filter(e => e.type === "classification-call").length, 1);
+  f.session.fromServer({ method: "turn/completed", params: { threadId: "thread", turn: { id: "turn", status: "completed", items: [] } } });
+  result.features = { ...result.features, relation: "continue", reasoning: "mechanical" };
+  result.questionScores.reasoning.probabilities = { mechanical: 1, solution: 0, diagnosis: 0, architecture: 0 };
+  result.demand = { choice: "routine" as any, confidence: 1, probabilities: { routine: 1, multi_step: 0, complex: 0 } };
+  await f.session.fromClient({ id: 4, method: "turn/start", params: {
+    threadId: "thread", input: [{ type: "text", text: "只列出已完成的技能名称" }] } });
+  assert.equal(f.server.find(m => m.id === 4)!.params.effort, "low");
+});
+
+
+test("native auto sends the demand question through the real adapter and preserves the route on malformed scores", async t => {
+  let calls = 0, valid = true;
+  const response = jevResponse(classification({ reasoning: "solution" }));
+  const upstream = await serve(async (req, res) => {
+    const body = await readJSON(req); calls++;
+    assert.equal(Object.keys(body.questions).length, 6);
+    assert.ok(body.questions.demand);
+    res.setHeader("content-type", "application/json");
+    res.end(JSON.stringify({ ...response, answers: { ...response.answers, ...(valid ? { demand: {
+      type: "choice", choice: "complex", confidence: 0.9,
+      probabilities: { routine: 0.02, multi_step: 0.08, complex: 0.9 },
+    } } : {}) } }));
+  });
+  const dir = await mkdtemp(join(tmpdir(), "fenjue-demand-adapter-"));
+  const config = semanticConfig();
+  config.routes.deep = { model: "fixture-fast", effort: "high" };
+  config.native = { reasoningDemand: "auto" };
+  config.semantic!.endpoint = upstream.url; delete config.semantic!.apiKeyEnv;
+  const events: NativeEvent[] = [], server: NativeMessage[] = [];
+  const records = new NativeRecords(dir, undefined, [], msg => assert.fail(msg));
+  const session = new NativeSession(config, records, m => server.push(m), () => {}, e => events.push(e));
+  t.after(async () => { session.close(); await upstream.close(); await rm(dir, { recursive: true, force: true }); });
+  await session.fromClient({ id: 1, method: "thread/start", params: { threadSource: "user", cwd: dir } });
+  session.fromServer({ id: 1, result: { thread: { id: "thread" }, model: "fixture-fast", reasoningEffort: "medium" } });
+  const start = (id: number, text: string) => session.fromClient({ id, method: "turn/start", params: {
+    threadId: "thread", input: [{ type: "text", text }] } });
+  await start(2, "按总体方案整合规则，解决冲突并确定边界");
+  assert.equal(server.find(m => m.id === 2)!.params.effort, "high");
+  session.fromServer({ id: 2, result: { turn: { id: "first" } } });
+  session.fromServer({ method: "turn/completed", params: { threadId: "thread", turn: { id: "first", status: "completed", items: [] } } });
+  valid = false;
+  await start(3, "继续核对同一个任务中的规则冲突");
+  assert.equal(server.find(m => m.id === 3)!.params.effort, "high");
+  session.fromServer({ id: 3, result: { turn: { id: "second" } } });
+  assert.equal(events.findLast(e => e.type === "accepted")!.reason, "invalid-response");
+  assert.equal(events.some(e => e.type === "demand-shadow"), false);
+  assert.equal(calls, 2);
+  assert.deepEqual(upstream.errors, []);
+});
+
+
+test("integrated demand respects overall shadow and manual routing modes", async t => {
+  const result = { ...classification({ reasoning: "solution" }), demand: {
+    choice: "complex" as const, confidence: 1, probabilities: { routine: 0, multi_step: 0, complex: 1 },
+  } };
+  for (const mode of ["shadow", "manual"] as const) {
+    const f = await fixture(t, async () => assert.fail("must not run independent shadow request"), "auto", result);
+    f.session.setMode(mode);
+    await f.start();
+    const request = f.server.find(m => m.method === "turn/start")!;
+    assert.equal(request.params.effort, "medium");
+    f.session.fromServer({ id: request.id, result: { turn: { id: "turn" } } });
+    const accepted = f.events.find(e => e.type === "accepted")!;
+    if (mode === "shadow") assert.equal((accepted.suggestion as any).effort, "high");
+    else assert.equal(f.events.some(e => e.type === "classification-call"), false);
+  }
 });

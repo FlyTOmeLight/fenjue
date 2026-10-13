@@ -10,6 +10,7 @@
   "rules": [{ "prefix": "[deep]", "route": "deep" }],
   "native": {
     "expertModel": "gpt-6-astra",
+    "capacityFallback": "main-to-expert",
     "expertPolicy": "constraints",
     "rules": [
       { "prefix": "[sol-xhigh]", "model": "gpt-6.1-sol", "effort": "xhigh" },

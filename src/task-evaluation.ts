@@ -4,6 +4,7 @@ import { join, resolve, relative, isAbsolute } from "node:path";
 import { spawn } from "node:child_process";
 import { record, type Route } from "./config.js";
 import type { ReviewCheckpoint, ReviewRecord } from "./architect-review.js";
+export type EvaluationContext = "task" | "latest-message";
 
 export interface ExecutionTask {
   id: string; category: string; group: string; split: "calibration" | "holdout";
@@ -15,7 +16,7 @@ export interface ExecutionTask {
 export interface ExecutionSuite {
   version: 1; tasks: ExecutionTask[]; baseline?: string;
   strategies: ({ id: string; kind: "fixed"; route: Route } |
-    { id: string; kind: "sol-auto" | "expert-auto"; expertModel?: string; expertPolicy?: "constraints" } |
+    { id: string; kind: "sol-auto" | "expert-auto"; expertModel?: string; expertPolicy?: "constraints"; classifierContext?: EvaluationContext } |
     { id: string; kind: "advisor-auto"; advisorRoute: Route })[];
 }
 export function parseExecutionSuite(value: unknown): ExecutionSuite {
@@ -43,6 +44,10 @@ export function parseExecutionSuite(value: unknown): ExecutionSuite {
         !["low", "medium", "high", "xhigh", "max", "ultra"].includes(String(s.route.effort)))) throw new Error("固定策略需要 model/effort");
     if (s.kind === "expert-auto" && (typeof s.expertModel !== "string" || !s.expertModel.trim())) throw new Error("专家策略需要 expertModel");
     if (s.expertPolicy !== undefined && (s.kind !== "expert-auto" || s.expertPolicy !== "constraints")) throw new Error("expertPolicy 仅支持 expert-auto 的 constraints 候选");
+    if (s.classifierContext !== undefined &&
+        (!["sol-auto", "expert-auto"].includes(String(s.kind)) || !["task", "latest-message"].includes(String(s.classifierContext)))) {
+      throw new Error("classifierContext 仅支持自动路由的 task/latest-message");
+    }
     if (s.kind === "advisor-auto" && (!record(s.advisorRoute) || typeof s.advisorRoute.model !== "string" || !s.advisorRoute.model.trim() ||
         !["low", "medium", "high", "xhigh", "max"].includes(String(s.advisorRoute.effort)))) throw new Error("审查策略需要 advisorRoute model/effort");
   }

@@ -4,7 +4,7 @@ Task-aware model and reasoning routing for the Codex CLI.
 
 Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型和思考强度。它保留原生工具、审批和会话恢复流程，并提供路由日志、合成任务评测与 Codex Judge 判分入口。
 
-**状态：实验性 0.2.0。** 当前提供源码安装，尚未发布 npm 包。模型名称是配置示例，是否可用由你的账号和 Codex 模型目录决定。现有评测尚未证明自动路由能提高任务质量或降低费用。
+**状态：实验性 [0.3.0](https://github.com/FlyTOmeLight/fenjue/releases/tag/v0.3.0)。** 当前提供源码安装，尚未发布 npm 包。模型名称是配置示例，是否可用由你的账号和 Codex 模型目录决定。合成任务结果见下文，日常质量与费用收益仍需实测。
 
 ## 能做什么
 
@@ -12,6 +12,8 @@ Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型
 - 在同一任务内随阶段升降档；正在执行的轮次与工具续接保持路线固定。
 - 支持 `shadow`（只观察）、`auto`（自动选择）、`manual`（固定选择）。
 - 为分类保留任务目标、最新请求及工具证据；压缩分类视图不改写 Codex 的执行历史。
+- 容量不足时可选择单次备用或持续重试；支持同一会话续做、等待期间取消，状态显示原选择和实际提交路线。
+- 可独立记录推理需求的影子判断，以及分类用量、人工切档和反馈；影子建议不改变执行路线。
 - 通过程序验收与独立模型判分比较完整任务，保留 fail 和 unknown。
 
 ## 安装
@@ -21,6 +23,7 @@ Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型
 ```bash
 git clone https://github.com/FlyTOmeLight/fenjue.git
 cd fenjue
+git checkout v0.3.0
 npm ci --ignore-scripts
 npm run build
 npm start -- --help
@@ -52,6 +55,22 @@ npm start -- codex-native --config fenjue.config.json
 ```bash
 npm start -- status --watch
 ```
+
+## 容量不足时持续重试
+
+默认不开启跨模型备用。需要 Sol/Astra 持续轮换时，在配置的 `native` 中合并以下字段，并将 `semantic.mode` 设为 `auto` 后重启：
+
+```json
+"expertModel": "gpt-6-astra",
+"capacityFallback": "bidirectional",
+"capacityRetry": "until-available"
+```
+
+`capacityRetry=once` 是默认行为：尚未输出或执行工具时最多切换一次。`until-available` 遇到明确的容量错误会持续尝试，执行中断后根据同一会话历史续做；首次立即重试，后续逐步延长等待，最多每 30 秒一次。打断、手动选模型或切换会话会停止恢复，其他错误也会结束重试。
+
+`capacityFallback=main-to-expert` 只允许主模型切到专家，持续模式之后只重试专家；`bidirectional` 允许双向轮换。manual、shadow 和显式 xhigh 路线不恢复。详见 [容量备用策略](docs/daily-use.md#容量不足时的备用策略)。
+
+需要观察任务的推理需求时，可额外设置 `native.reasoningDemand=shadow`。它发起独立后台分类，不改变现有选档；调用成本和人工反馈可在周报核对。配置和行为见 [推理需求与路由记录](docs/routing-upgrade.md)。
 
 ## 不使用语义分类器的入口
 
@@ -92,6 +111,7 @@ npm run verify:terminal
 ```bash
 npm run verify:codex
 npm run verify:native
+npm run verify:native:capacity -- --persistent
 ```
 
 评测默认不请求远程模型：
@@ -105,7 +125,9 @@ npm start -- judge result --input examples/judge-quality.json \
 
 离线分类评测使用声明标签检查路由规则，不能当作分类准确率。完整执行方法见 [任务评测](docs/task-evaluation.md)，模型审核方法见 [Codex Judge](docs/model-judge.md)。
 
-最近一次 24 次完整任务实验的公开摘要见 [质量结果](docs/evaluation-results.md)。该实验未显示新版的质量或效率收益；原始日志留在本地，公开摘要不能独立复现其历史版本对照。
+最新上下文对照完成 6 个合成任务 × 3 种策略 × 2 次，共 36 次真实执行：固定 Sol high 通过 **11/12**，仅最新消息通过 **10/12**，任务上下文通过 **12/12**；其余 3 次为超时。任务上下文的总耗时比固定 high 少约 24%，执行总 token 多约 11%。这组结果支持保留任务上下文，不能据此判断日常质量或费用收益。详见 [完整结果与范围](docs/task-evaluation.md#2026-10-13-完整对照结果)和 [逐次数据](evals/native-routing/context-comparison-results.json)。
+
+此前 24 次完整任务实验的公开摘要见 [历史质量结果](docs/evaluation-results.md)。该实验未显示新版的质量或效率收益；原始日志留在本地，公开摘要不能独立复现其历史版本对照。
 
 ## 文档与贡献
 
@@ -113,6 +135,7 @@ npm start -- judge result --input examples/judge-quality.json \
 - [运行环境和兼容性](docs/compatibility.md)
 - [合成分类与执行用例](evals/README.md)
 - [反馈与专家审查](docs/continuous-iteration.md)
+- [推理需求影子判断与路由成本](docs/routing-upgrade.md)
 - [贡献指南](CONTRIBUTING.md)
 
 代码采用 [MIT 许可证](LICENSE)。独立安装组件和设计参考见 [NOTICE](NOTICE)。

@@ -19,6 +19,17 @@ test("context selection preserves complete small inputs and never mutates origin
   assert.equal(original.currentTask.evidence.length, 1);
 });
 
+test("latest-message projection drops oversized old evidence before applying the input budget", () => {
+  const original = view(["旧工具证据".repeat(100000)]), saved = structuredClone(original);
+  original.currentTask.incomplete = true;
+  const selected = classifierContext(original, config, false, "latest-message");
+  assert.deepEqual(selected.currentTask, { messages: [], evidence: [], incomplete: false });
+  assert.deepEqual(selected.newMessages, original.newMessages);
+  assert.equal(original.currentTask.evidence[0], saved.currentTask.evidence[0]);
+  assert.throws(() => classifierContext({ ...original, incomplete: true }, config, false, "latest-message"),
+    e => e instanceof ClassificationError && e.code === "incomplete-context");
+});
+
 test("JSON byte budgets include escaping and multibyte evidence while preserving source conclusions", () => {
   for (const content of ["中文😀\\\"\n".repeat(15000), "\\\"".repeat(50000)]) {
     const conclusion = "根因是目录过滤，已经确认使用既定接口。";

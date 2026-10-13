@@ -16,15 +16,29 @@ export class NativeRouteStatus {
   private reason?: string;
   private suggestion?: string;
   private reported?: string;
+  private requested?: string;
+  private explanation?: string;
+  private retryLabel = "1/1";
   time?: string;
   update(event: NativeEvent): boolean {
     if (["usage", "evidence", "final-answer", "planned", "classification-call", "classification-started", "demand-shadow"].includes(event.type)) return false;
     if (!["bound", "classifying", "submitting"].includes(event.type) && this.latest?.threadId && event.threadId !== this.latest.threadId) return false;
     this.latest = event; this.time = typeof event.time === "string" ? event.time : undefined;
+    if (event.type === "bound") { this.requested = undefined; this.explanation = undefined; }
     if (event.type === "bound" || event.type === "accepted") this.reported = undefined;
     if (event.type === "accepted") {
       this.reason = event.reason;
+      this.retryLabel = event.retryPolicy === "until-available" ? `第 ${event.attempt ?? 1} 次` : "1/1";
       this.suggestion = record(event.suggestion) ? `${event.suggestion.model} · ${event.suggestion.effort}` : undefined;
+      this.requested = record(event.requestedRoute) ? `${event.requestedRoute.model} · ${event.requestedRoute.effort}` : undefined;
+      if (event.reason !== "capacity-retry") {
+        const f = record(event.classification) && record(event.classification.features) ? event.classification.features : undefined;
+        const labels: Record<string, string> = { mechanical: "机械处理", solution: "实施", diagnosis: "诊断", architecture: "方案权衡",
+          local: "局部工作", multifile: "项目内协作", cross_system: "跨系统协作", missing: "需求待补充", unknown_cause: "根因未明" };
+        this.explanation = f ? [f.reasoning, f.scope, f.uncertainty].map(v => labels[String(v)]).filter(Boolean).join(" · ") : undefined;
+        if (Array.isArray(event.held) && event.held.length) this.explanation = [this.explanation,
+          `证据不足，保留${event.held.map(v => v === "model" ? "模型" : "思考强度").join("和")}`].filter(Boolean).join("；");
+      }
     }
     if (event.type === "rerouted" && typeof event.toModel === "string") this.reported = event.toModel;
     return true;
@@ -38,14 +52,16 @@ export class NativeRouteStatus {
       "review-skipped": "跳过专家审查", "review-error": "专家审查失败" };
     const failed = (e.type === "completed" && e.status === "failed") || e.type === "retry-failed";
     const phase = failed ? e.previousError ? `重试失败：首次 ${nativeFailureText(e.previousError)}；重试 ${nativeFailureText(e.error)}` :
-      `轮次失败：${nativeFailureText(e.error)}` : e.type === "retrying" ? `${e.fromModel} 容量不足，正在改用 ${e.toModel} 重试（1/1）` :
+      `轮次失败：${nativeFailureText(e.error)}` : e.type === "retrying" ? `${e.fromModel} 容量不足，${e.waitMs ? `等待 ${Number(e.waitMs) / 1000} 秒后` : "正在"}${e.fromModel === e.toModel ? "使用" : "改用"} ${e.toModel} 重试（${e.retryPolicy === "until-available" ? `第 ${e.attempt ?? 1} 次` : "1/1"}）` :
       reviewPhase[e.type] ?? (e.type === "classifying" ? "评估中" : e.type === "accepted" ? "已提交" :
       e.type === "completed" ? ({ completed: "轮次完成", interrupted: "已打断", failed: "轮次失败" }[String(e.status)] ?? String(e.status)) :
       e.type === "mode" ? "下轮生效" : e.reason ?? e.type);
     const route = e.route ? `${e.route.model} · ${e.route.effort}` : "等待会话";
-    const reason = !failed && e.type !== "retrying" && this.reason ? ` (${this.reason === "capacity-retry" ? "容量重试 1/1" : this.reason})` : "";
+    const reason = !failed && e.type !== "retrying" && this.reason ? ` (${this.reason === "capacity-retry" ? `容量重试 ${this.retryLabel}` : this.reason})` : "";
     return displayText(`焚诀 ${mode}·均衡 | ${route} | ${phase}${reason}` +
       (e.mode === "shadow" && this.suggestion ? ` | 建议 ${this.suggestion}` : "") +
+      (this.requested ? ` | 原选择 ${this.requested}；容量不足自动恢复` : "") +
+      (this.explanation ? ` | 判断 ${this.explanation}` : "") +
       (this.reported ? ` | 服务端改为 ${this.reported}` : ""));
   }
 }

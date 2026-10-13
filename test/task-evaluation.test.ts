@@ -33,6 +33,18 @@ test("constraint admission is an explicit expert-auto evaluation candidate", () 
   }
 });
 
+test("context comparison freezes three strategies and rejects unrecognized classifier views", async () => {
+  const comparison = parseExecutionSuite(JSON.parse(await readFile("evals/execution-pilot/context-comparison.json", "utf8")));
+  assert.equal(comparison.tasks.length * comparison.strategies.length * 2, 36);
+  assert.equal(comparison.baseline, "fixed-sol-high");
+  assert.deepEqual(comparison.strategies.map(s => "classifierContext" in s ? s.classifierContext : undefined),
+    [undefined, "latest-message", "task"]);
+  for (const patch of [{ ...suite().strategies[0], classifierContext: "unknown" },
+    { id: "fixed", kind: "fixed", route: { model: "sol", effort: "high" }, classifierContext: "task" }]) {
+    assert.throws(() => parseExecutionSuite({ ...suite(), strategies: [patch, suite().strategies[1]] }), /classifierContext/);
+  }
+});
+
 test("snapshot copies preserve initial bytes, isolate variants and reject credentials, links and escape paths", async t => {
   const root = await temporary(t), source = join(root, "source"), a = join(root, "a"), b = join(root, "b");
   await mkdir(source); await writeFile(join(source, "code.mjs"), "original\n");

@@ -32,8 +32,11 @@ function excerpt(text: string, maxBytes: number): string {
 }
 
 // Only the classifier projection changes. Execution input and saved history stay whole.
-export function classifierContext(view: TaskView, config: SemanticConfig, constraints = false): TaskView {
-  const selected = structuredClone(view);
+export function classifierContext(view: TaskView, config: SemanticConfig, constraints = false, context: "task" | "latest-message" = "task"): TaskView {
+  const selected = context === "latest-message" ? {
+    currentTask: { messages: [], evidence: [], incomplete: false },
+    newMessages: view.newMessages.slice(-1), evidence: [], incomplete: view.incomplete,
+  } : structuredClone(view);
   const fits = () => {
     try { classificationPayload(selected, config, constraints); return true; }
     catch (error) { if (error instanceof ClassificationError && error.code === "input-budget") return false; throw error; }

@@ -22,6 +22,8 @@ let upstream: Awaited<ReturnType<typeof serve>> | undefined, client: EvaluationC
 const seen: any[] = [], events: any[] = [];
 let phase = "recover";
 const terminal = process.argv.includes("--terminal");
+const persistent = process.argv.includes("--persistent");
+let partialStep = 0;
 try {
   const home = join(root, "home"); await mkdir(home);
   upstream = await serve(async (req, res) => {
@@ -29,7 +31,9 @@ try {
     const body = await readJSON(req);
     const structured = body.text?.format?.type === "json_schema";
     if (!structured) seen.push({ model: body.model, effort: body.reasoning?.effort, input: body.input });
-    if (!structured && phase !== "next" && (phase === "both-fail" || body.model === "gpt-6.1-sol")) {
+    if (!structured && phase === "partial-work") partialStep++;
+    if (!structured && (phase === "both-fail" || (phase === "recover" && (persistent ? seen.length <= 2 : body.model === "gpt-6.1-sol")) ||
+        (phase === "partial-work" && partialStep === 2))) {
       res.writeHead(200, { "content-type": "text/event-stream" });
       const failure = { type: "response.failed", response: { id: "overload", status: "failed",
         error: { code: "fixture_capacity", message: "CAPACITY_FIXTURE_REPLAY" } } };
@@ -38,21 +42,31 @@ try {
     res.writeHead(200, { "content-type": "text/event-stream" });
     const text = structured ? JSON.stringify(Object.fromEntries(Object.keys(body.text.format.schema?.properties ?? {}).map(k => [k, "Capacity fixture"]))) :
       phase === "next" ? "AFTER_CAPACITY_RETRY" : "CAPACITY_RETRY_OK";
-    const item = { type: "message", id: "answer-" + seen.length, role: "assistant", phase: "final_answer",
+    let item: any = { type: "message", id: "answer-" + seen.length, role: "assistant", phase: "final_answer",
       content: [{ type: "output_text", text, annotations: [] }] };
+    if (!structured && phase === "partial-work" && partialStep === 1) {
+      const tools = [...(body.tools ?? []), ...(body.input ?? []).filter((i: any) => i.type === "additional_tools").flatMap((i: any) => i.tools ?? [])]
+        .flatMap((t: any) => t.type === "namespace" ? (t.tools ?? []).map((inner: any) => ({ ...inner, namespace: t.name })) : [t]);
+      const tool = tools.find(t => t.name === "exec_command") ?? tools.find(t => t.name === "exec"); assert.ok(tool);
+      const args = { cmd: "printf PARTIAL_CAPACITY_WORK", max_output_tokens: 1000 };
+      item = { type: tool.type === "custom" ? "custom_tool_call" : "function_call", id: "partial-work", call_id: "partial-work",
+        name: tool.name, namespace: tool.namespace,
+        ...(tool.type === "custom" ? { input: `text(await tools.exec_command(${JSON.stringify(args)}))` } : { arguments: JSON.stringify(args) }) };
+    }
     const response = { id: "response-" + seen.length, object: "response", status: "completed", model: body.model,
       output: [item], usage: { input_tokens: 20, output_tokens: 10, total_tokens: 30,
         input_tokens_details: { cached_tokens: 0 }, output_tokens_details: { reasoning_tokens: 0 } } };
     const messages = [
       { type: "response.created", response: { ...response, status: "in_progress", output: [] } },
-      { type: "response.output_item.added", output_index: 0, item: { ...item, content: [] } },
-      { type: "response.output_text.delta", output_index: 0, content_index: 0, item_id: item.id, delta: text },
+      { type: "response.output_item.added", output_index: 0, item: { ...item, ...(item.type === "message" ? { content: [] } : {}) } },
+      ...(item.type === "message" ? [{ type: "response.output_text.delta", output_index: 0, content_index: 0, item_id: item.id, delta: text }] : []),
       { type: "response.output_item.done", output_index: 0, item }, { type: "response.completed", response },
     ];
     res.end(messages.map((m, sequence_number) => `event: ${m.type}\ndata: ${JSON.stringify({ ...m, sequence_number })}\n\n`).join(""));
   });
   const base = JSON.parse(await readFile("examples/native-balanced.json", "utf8"));
-  const config = parseConfig({ ...base, auth: "mock", upstream: upstream.url, semantic: { ...base.semantic, mode: "auto" } });
+  const config = parseConfig({ ...base, auth: "mock", upstream: upstream.url,
+    native: { ...base.native, capacityFallback: "bidirectional", capacityRetry: persistent ? "until-available" : "once" }, semantic: { ...base.semantic, mode: "auto" } });
   const settings = { sqlite_home: home, log_dir: home, "features.apps": false, "features.plugins": false,
     "features.remote_plugin": false, "features.hooks": false, "features.memories": false, "features.multi_agent": false,
     "features.shell_snapshot": false, "features.skip_host_skill_discovery": true, "features.reasoning_effort_override": false,
@@ -104,9 +118,11 @@ child.on('exit',code=>process.exit(code??1));
   await until(() => events.some(e => e.type === "completed"));
   assert.equal(events.find(e => e.type === "completed")?.error?.codexErrorInfo, "serverOverloaded");
   await until(() => events.some(e => e.type === "completed" && e.status === "completed"));
-  assert.equal(events.filter(e => e.type === "retrying").length, 1);
-  assert.deepEqual(seen.map(s => [s.model, s.effort]), [["gpt-6.1-sol", "high"], ["gpt-6-astra", "high"]]);
+  assert.equal(events.filter(e => e.type === "retrying").length, persistent ? 2 : 1);
+  assert.deepEqual(seen.map(s => [s.model, s.effort]), [["gpt-6.1-sol", "high"], ["gpt-6-astra", "high"], ...(persistent ? [["gpt-6.1-sol", "high"]] : [])]);
   assert.ok(JSON.stringify(seen[1].input).includes("CAPACITY_ORIGINAL_INPUT"));
+  if (persistent) assert.equal(JSON.stringify(seen.at(-1).input).match(/CAPACITY_ORIGINAL_INPUT/g)?.length, 1,
+    "persistent recovery must not append the full original task on every failure");
   assert.equal(records.load(events.find(e => e.type === "bound").threadId)!.task.messages.length, 1);
   if (terminalResult) {
     phase = "next";
@@ -114,12 +130,23 @@ child.on('exit',code=>process.exit(code??1));
   } else {
     assert.ok(JSON.stringify(seen[1].input).includes("Fixture plan instructions"));
     assert.ok(client!.messages.some(m => m.params?.item?.text === "CAPACITY_RETRY_OK"));
+    if (persistent) {
+      phase = "partial-work";
+      const before = events.length, requestsBefore = seen.length;
+      await client!.request("turn/start", { threadId: threadId!, input: [{ type: "text", text: "PARTIAL_TASK: execute the fixture command, then finish." }] });
+      await until(() => events.slice(before).some(e => e.type === "completed" && e.status === "completed"));
+      assert.equal(partialStep, 3);
+      assert.equal(events.slice(before).filter(e => e.type === "evidence" && e.itemType === "commandExecution").length, 1);
+      assert.ok(JSON.stringify(seen[requestsBefore + 2].input).includes("PARTIAL_CAPACITY_WORK"), "tool result missing from recovery history");
+      assert.ok(JSON.stringify(seen[requestsBefore + 2].input).includes("不要重复"), "original task was replayed instead of continued");
+    }
     phase = "both-fail";
-    const before = events.length;
+    const before = events.length, requestsBefore = seen.length;
     await client!.request("turn/start", { threadId: threadId!, input: [{ type: "text", text: "Another capacity fixture task." }] });
-    await until(() => events.slice(before).some(e => e.type === "completed" && e.previousError));
-    assert.equal(events.slice(before).filter(e => e.type === "retrying").length, 1);
-    assert.equal(seen.length, 4, "second overload must not produce a third attempt");
+    await until(() => persistent ? events.slice(before).filter(e => e.type === "retrying").length === 2 : events.slice(before).some(e => e.type === "completed" && e.previousError));
+    assert.equal(events.slice(before).filter(e => e.type === "retrying").length, persistent ? 2 : 1);
+    assert.equal(seen.length, requestsBefore + 2);
+    if (persistent) await client!.request("turn/interrupt", { threadId: threadId! });
     phase = "next";
     const next = await client!.request("turn/start", { threadId: threadId!, input: [{ type: "text", text: "Continue after retry." }] });
     await client!.completed(next.turn.id, 20000);
@@ -127,8 +154,9 @@ child.on('exit',code=>process.exit(code??1));
   }
   assert.deepEqual(upstream.errors, []);
   console.log(JSON.stringify({ passed: true, version: (await promisify(execFile)(codex, ["--version"])).stdout.trim(),
-    checks: ["captured native capacity error replay", "one model switch", "input preserved", "next user turn works",
-      ...(terminal ? ["real TUI retry answer displayed"] : ["Plan preserved", "both failures stop"])],
+    checks: ["captured native capacity error replay", persistent ? "multiple model switches" : "one model switch", "input preserved", "next user turn works",
+      ...(persistent && !terminal ? ["partial tool work continued from native history", "waiting retry cancelled"] : []),
+      ...(terminal ? ["real TUI retry answer displayed"] : ["Plan preserved", persistent ? "both failures keep retrying until cancelled" : "both failures stop"])],
     localModelRequests: seen.length }));
 } finally {
   client?.close(); await gateway?.close(); await upstream?.close(); await rm(root, { recursive: true, force: true });

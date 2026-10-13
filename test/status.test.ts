@@ -24,6 +24,29 @@ test("native status separates failure cause from classification and shows capaci
   assert.match(status.line(), /轮次完成.*classified/); assert.doesNotMatch(status.line(), /Backup denied|首次/);
 });
 
+test("native status preserves the task explanation and original route after capacity fallback", () => {
+  const status = new NativeRouteStatus();
+  const common = { threadId: "thread", mode: "auto" as const, route: { model: "astra", effort: "high" } };
+  status.update({ ...common, type: "accepted", reason: "classified", classification: {
+    features: { reasoning: "diagnosis", scope: "cross_system", uncertainty: "unknown_cause" } } });
+  assert.match(status.line(), /判断 诊断 · 跨系统协作 · 根因未明/);
+  status.update({ ...common, route: { model: "sol", effort: "high" }, type: "accepted", reason: "capacity-retry", requestedRoute: common.route });
+  status.update({ ...common, route: { model: "sol", effort: "high" }, type: "completed", status: "completed" });
+  assert.match(status.line(), /sol · high.*原选择 astra · high.*容量不足.*判断 诊断/);
+  status.update({ ...common, type: "accepted", reason: "prefix-rule" });
+  assert.doesNotMatch(status.line(), /原选择|根因未明/);
+});
+
+test("native status shows persistent retry count and backoff without a one-attempt ceiling", () => {
+  const status = new NativeRouteStatus();
+  const common = { threadId: "thread", mode: "auto" as const, route: { model: "sol", effort: "high" },
+    requestedRoute: { model: "sol", effort: "high" }, retryPolicy: "until-available", attempt: 3 };
+  status.update({ ...common, type: "retrying", fromModel: "astra", toModel: "sol", waitMs: 2000 });
+  assert.match(status.line(), /等待 2 秒后.*sol.*第 3 次/); assert.doesNotMatch(status.line(), /1\/1/);
+  status.update({ ...common, type: "accepted", reason: "capacity-retry" });
+  assert.match(status.line(), /容量重试 第 3 次.*原选择 sol/);
+});
+
 test("status follows the newest request and distinguishes selected and reported models", () => {
   const status = new RouteStatus();
   assert.match(status.line(), /等待模型请求/);

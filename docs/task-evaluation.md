@@ -39,7 +39,49 @@ npm run eval:tasks -- --live --task cross-unknown --repeats 2 --max-runs 6 \
 
 `--suite` 指定任务集；`--output` 指定一个尚不存在的输出目录。默认写入 `.fenjue/execution/<时间>/`。流程顺序轮换策略，各执行独立会话、不共享解题结果，不自动重试。基础设施异常时保存部分报告并停止后续执行。任务未通过验收则记录失败并继续，最终返回非零退出码。
 
+批次进程退出后，可以用 `--resume` 和原输出目录执行尚未记录的任务：
+
+```bash
+npm run eval:tasks -- --suite evals/execution-pilot/context-comparison.json \
+  --live --resume --repeats 2 --max-runs 27 \
+  --config examples/native-balanced.json --env-file /path/to/gateway.env \
+  --output .fenjue/context-comparison-live-integrated
+```
+
+这里的 27 只是已记录 9/36 次时的剩余预算示例。续跑保持原任务、策略、顺序和重复次数，成功、失败及超时都占用已执行的位置，不重跑它们。`--max-runs` 约束本次剩余尝试，不把新开整批当作免费重试。任务集、冻结文件、Codex 版本、配置或模型目录改变时拒绝续跑；发现运行目录尚未写入报告时，也先停止核对实际消耗。续跑前保存 manifest/report 检查点，并在 manifest 记录续跑时间和剩余次数。
+
+任务达到 wall-clock 上限计为 `timeout`，不会因单轮等待的计时器先触发就当作基础设施故障停止整批。容量不足等服务错误仍保留为基础设施错误并停止后续执行。
+
 初版运行器曾在 Codex 0.159.3 验证；升级后应重新运行兼容性检查。评测统一使用 workspace-write、approvalPolicy=never；审批请求被拒绝，交互提问不伪造用户回答。关闭插件、hooks、记忆和子代理，控制外部差异；这批结果适用于该受控环境，不能直接代表启用这些能力的日常任务。
+
+## 固定路线、最新消息与任务上下文对照
+
+`evals/execution-pilot/context-comparison.json` 复用上述六个代码夹具和验收器；两个诊断任务拆成分析、修复和核对三个轮次，分页协作任务增加核对轮次。比较三种策略：固定 Sol high、只看最新消息的 Sol/Astra 自动路由、使用任务上下文的 Sol/Astra 自动路由。两种自动策略使用相同分类器和模型/effort 策略，仅分类输入不同。它是上下文消融实验，不是 Magpie 的直接运行结果。
+
+```bash
+npm run eval:tasks -- --suite evals/execution-pilot/context-comparison.json --dry-run
+npm run eval:tasks -- --suite evals/execution-pilot/context-comparison.json \
+  --live --repeats 2 --max-runs 36 \
+  --config examples/native-balanced.json --env-file /path/to/gateway.env
+```
+
+这批复用任务全部归为 calibration，不作为独立冻结验证集。实验关闭焚诀的容量 fallback 和自动专家审查，保留服务端重路由记录。报告以固定 high 为基线，分别统计执行 token、缓存输入 token、分类 token/耗时、任务验收和逐任务配对结果。分类规则中仍有“继续”沿用路线等共同路径，因此 latest-message 并非无状态路由。验收通过不等于独立模型质量判分通过；本命令不调用 Judge。
+
+### 2026-10-13 完整对照结果
+
+已完成 6 个任务 × 3 种策略 × 2 次，共 36 次真实执行。此前另一批的 1 次容量失败单独保留，累计消耗授权的 37 次尝试；没有重跑已记录的失败。可共享的逐次数据见 [context-comparison-results.json](../evals/native-routing/context-comparison-results.json)，原始 manifest、验收输出和日志保留在本机 `.fenjue/context-comparison-live-integrated/`。
+
+| 策略 | 完成且验收通过 | 超时 | 总耗时（秒） | 执行总 token | 其中缓存输入 token | Jev 输入 token |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 固定 Sol high | 11/12 | 1 | 1828.4 | 2,859,283 | 2,490,240 | 0 |
+| 仅最新消息 | 10/12 | 2 | 1661.0 | 2,782,900 | 2,495,104 | 70,426 |
+| 任务上下文 | 12/12 | 0 | 1393.4 | 3,163,079 | 2,751,488 | 121,569 |
+
+任务上下文相对固定 high 的验收配对是 1 胜、0 负、11 平；相对仅最新消息有 2 次避免超时。它的总耗时约少 24%，执行总 token 约多 11%，因此不能据此宣称更省费用。表中包含超时尝试；缓存输入已经包含在执行总 token 中，Jev 只记录输入 token，不是分类器总用量。
+
+三次超时均超过任务的 240 秒上限：`local-diagnosis/latest-message/1`、`cross-unknown/fixed-sol-high/1` 和 `cross-unknown/latest-message/2`。第一次因单轮计时器先触发，被误记为基础设施错误；核对实际耗时后改为 timeout，原报告和该次 result 的备份仍保留。运行器修复了这个计时问题，并从已记录的 9 次之后续跑剩余 27 次。
+
+这组结果支持继续保留任务上下文，但只有六个合成任务，不能证明日常质量等价，也不扩大模型准入。运行使用 Codex 0.162.1、Jev 和 `balanced-native-v6`；数据记录任务、配置、目录及部分源码哈希。两会话同时有其他代码工作，保留的源码快照不等于完整冻结仓库，复现时需同时核对实现版本。
 
 ## 任务格式
 

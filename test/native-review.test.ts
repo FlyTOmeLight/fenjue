@@ -17,10 +17,11 @@ async function until(predicate: () => boolean) {
   const deadline = Date.now() + 2000;
   while (!predicate()) { if (Date.now() >= deadline) assert.fail("condition timed out"); await delay(5); }
 }
-async function fixture(t: any, mode: "complete" | "hold" | "budget" | "failure" | "missing-usage" | "timeout" | "tool-budget" = "complete", enabled = true) {
+async function fixture(t: any, mode: "complete" | "hold" | "budget" | "failure" | "missing-usage" | "timeout" | "tool-budget" | "revision-capacity" = "complete", enabled = true) {
   const root = await mkdtemp(join(tmpdir(), "fenjue-auto-review-"));
   const c = semanticConfig(); c.routes.deep = { model: "fixture-fast", effort: "high" };
-  const config = parseConfig({ ...c, native: { ...(enabled ? { review: { model: "fixture-deep", maxReviewsPerTask: 1, maxTokens: 100,
+  const config = parseConfig({ ...c, native: { ...(mode === "revision-capacity" ? { expertModel: "fixture-deep", capacityFallback: "bidirectional", capacityRetry: "until-available" } : {}),
+    ...(enabled ? { review: { model: "fixture-deep", maxReviewsPerTask: 1, maxTokens: 100,
     timeoutMs: mode === "timeout" ? 1000 : 120000, maxToolCalls: mode === "tool-budget" ? 1 : 20 } } : {}) } });
   const records = new NativeRecords(root, join(root, "daily"), ["private-test-key"], m => assert.fail(m));
   const server: NativeMessage[] = [], client: NativeMessage[] = [], events: NativeEvent[] = [];
@@ -52,7 +53,10 @@ async function fixture(t: any, mode: "complete" | "hold" | "budget" | "failure" 
         deliver({ method: "turn/started", params: { threadId: "main", turn: { id: turn } } });
         deliver({ method: "item/completed", params: { threadId: "main", turnId: turn, item: { id: "derived-user", type: "userMessage", content: m.params.input } } });
         deliver({ method: "thread/tokenUsage/updated", params: { threadId: "main", turnId: turn, tokenUsage: { last: { totalTokens: 30 }, total: { totalTokens: 50 } } } });
-        deliver({ method: "turn/completed", params: { threadId: "main", turn: { id: turn, status: "completed", items: [failure("passed", "node test.mjs", 0)] } } });
+        const overloaded = mode === "revision-capacity" && mainId === 1;
+        deliver({ method: "turn/completed", params: { threadId: "main", turn: { id: turn, status: overloaded ? "failed" : "completed",
+          ...(overloaded ? { error: { message: "Selected model is at capacity.", codexErrorInfo: "serverOverloaded" } } : {}),
+          items: overloaded ? [] : [failure("passed", "node test.mjs", 0)] } } });
       } else if (String(m.id).startsWith("fenjue")) deliver({ id: m.id, result: {} });
     });
   };
@@ -105,6 +109,20 @@ test("daily review privately checks repeated failures and starts a visible revis
   assert.deepEqual(report.summary.outcomes, { unknown: 1 });
   await f.work([failure("other1", "node other.mjs"), edit("other2"), failure("other3", "node other.mjs")]);
   await delay(20);
+  assert.equal(f.server.filter(m => m.method === "thread/start" && m.params.ephemeral).length, 1);
+});
+
+test("persistent recovery also continues the foreground revision without starting another expert review", async t => {
+  const f = await fixture(t, "revision-capacity"); await f.work();
+  await until(() => f.events.some(e => e.type === "completed" && e.turnId === "revision-1"));
+  assert.equal(f.events.filter(e => e.type === "retrying").length, 1);
+  await until(() => f.events.some(e => e.type === "completed" && e.turnId === "revision-2"));
+  assert.equal(f.events.at(-1)!.status, "completed");
+  const state = f.records.load("main")!;
+  assert.deepEqual(state.task.messages, ["修复排序"]);
+  assert.deepEqual(state.review, { count: 1, revisionTurns: ["revision-1", "revision-2"] });
+  const capture = await readFile(f.records.capturePath!, "utf8");
+  assert.equal(capture.split('"kind":"user"').length - 1, 1);
   assert.equal(f.server.filter(m => m.method === "thread/start" && m.params.ephemeral).length, 1);
 });
 

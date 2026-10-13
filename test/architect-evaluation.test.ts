@@ -44,6 +44,7 @@ createInterface({input:process.stdin}).on('line',line=>{
  const m=JSON.parse(line),p=m.params??{};
  if(m.method==='initialize'){send({id:m.id,result:{}});return}
  if(m.method==='thread/start'){
+  if(p.ephemeral&&process.env.FENJUE_FIXTURE_FAIL_REVIEW_START){send({id:m.id,error:{code:-1,message:'Fixture review unavailable'}});return}
   const id='thread-'+(++next);threads.set(id,{cwd:p.cwd,architect:!!p.ephemeral,tokens:0});
   appendFileSync(process.env.FENJUE_FIXTURE_TRACE,JSON.stringify({method:m.method,params:p})+'\\n');
   send({id:m.id,result:{thread:{id,threadSource:p.threadSource,ephemeral:p.ephemeral,turns:[]},model:p.model,reasoningEffort:p.config.model_reasoning_effort,cwd:p.cwd}});return
@@ -89,6 +90,35 @@ createInterface({input:process.stdin}).on('line',line=>{
   { env: { ...process.env, FENJUE_CODEX_BIN: fixture, FENJUE_FIXTURE_TRACE: traceFile, FENJUE_FIXTURE_SKIP_EXPERT_USAGE: "1" }, timeout: 30000 });
   const missing = JSON.parse(await readFile(join(missingOutput, "report.json"), "utf8"));
   assert.ok(missing.rows.filter((r: any) => r.strategy !== "baseline").every((r: any) => r.usage === null));
+  const resumeOutput = join(root, "resume");
+  const runArgs = [resolve("dist/scripts/evaluate-tasks.js"), "--suite", join(suite, "suite.json"),
+    "--config", configFile, "--output", resumeOutput, "--live"];
+  const fixtureEnv = { ...process.env, FENJUE_CODEX_BIN: fixture, FENJUE_FIXTURE_TRACE: traceFile };
+  await assert.rejects(() => promisify(execFile)(process.execPath, [...runArgs, "--max-runs", "3"],
+    { env: { ...fixtureEnv, FENJUE_FIXTURE_FAIL_REVIEW_START: "1" }, timeout: 30000 }));
+  const partial = JSON.parse(await readFile(join(resumeOutput, "report.json"), "utf8"));
+  assert.equal(partial.rows.length, 2); assert.equal(partial.complete, false);
+  const beforeResume = (await readFile(traceFile, "utf8")).trim().split("\n").length;
+  await assert.rejects(() => promisify(execFile)(process.execPath, [...runArgs, "--max-runs", "0", "--resume"],
+    { env: fixtureEnv, timeout: 30000 }), (error: any) => /max-runs 1/.test(error.stderr));
+  const changedConfig = join(root, "changed-config.json");
+  await writeFile(changedConfig, JSON.stringify({ ...config, semantic: { ...config.semantic, minConfidence: 0.9 } }));
+  await assert.rejects(() => promisify(execFile)(process.execPath, [...runArgs.map(arg => arg === configFile ? changedConfig : arg), "--max-runs", "1", "--resume"],
+    { env: fixtureEnv, timeout: 30000 }), (error: any) => /配置或模型目录已变化/.test(error.stderr));
+  const orphan = join(resumeOutput, "runs", "unrecorded-attempt"); await mkdir(orphan);
+  try {
+    await assert.rejects(() => promisify(execFile)(process.execPath, [...runArgs, "--max-runs", "1", "--resume"],
+      { env: fixtureEnv, timeout: 30000 }), (error: any) => /尚未进入报告/.test(error.stderr));
+  } finally { await rm(orphan, { recursive: true }); }
+  assert.equal((await readFile(traceFile, "utf8")).trim().split("\n").length, beforeResume, "invalid resumes must not start a task");
+  await assert.rejects(() => promisify(execFile)(process.execPath, [...runArgs, "--max-runs", "1", "--resume"],
+    { env: fixtureEnv, timeout: 30000 }), (error: any) => error.code === 1 && !/未知|需显式/.test(error.stderr));
+  const resumed = JSON.parse(await readFile(join(resumeOutput, "report.json"), "utf8"));
+  assert.equal(resumed.complete, true); assert.equal(resumed.rows.length, 3);
+  assert.deepEqual(resumed.rows.slice(0, 2), partial.rows, "finished and failed attempts must not be rerun or rewritten");
+  assert.equal(resumed.rows[2].acceptance.passed, true);
+  const newTrace = (await readFile(traceFile, "utf8")).trim().split("\n").slice(beforeResume).map(line => JSON.parse(line));
+  assert.equal(newTrace.filter(r => r.method === "thread/start" && !r.params.ephemeral).length, 1);
   const budgetSuite = JSON.parse(await readFile(join(suite, "suite.json"), "utf8"));
   budgetSuite.tasks[0].limits.tokens = 110;
   await writeFile(join(suite, "suite.json"), JSON.stringify(budgetSuite));

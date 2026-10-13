@@ -1,0 +1,1768 @@
+{
+  "date": "2026-10-13",
+  "dataset": "evals/execution-pilot/context-comparison.json",
+  "mode": "live",
+  "complete": true,
+  "budget": {
+    "authorizedAttempts": 37,
+    "priorCapacityFailureAttempts": 1,
+    "batchAttempts": 36,
+    "remainingAttempts": 0
+  },
+  "provenance": {
+    "suiteDigest": "4cbcd06f890b4ab6683a517ef533038b7a607d7a18939e6923ed28c4bc4cbfd4",
+    "policies": {
+      "fixed-sol-high": "fixed",
+      "latest-message": "balanced-native-v6",
+      "task-context": "balanced-native-v6"
+    },
+    "repeats": 2,
+    "capacityFallback": "off",
+    "codex": "codex-cli 0.162.1",
+    "node": "v26.11.1",
+    "catalogDigest": "6bbb8e07ae782bd9307174add4d46b07ffded29892a79439fe6e1407a6147158",
+    "configDigest": "2cc8046def23b5869e3e44e43e8cfda6b2292e72793082b29cf868db9df8a7ba",
+    "classifier": {
+      "model": "typesafe-ai/jev",
+      "provider": "vercel",
+      "minConfidence": 0.75
+    },
+    "startedAt": "2026-10-13T07:36:30.585Z",
+    "resumptions": [
+      {
+        "at": "2026-10-13T08:01:00.897Z",
+        "recordedExecutions": 9,
+        "remainingExecutions": 27
+      }
+    ],
+    "snapshots": {
+      "mechanical-doc": {
+        "digest": "293ac017023e2799d9a6b2ab42a09bf0d9393f859d7b9080cdb787d283b6ae70",
+        "files": {
+          "README.md": "7d84c4147a41c3d9d0c721fead2c0f622a761cac530337ffe376086ffd7bad50"
+        }
+      },
+      "csv-feature": {
+        "digest": "3c062f4d601d632054cb84ebc5ccb408b396ab9303859718c1094b894ab80868",
+        "files": {
+          "csv.mjs": "1dc09de9531e6efd01d664cd03fae84c8b8ddc4144ecbf17adb6204ea48a4893"
+        }
+      },
+      "local-diagnosis": {
+        "digest": "851fd2a7bdd1e925dc9e6b51cb2059727a4906107740894c3849fc92c7db24b2",
+        "files": {
+          "pool.mjs": "6fa8581df58981245b51c0894d4712e3e6881e088b0a89ed897964877cc9d0be"
+        }
+      },
+      "cross-known": {
+        "digest": "10d06fd9f3ab0d58ee875b91eab56c83267f2f46ee7621977fbee3c96d7a2843",
+        "files": {
+          "directory-service.mjs": "a7a45a612ef0681fa75d241eb2e128175868d58396efc5389716352c2b3d0304",
+          "sync-service.mjs": "b40249d72dd01638dbb0749b3727d69ab937d7003d1f3d928d0023015d8cf88a"
+        }
+      },
+      "cross-unknown": {
+        "digest": "dae31702208e9897e301984fac5cb786eacb4fc1d539e29e4884d4a2678e7de8",
+        "files": {
+          "projection-service.mjs": "cc7bb7916a83b67c2bbf402188ca78fa7eaeb4a0749c88cccb390bdc2cb2e44c",
+          "source-service.mjs": "714d922aa7f998e46c0ef66b59b1681b34e10a834183ccc2c044877de6fc34c8"
+        }
+      },
+      "multi-turn": {
+        "digest": "24f1462493168357a097f3f2a962aef7e7f04a0c97ad2ba612488aa1d8984665",
+        "files": {
+          "search.mjs": "75dbf7a8ce4c0a7fb0d8a6dcec680223e00fe16e30294fb5f935d2e1381be6cc"
+        }
+      }
+    }
+  },
+  "sourceHashes": {
+    "integrated-routing-source": {
+      "src/config.ts": "4bdf9b6a7df05397a196ee9f08224ee56af54a40056a619f0de9f1fe6e489189",
+      "src/native-session.ts": "80b9dfd9de36bbee4dee66121d440f06e7219c5e22ba276193b2fbde026fb99b",
+      "src/native-policy.ts": "38e4c65b6e1b1472f4758ecd829828eccc36270ea9aaab6f1edbca44c2ca50b8",
+      "src/native-records.ts": "b5d41590084211f44d49d887f2c5d979819a243a8b285b20be1e458b46597372",
+      "src/native-gateway.ts": "f2ba8a7102b38ef1ba0bf34f5973be758ad4598629acbe06ec2a56fcb7b06b6a",
+      "src/classifier-context.ts": "0f835322559f3db78201889ef567704b94ecb56eee1f32b4480c9e9a55860296",
+      "src/task-evaluation.ts": "10e6858a03448a51ccf43a170380dd3ab87a4c80d481c264dc804020b7a396fd",
+      "scripts/evaluate-tasks.ts": "53b612727b7e93effe8f7e1292c1bf366d1509d3a61ae7e22d41f59658d060e1"
+    },
+    "integrated-resume-source": {
+      "src/config.ts": "4bdf9b6a7df05397a196ee9f08224ee56af54a40056a619f0de9f1fe6e489189",
+      "src/native-session.ts": "1020430708ad81d7bf2a4d50ee8ed12b2678b9d24932da7cecd05ffcc4b3ecdf",
+      "src/native-policy.ts": "38e4c65b6e1b1472f4758ecd829828eccc36270ea9aaab6f1edbca44c2ca50b8",
+      "src/native-records.ts": "b5d41590084211f44d49d887f2c5d979819a243a8b285b20be1e458b46597372",
+      "src/native-gateway.ts": "f2ba8a7102b38ef1ba0bf34f5973be758ad4598629acbe06ec2a56fcb7b06b6a",
+      "src/classifier-context.ts": "0f835322559f3db78201889ef567704b94ecb56eee1f32b4480c9e9a55860296",
+      "src/task-evaluation.ts": "10e6858a03448a51ccf43a170380dd3ab87a4c80d481c264dc804020b7a396fd",
+      "scripts/evaluate-tasks.ts": "512c774b1aab1d11058f2a2b7a687685930c9aaf8e34c961c3fb47123f38bf95"
+    }
+  },
+  "origins": [
+    "synthetic"
+  ],
+  "admission": "not-decided",
+  "notes": [
+    "Six synthetic calibration tasks, each repeated twice per strategy; no holdout, Judge, or actual Magpie execution.",
+    "Both automatic strategies use the same balanced-native-v6 policy. Only classifier context differs; native execution retains full history. Shared continuation rules remain enabled.",
+    "Fenjue capacity fallback and automatic expert review were disabled for this batch. The prior capacity failure is retained separately and consumes one authorized attempt.",
+    "All recorded attempts, including the three timeouts, are included in summaries and paired outcomes; no recorded attempt was rerun.",
+    "Row 9 exceeded the 240000 ms task deadline but was initially labeled infrastructure-error. It was corrected transparently to timeout; original report and result backups remain in the local batch directory.",
+    "Execution token totals include cached input; reasoning is part of output. classifierInputTokens counts Jev input only. Classifier output and precise subscription cost were not captured.",
+    "Source snapshots cover the listed routing/evaluation files at initial execution and resume. They are not a frozen checkout of the entire repository; other-session work was present concurrently.",
+    "Results support retaining task context for this calibration set; they do not establish daily quality equivalence, cost savings, or broader model admission."
+  ],
+  "summaries": [
+    {
+      "strategy": "fixed-sol-high",
+      "executions": 12,
+      "passed": 11,
+      "infrastructureErrors": 0,
+      "elapsedMs": 1828419,
+      "cachedInputTokens": 2490240,
+      "toolCalls": 120,
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "decisionReasons": {
+        "manual": 23
+      },
+      "expertTurns": 0,
+      "reviews": 0,
+      "reviewMs": 0,
+      "revisions": 0,
+      "reviewCheckpoints": {
+        "plan": 0,
+        "repeated-error": 0,
+        "final": 0
+      },
+      "executionTotalTokens": 2859283,
+      "classifierInputTokens": 0,
+      "timeouts": 1,
+      "executionInputTokens": 2819548,
+      "executionOutputTokens": 39735
+    },
+    {
+      "strategy": "latest-message",
+      "executions": 12,
+      "passed": 10,
+      "infrastructureErrors": 0,
+      "elapsedMs": 1660993,
+      "cachedInputTokens": 2495104,
+      "toolCalls": 104,
+      "classifierCalls": 23,
+      "classifierMs": 19601,
+      "decisionReasons": {
+        "classified": 16,
+        "low-confidence": 7
+      },
+      "expertTurns": 10,
+      "reviews": 0,
+      "reviewMs": 0,
+      "revisions": 0,
+      "reviewCheckpoints": {
+        "plan": 0,
+        "repeated-error": 0,
+        "final": 0
+      },
+      "executionTotalTokens": 2782900,
+      "classifierInputTokens": 70426,
+      "timeouts": 2,
+      "executionInputTokens": 2749919,
+      "executionOutputTokens": 32981
+    },
+    {
+      "strategy": "task-context",
+      "executions": 12,
+      "passed": 12,
+      "infrastructureErrors": 0,
+      "elapsedMs": 1393434,
+      "cachedInputTokens": 2751488,
+      "toolCalls": 109,
+      "classifierCalls": 24,
+      "classifierMs": 27231,
+      "decisionReasons": {
+        "classified": 22,
+        "low-confidence": 2
+      },
+      "expertTurns": 6,
+      "reviews": 0,
+      "reviewMs": 0,
+      "revisions": 0,
+      "reviewCheckpoints": {
+        "plan": 0,
+        "repeated-error": 0,
+        "final": 0
+      },
+      "executionTotalTokens": 3163079,
+      "classifierInputTokens": 121569,
+      "timeouts": 0,
+      "executionInputTokens": 3129968,
+      "executionOutputTokens": 33111
+    }
+  ],
+  "pairs": [
+    {
+      "strategy": "latest-message",
+      "wins": 1,
+      "losses": 2,
+      "ties": 9,
+      "infrastructurePairs": 0,
+      "pairs": [
+        {
+          "task": "mechanical-doc",
+          "category": "mechanical-doc",
+          "split": "calibration",
+          "repeat": 1,
+          "result": "tie",
+          "elapsedDeltaMs": -10313,
+          "tokenDelta": -7646
+        },
+        {
+          "task": "csv-feature",
+          "category": "csv-feature",
+          "split": "calibration",
+          "repeat": 1,
+          "result": "tie",
+          "elapsedDeltaMs": 30122,
+          "tokenDelta": 1589
+        },
+        {
+          "task": "local-diagnosis",
+          "category": "local-diagnosis",
+          "split": "calibration",
+          "repeat": 1,
+          "result": "loss",
+          "elapsedDeltaMs": 1244,
+          "tokenDelta": -208941
+        },
+        {
+          "task": "cross-known",
+          "category": "cross-known",
+          "split": "calibration",
+          "repeat": 1,
+          "result": "tie",
+          "elapsedDeltaMs": -31434,
+          "tokenDelta": -14647
+        },
+        {
+          "task": "cross-unknown",
+          "category": "cross-unknown",
+          "split": "calibration",
+          "repeat": 1,
+          "result": "win",
+          "elapsedDeltaMs": -12488,
+          "tokenDelta": 244735
+        },
+        {
+          "task": "multi-turn",
+          "category": "multi-turn",
+          "split": "calibration",
+          "repeat": 1,
+          "result": "tie",
+          "elapsedDeltaMs": -67486,
+          "tokenDelta": -5303
+        },
+        {
+          "task": "mechanical-doc",
+          "category": "mechanical-doc",
+          "split": "calibration",
+          "repeat": 2,
+          "result": "tie",
+          "elapsedDeltaMs": -930,
+          "tokenDelta": -28570
+        },
+        {
+          "task": "csv-feature",
+          "category": "csv-feature",
+          "split": "calibration",
+          "repeat": 2,
+          "result": "tie",
+          "elapsedDeltaMs": -41095,
+          "tokenDelta": -56010
+        },
+        {
+          "task": "local-diagnosis",
+          "category": "local-diagnosis",
+          "split": "calibration",
+          "repeat": 2,
+          "result": "tie",
+          "elapsedDeltaMs": -45201,
+          "tokenDelta": -11720
+        },
+        {
+          "task": "cross-known",
+          "category": "cross-known",
+          "split": "calibration",
+          "repeat": 2,
+          "result": "tie",
+          "elapsedDeltaMs": -20935,
+          "tokenDelta": 28758
+        },
+        {
+          "task": "cross-unknown",
+          "category": "cross-unknown",
+          "split": "calibration",
+          "repeat": 2,
+          "result": "loss",
+          "elapsedDeltaMs": 15927,
+          "tokenDelta": -15309
+        },
+        {
+          "task": "multi-turn",
+          "category": "multi-turn",
+          "split": "calibration",
+          "repeat": 2,
+          "result": "tie",
+          "elapsedDeltaMs": 15163,
+          "tokenDelta": -3319
+        }
+      ]
+    },
+    {
+      "strategy": "task-context",
+      "wins": 1,
+      "losses": 0,
+      "ties": 11,
+      "infrastructurePairs": 0,
+      "pairs": [
+        {
+          "task": "mechanical-doc",
+          "category": "mechanical-doc",
+          "split": "calibration",
+          "repeat": 1,
+          "result": "tie",
+          "elapsedDeltaMs": -26603,
+          "tokenDelta": -7685
+        },
+        {
+          "task": "csv-feature",
+          "category": "csv-feature",
+          "split": "calibration",
+          "repeat": 1,
+          "result": "tie",
+          "elapsedDeltaMs": 2267,
+          "tokenDelta": -600
+        },
+        {
+          "task": "local-diagnosis",
+          "category": "local-diagnosis",
+          "split": "calibration",
+          "repeat": 1,
+          "result": "tie",
+          "elapsedDeltaMs": -93320,
+          "tokenDelta": -59826
+        },
+        {
+          "task": "cross-known",
+          "category": "cross-known",
+          "split": "calibration",
+          "repeat": 1,
+          "result": "tie",
+          "elapsedDeltaMs": -26969,
+          "tokenDelta": 79262
+        },
+        {
+          "task": "cross-unknown",
+          "category": "cross-unknown",
+          "split": "calibration",
+          "repeat": 1,
+          "result": "win",
+          "elapsedDeltaMs": -43126,
+          "tokenDelta": 311435
+        },
+        {
+          "task": "multi-turn",
+          "category": "multi-turn",
+          "split": "calibration",
+          "repeat": 1,
+          "result": "tie",
+          "elapsedDeltaMs": -84614,
+          "tokenDelta": -4670
+        },
+        {
+          "task": "mechanical-doc",
+          "category": "mechanical-doc",
+          "split": "calibration",
+          "repeat": 2,
+          "result": "tie",
+          "elapsedDeltaMs": 4453,
+          "tokenDelta": -28567
+        },
+        {
+          "task": "csv-feature",
+          "category": "csv-feature",
+          "split": "calibration",
+          "repeat": 2,
+          "result": "tie",
+          "elapsedDeltaMs": -14984,
+          "tokenDelta": -30612
+        },
+        {
+          "task": "local-diagnosis",
+          "category": "local-diagnosis",
+          "split": "calibration",
+          "repeat": 2,
+          "result": "tie",
+          "elapsedDeltaMs": -41458,
+          "tokenDelta": -33672
+        },
+        {
+          "task": "cross-known",
+          "category": "cross-known",
+          "split": "calibration",
+          "repeat": 2,
+          "result": "tie",
+          "elapsedDeltaMs": -69500,
+          "tokenDelta": 51943
+        },
+        {
+          "task": "cross-unknown",
+          "category": "cross-unknown",
+          "split": "calibration",
+          "repeat": 2,
+          "result": "tie",
+          "elapsedDeltaMs": -53523,
+          "tokenDelta": 30933
+        },
+        {
+          "task": "multi-turn",
+          "category": "multi-turn",
+          "split": "calibration",
+          "repeat": 2,
+          "result": "tie",
+          "elapsedDeltaMs": 12392,
+          "tokenDelta": -4145
+        }
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "task": "mechanical-doc",
+      "category": "mechanical-doc",
+      "split": "calibration",
+      "strategy": "fixed-sol-high",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 54369,
+      "toolCalls": 4,
+      "usage": {
+        "totalTokens": 117974,
+        "inputTokens": 117325,
+        "cachedInputTokens": 104320,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 649,
+        "reasoningOutputTokens": 51
+      },
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "manual"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 0
+    },
+    {
+      "task": "mechanical-doc",
+      "category": "mechanical-doc",
+      "split": "calibration",
+      "strategy": "latest-message",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 44056,
+      "toolCalls": 4,
+      "usage": {
+        "totalTokens": 110328,
+        "inputTokens": 109938,
+        "cachedInputTokens": 98944,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 390,
+        "reasoningOutputTokens": 0
+      },
+      "classifierCalls": 1,
+      "classifierMs": 582,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        }
+      ],
+      "decisionReasons": [
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 3020
+    },
+    {
+      "task": "mechanical-doc",
+      "category": "mechanical-doc",
+      "split": "calibration",
+      "strategy": "task-context",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 27766,
+      "toolCalls": 4,
+      "usage": {
+        "totalTokens": 110289,
+        "inputTokens": 109895,
+        "cachedInputTokens": 98816,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 394,
+        "reasoningOutputTokens": 0
+      },
+      "classifierCalls": 1,
+      "classifierMs": 595,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        }
+      ],
+      "decisionReasons": [
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 3020
+    },
+    {
+      "task": "csv-feature",
+      "category": "csv-feature",
+      "split": "calibration",
+      "strategy": "latest-message",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 102452,
+      "toolCalls": 4,
+      "usage": {
+        "totalTokens": 122803,
+        "inputTokens": 120164,
+        "cachedInputTokens": 105600,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 2639,
+        "reasoningOutputTokens": 14
+      },
+      "classifierCalls": 1,
+      "classifierMs": 828,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 3118
+    },
+    {
+      "task": "csv-feature",
+      "category": "csv-feature",
+      "split": "calibration",
+      "strategy": "task-context",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 74597,
+      "toolCalls": 6,
+      "usage": {
+        "totalTokens": 120614,
+        "inputTokens": 118782,
+        "cachedInputTokens": 104832,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 1832,
+        "reasoningOutputTokens": 54
+      },
+      "classifierCalls": 1,
+      "classifierMs": 1884,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 3118
+    },
+    {
+      "task": "csv-feature",
+      "category": "csv-feature",
+      "split": "calibration",
+      "strategy": "fixed-sol-high",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 72330,
+      "toolCalls": 6,
+      "usage": {
+        "totalTokens": 121214,
+        "inputTokens": 118991,
+        "cachedInputTokens": 104704,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 2223,
+        "reasoningOutputTokens": 461
+      },
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "manual"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 0
+    },
+    {
+      "task": "local-diagnosis",
+      "category": "local-diagnosis",
+      "split": "calibration",
+      "strategy": "task-context",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 145460,
+      "toolCalls": 14,
+      "usage": {
+        "totalTokens": 380941,
+        "inputTokens": 375192,
+        "cachedInputTokens": 334976,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 5749,
+        "reasoningOutputTokens": 914
+      },
+      "classifierCalls": 3,
+      "classifierMs": 8979,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "classified",
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 18077
+    },
+    {
+      "task": "local-diagnosis",
+      "category": "local-diagnosis",
+      "split": "calibration",
+      "strategy": "fixed-sol-high",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 238780,
+      "toolCalls": 18,
+      "usage": {
+        "totalTokens": 440767,
+        "inputTokens": 434965,
+        "cachedInputTokens": 401792,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 5802,
+        "reasoningOutputTokens": 1400
+      },
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "manual",
+        "manual",
+        "manual"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 0
+    },
+    {
+      "task": "local-diagnosis",
+      "category": "local-diagnosis",
+      "split": "calibration",
+      "strategy": "latest-message",
+      "repeat": 1,
+      "status": "timeout",
+      "elapsedMs": 240024,
+      "toolCalls": 11,
+      "usage": {
+        "totalTokens": 231826,
+        "inputTokens": 227154,
+        "cachedInputTokens": 206080,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 4672,
+        "reasoningOutputTokens": 1039
+      },
+      "classifierCalls": 2,
+      "classifierMs": 1387,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "low-confidence"
+      ],
+      "revisions": 0,
+      "passed": false,
+      "classifierInputTokens": 6139,
+      "statusCorrection": {
+        "from": "infrastructure-error",
+        "reason": "The per-turn deadline fired before the outer task timer; the 240000 ms task deadline was exceeded.",
+        "correctedAt": "2026-10-13T08:00:50.079Z"
+      }
+    },
+    {
+      "task": "cross-known",
+      "category": "cross-known",
+      "split": "calibration",
+      "strategy": "fixed-sol-high",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 187239,
+      "toolCalls": 10,
+      "usage": {
+        "totalTokens": 223372,
+        "inputTokens": 218804,
+        "cachedInputTokens": 195840,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 4568,
+        "reasoningOutputTokens": 1094
+      },
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "manual",
+        "manual"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 0
+    },
+    {
+      "task": "cross-known",
+      "category": "cross-known",
+      "split": "calibration",
+      "strategy": "latest-message",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 155805,
+      "toolCalls": 8,
+      "usage": {
+        "totalTokens": 208725,
+        "inputTokens": 205966,
+        "cachedInputTokens": 185984,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 2759,
+        "reasoningOutputTokens": 20
+      },
+      "classifierCalls": 2,
+      "classifierMs": 1619,
+      "routes": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "medium"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 6182
+    },
+    {
+      "task": "cross-known",
+      "category": "cross-known",
+      "split": "calibration",
+      "strategy": "task-context",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 160270,
+      "toolCalls": 13,
+      "usage": {
+        "totalTokens": 302634,
+        "inputTokens": 299767,
+        "cachedInputTokens": 260352,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 2867,
+        "reasoningOutputTokens": 59
+      },
+      "classifierCalls": 2,
+      "classifierMs": 1366,
+      "routes": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "medium"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "low-confidence"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 10110
+    },
+    {
+      "task": "cross-unknown",
+      "category": "cross-unknown",
+      "split": "calibration",
+      "strategy": "latest-message",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 227528,
+      "toolCalls": 14,
+      "usage": {
+        "totalTokens": 435814,
+        "inputTokens": 431542,
+        "cachedInputTokens": 402560,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 4272,
+        "reasoningOutputTokens": 156
+      },
+      "classifierCalls": 3,
+      "classifierMs": 2962,
+      "routes": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "low-confidence",
+        "low-confidence"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 9189
+    },
+    {
+      "task": "cross-unknown",
+      "category": "cross-unknown",
+      "split": "calibration",
+      "strategy": "task-context",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 196890,
+      "toolCalls": 17,
+      "usage": {
+        "totalTokens": 502514,
+        "inputTokens": 498039,
+        "cachedInputTokens": 442880,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 4475,
+        "reasoningOutputTokens": 328
+      },
+      "classifierCalls": 3,
+      "classifierMs": 3046,
+      "routes": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "classified",
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 18585
+    },
+    {
+      "task": "cross-unknown",
+      "category": "cross-unknown",
+      "split": "calibration",
+      "strategy": "fixed-sol-high",
+      "repeat": 1,
+      "status": "timeout",
+      "elapsedMs": 240016,
+      "toolCalls": 8,
+      "usage": {
+        "totalTokens": 191079,
+        "inputTokens": 188132,
+        "cachedInputTokens": 169728,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 2947,
+        "reasoningOutputTokens": 592
+      },
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "manual",
+        "manual"
+      ],
+      "revisions": 0,
+      "passed": false,
+      "classifierInputTokens": 0
+    },
+    {
+      "task": "multi-turn",
+      "category": "multi-turn",
+      "split": "calibration",
+      "strategy": "task-context",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 89295,
+      "toolCalls": 8,
+      "usage": {
+        "totalTokens": 190494,
+        "inputTokens": 189159,
+        "cachedInputTokens": 174464,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 1335,
+        "reasoningOutputTokens": 0
+      },
+      "classifierCalls": 2,
+      "classifierMs": 2113,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 8342
+    },
+    {
+      "task": "multi-turn",
+      "category": "multi-turn",
+      "split": "calibration",
+      "strategy": "fixed-sol-high",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 173909,
+      "toolCalls": 7,
+      "usage": {
+        "totalTokens": 195164,
+        "inputTokens": 193435,
+        "cachedInputTokens": 166144,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 1729,
+        "reasoningOutputTokens": 14
+      },
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "manual",
+        "manual"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 0
+    },
+    {
+      "task": "multi-turn",
+      "category": "multi-turn",
+      "split": "calibration",
+      "strategy": "latest-message",
+      "repeat": 1,
+      "status": "completed",
+      "elapsedMs": 106423,
+      "toolCalls": 7,
+      "usage": {
+        "totalTokens": 189861,
+        "inputTokens": 188549,
+        "cachedInputTokens": 165504,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 1312,
+        "reasoningOutputTokens": 0
+      },
+      "classifierCalls": 2,
+      "classifierMs": 1316,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 6067
+    },
+    {
+      "task": "mechanical-doc",
+      "category": "mechanical-doc",
+      "split": "calibration",
+      "strategy": "latest-message",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 35272,
+      "toolCalls": 2,
+      "usage": {
+        "totalTokens": 88951,
+        "inputTokens": 88568,
+        "cachedInputTokens": 67584,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 383,
+        "reasoningOutputTokens": 0
+      },
+      "classifierCalls": 1,
+      "classifierMs": 641,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        }
+      ],
+      "decisionReasons": [
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 3020
+    },
+    {
+      "task": "mechanical-doc",
+      "category": "mechanical-doc",
+      "split": "calibration",
+      "strategy": "task-context",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 40655,
+      "toolCalls": 2,
+      "usage": {
+        "totalTokens": 88954,
+        "inputTokens": 88562,
+        "cachedInputTokens": 77568,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 392,
+        "reasoningOutputTokens": 18
+      },
+      "classifierCalls": 1,
+      "classifierMs": 774,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        }
+      ],
+      "decisionReasons": [
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 3020
+    },
+    {
+      "task": "mechanical-doc",
+      "category": "mechanical-doc",
+      "split": "calibration",
+      "strategy": "fixed-sol-high",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 36202,
+      "toolCalls": 5,
+      "usage": {
+        "totalTokens": 117521,
+        "inputTokens": 116929,
+        "cachedInputTokens": 92160,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 592,
+        "reasoningOutputTokens": 13
+      },
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "manual"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 0
+    },
+    {
+      "task": "csv-feature",
+      "category": "csv-feature",
+      "split": "calibration",
+      "strategy": "task-context",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 83573,
+      "toolCalls": 4,
+      "usage": {
+        "totalTokens": 120211,
+        "inputTokens": 118474,
+        "cachedInputTokens": 104704,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 1737,
+        "reasoningOutputTokens": 96
+      },
+      "classifierCalls": 1,
+      "classifierMs": 647,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 3118
+    },
+    {
+      "task": "csv-feature",
+      "category": "csv-feature",
+      "split": "calibration",
+      "strategy": "fixed-sol-high",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 98557,
+      "toolCalls": 8,
+      "usage": {
+        "totalTokens": 150823,
+        "inputTokens": 147713,
+        "cachedInputTokens": 118784,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 3110,
+        "reasoningOutputTokens": 429
+      },
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "manual"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 0
+    },
+    {
+      "task": "csv-feature",
+      "category": "csv-feature",
+      "split": "calibration",
+      "strategy": "latest-message",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 57462,
+      "toolCalls": 5,
+      "usage": {
+        "totalTokens": 94813,
+        "inputTokens": 93183,
+        "cachedInputTokens": 79872,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 1630,
+        "reasoningOutputTokens": 141
+      },
+      "classifierCalls": 1,
+      "classifierMs": 603,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 3118
+    },
+    {
+      "task": "local-diagnosis",
+      "category": "local-diagnosis",
+      "split": "calibration",
+      "strategy": "fixed-sol-high",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 224500,
+      "toolCalls": 15,
+      "usage": {
+        "totalTokens": 440699,
+        "inputTokens": 435178,
+        "cachedInputTokens": 384640,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 5521,
+        "reasoningOutputTokens": 907
+      },
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "manual",
+        "manual",
+        "manual"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 0
+    },
+    {
+      "task": "local-diagnosis",
+      "category": "local-diagnosis",
+      "split": "calibration",
+      "strategy": "latest-message",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 179299,
+      "toolCalls": 17,
+      "usage": {
+        "totalTokens": 428979,
+        "inputTokens": 423168,
+        "cachedInputTokens": 370560,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 5811,
+        "reasoningOutputTokens": 945
+      },
+      "classifierCalls": 3,
+      "classifierMs": 3343,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "low-confidence",
+        "low-confidence"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 9135
+    },
+    {
+      "task": "local-diagnosis",
+      "category": "local-diagnosis",
+      "split": "calibration",
+      "strategy": "task-context",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 183042,
+      "toolCalls": 13,
+      "usage": {
+        "totalTokens": 407027,
+        "inputTokens": 402039,
+        "cachedInputTokens": 328704,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 4988,
+        "reasoningOutputTokens": 611
+      },
+      "classifierCalls": 3,
+      "classifierMs": 2538,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "classified",
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 18096
+    },
+    {
+      "task": "cross-known",
+      "category": "cross-known",
+      "split": "calibration",
+      "strategy": "latest-message",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 187352,
+      "toolCalls": 9,
+      "usage": {
+        "totalTokens": 275011,
+        "inputTokens": 271790,
+        "cachedInputTokens": 262528,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 3221,
+        "reasoningOutputTokens": 93
+      },
+      "classifierCalls": 2,
+      "classifierMs": 1845,
+      "routes": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "medium"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 6182
+    },
+    {
+      "task": "cross-known",
+      "category": "cross-known",
+      "split": "calibration",
+      "strategy": "task-context",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 138787,
+      "toolCalls": 7,
+      "usage": {
+        "totalTokens": 298196,
+        "inputTokens": 294557,
+        "cachedInputTokens": 254464,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 3639,
+        "reasoningOutputTokens": 70
+      },
+      "classifierCalls": 2,
+      "classifierMs": 1405,
+      "routes": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "medium"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "low-confidence"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 9954
+    },
+    {
+      "task": "cross-known",
+      "category": "cross-known",
+      "split": "calibration",
+      "strategy": "fixed-sol-high",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 208287,
+      "toolCalls": 15,
+      "usage": {
+        "totalTokens": 246253,
+        "inputTokens": 241332,
+        "cachedInputTokens": 204928,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 4921,
+        "reasoningOutputTokens": 913
+      },
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "manual",
+        "manual"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 0
+    },
+    {
+      "task": "cross-unknown",
+      "category": "cross-unknown",
+      "split": "calibration",
+      "strategy": "task-context",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 170575,
+      "toolCalls": 14,
+      "usage": {
+        "totalTokens": 450976,
+        "inputTokens": 446645,
+        "cachedInputTokens": 394752,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 4331,
+        "reasoningOutputTokens": 333
+      },
+      "classifierCalls": 3,
+      "classifierMs": 2332,
+      "routes": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "classified",
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 17819
+    },
+    {
+      "task": "cross-unknown",
+      "category": "cross-unknown",
+      "split": "calibration",
+      "strategy": "fixed-sol-high",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 224098,
+      "toolCalls": 16,
+      "usage": {
+        "totalTokens": 420043,
+        "inputTokens": 414032,
+        "cachedInputTokens": 381824,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 6011,
+        "reasoningOutputTokens": 1515
+      },
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "manual",
+        "manual",
+        "manual"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 0
+    },
+    {
+      "task": "cross-unknown",
+      "category": "cross-unknown",
+      "split": "calibration",
+      "strategy": "latest-message",
+      "repeat": 2,
+      "status": "timeout",
+      "elapsedMs": 240025,
+      "toolCalls": 15,
+      "usage": {
+        "totalTokens": 404734,
+        "inputTokens": 400253,
+        "cachedInputTokens": 374272,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 4481,
+        "reasoningOutputTokens": 430
+      },
+      "classifierCalls": 3,
+      "classifierMs": 3139,
+      "routes": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "low-confidence",
+        "low-confidence"
+      ],
+      "revisions": 0,
+      "passed": false,
+      "classifierInputTokens": 9189
+    },
+    {
+      "task": "multi-turn",
+      "category": "multi-turn",
+      "split": "calibration",
+      "strategy": "fixed-sol-high",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 70132,
+      "toolCalls": 8,
+      "usage": {
+        "totalTokens": 194374,
+        "inputTokens": 192712,
+        "cachedInputTokens": 165376,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 1662,
+        "reasoningOutputTokens": 41
+      },
+      "classifierCalls": 0,
+      "classifierMs": 0,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "decisionReasons": [
+        "manual",
+        "manual"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 0
+    },
+    {
+      "task": "multi-turn",
+      "category": "multi-turn",
+      "split": "calibration",
+      "strategy": "latest-message",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 85295,
+      "toolCalls": 8,
+      "usage": {
+        "totalTokens": 191055,
+        "inputTokens": 189644,
+        "cachedInputTokens": 175616,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 1411,
+        "reasoningOutputTokens": 48
+      },
+      "classifierCalls": 2,
+      "classifierMs": 1336,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 6067
+    },
+    {
+      "task": "multi-turn",
+      "category": "multi-turn",
+      "split": "calibration",
+      "strategy": "task-context",
+      "repeat": 2,
+      "status": "completed",
+      "elapsedMs": 82524,
+      "toolCalls": 7,
+      "usage": {
+        "totalTokens": 190229,
+        "inputTokens": 188857,
+        "cachedInputTokens": 174976,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 1372,
+        "reasoningOutputTokens": 34
+      },
+      "classifierCalls": 2,
+      "classifierMs": 1552,
+      "routes": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      ],
+      "decisionReasons": [
+        "classified",
+        "classified"
+      ],
+      "revisions": 0,
+      "passed": true,
+      "classifierInputTokens": 8310
+    }
+  ]
+}

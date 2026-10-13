@@ -26,6 +26,8 @@ export interface NativeReviewConfig extends Route {
   maxToolCalls: number;
 }
 export interface NativeRule extends Route { prefix: string }
+export type CapacityFallback = "off" | "main-to-expert" | "bidirectional";
+export type CapacityRetry = "once" | "until-available";
 export interface Config {
   version: 1;
   auth: "chatgpt" | "api-key" | "mock";
@@ -36,7 +38,8 @@ export interface Config {
   rules: { prefix: string; route: string }[];
   semantic?: SemanticConfig;
   capture?: { directory: string; execution?: ExecutionCaptureConfig };
-  native?: { expertModel?: string; expertPolicy?: "constraints"; reasoningDemand?: "shadow"; review?: NativeReviewConfig; rules?: NativeRule[] };
+  native?: { expertModel?: string; expertPolicy?: "constraints"; reasoningDemand?: "shadow"; capacityFallback?: CapacityFallback; capacityRetry?: CapacityRetry;
+    classifierContext?: "task" | "latest-message"; review?: NativeReviewConfig; rules?: NativeRule[] };
 }
 export const AUTO_MODEL = "fenjue-auto";
 export const PROXY_HEADER = "x-fenjue-token";
@@ -81,6 +84,18 @@ export function parseConfig(value: unknown): Config {
     throw new Error("native.expertModel 必须为真实模型名；省略时只自动选择主模型的三档 effort");
   }
   let native = value.native;
+  if (record(native) && native.capacityRetry !== undefined &&
+      (typeof native.capacityRetry !== "string" || !["once", "until-available"].includes(native.capacityRetry))) {
+    throw new Error("native.capacityRetry 必须为 once 或 until-available");
+  }
+  if (record(native) && native.classifierContext !== undefined && !["task", "latest-message"].includes(String(native.classifierContext))) {
+    throw new Error("native.classifierContext 必须为 task 或 latest-message");
+  }
+  if (record(native) && native.capacityFallback !== undefined &&
+      (!["off", "main-to-expert", "bidirectional"].includes(String(native.capacityFallback)) ||
+        (native.capacityFallback !== "off" && typeof native.expertModel !== "string"))) {
+    throw new Error("native.capacityFallback 支持 off/main-to-expert/bidirectional；开启时需要 expertModel");
+  }
   if (record(native) && native.reasoningDemand !== undefined && native.reasoningDemand !== "shadow") {
     throw new Error("native.reasoningDemand 仅支持 shadow；省略时关闭");
   }

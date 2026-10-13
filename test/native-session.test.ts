@@ -15,7 +15,7 @@ import { type Classify, type Features, type QuestionScores, ClassificationError 
 import { classification, semanticConfig, models } from "./fixtures.js";
 
 function config() {
-  const c = semanticConfig(); c.routes.deep = { model: "fixture-fast", effort: "high" }; c.native = { expertModel: "fixture-deep" }; return c;
+  const c = semanticConfig(); c.routes.deep = { model: "fixture-fast", effort: "high" }; c.native = { expertModel: "fixture-deep", capacityFallback: "bidirectional" }; return c;
 }
 async function fixture(t: any, classify: Classify, execution = false, c = config()) {
   const dir = await mkdtemp(join(tmpdir(), "fenjue-native-test-"));
@@ -93,6 +93,181 @@ test("capacity retry works when the failed turn completes before its start respo
   assert.equal(f.events.at(-1)!.status, "completed");
 });
 
+test("persistent capacity recovery rotates with backoff until success and preserves the original selection", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let calls = 0;
+  const c = config(); c.native!.capacityRetry = "until-available";
+  const f = await fixture(t, async () => { calls++; return classification(); }, true, c);
+  const first = await f.start("执行任务"), original = structuredClone(f.server.at(-1)!.params);
+  let turn = f.accept(first);
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    const before = f.server.length;
+    capacityFailure(f, turn);
+    const event = f.events.at(-1)!;
+    assert.equal(event.type, "retrying"); assert.equal(event.attempt, attempt);
+    assert.deepEqual(event.requestedRoute, { model: original.model, effort: original.effort });
+    const waitMs = attempt === 1 ? 0 : 1000 * 2 ** (attempt - 2);
+    assert.equal(event.waitMs, waitMs);
+    if (waitMs) {
+      t.mock.timers.tick(waitMs - 1); assert.equal(f.server.length, before);
+      t.mock.timers.tick(1);
+    }
+    assert.equal(f.server.length, before + 1);
+    const retry = f.server.at(-1)!;
+    assert.equal(retry.params.model, attempt % 2 ? "fixture-deep" : "fixture-fast");
+    assert.match(retry.params.input[0].text, /继续.*不要重复/s);
+    turn = f.accept(retry, `retry-${attempt}`);
+  }
+  f.complete(turn); t.mock.timers.tick(60_000);
+  assert.equal(f.events.at(-1)!.status, "completed"); assert.equal(calls, 1);
+  assert.deepEqual(f.records.load("thread")!.task.messages, ["执行任务"]);
+  const casePath = join(f.cases, (await readdir(f.cases)).find(name => name.startsWith("daily-"))!, "capture.json");
+  const capture = JSON.parse(await readFile(casePath, "utf8"));
+  assert.deepEqual(capture.outcomes, { [turn]: "completed" });
+});
+
+test("persistent one-way fallback stays on the expert and caps its delay", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const c = config(); c.native!.capacityRetry = "until-available"; c.native!.capacityFallback = "main-to-expert";
+  const f = await fixture(t, async () => classification(), false, c);
+  let turn = f.accept(await f.start("执行任务"));
+  for (let attempt = 1; attempt <= 8; attempt++) {
+    capacityFailure(f, turn);
+    const waitMs = Number(f.events.at(-1)!.waitMs);
+    assert.equal(waitMs, attempt === 1 ? 0 : Math.min(30_000, 1000 * 2 ** (attempt - 2)));
+    t.mock.timers.tick(waitMs);
+    const retry = f.server.at(-1)!; assert.equal(retry.params.model, "fixture-deep");
+    turn = f.accept(retry, `retry-${attempt}`);
+  }
+  f.complete(turn);
+  assert.throws(() => parseConfig({ ...c, native: { ...c.native, capacityRetry: "forever" } }));
+  assert.throws(() => parseConfig({ ...c, native: { ...c.native, capacityRetry: ["until-available"] } }));
+});
+
+test("persistent recovery continues partial work in the same thread with unchanged permissions and Plan", async t => {
+  for (const notification of [
+    { method: "item/agentMessage/delta", params: { delta: "正在处理" } },
+    { method: "item/reasoning/summaryTextDelta", params: { delta: "思考摘要" } },
+    { method: "item/started", params: { item: { type: "commandExecution", id: "work" } } },
+    { method: "item/completed", params: { item: { type: "mcpToolCall", id: "tool", result: "done" } } },
+    undefined,
+  ]) {
+    const c = config(); c.native!.capacityRetry = "until-available";
+    const f = await fixture(t, async () => classification({ reasoning: "diagnosis" }), false, c);
+    const first = await f.start("执行原始任务", { approvalPolicy: "on-request", sandboxPolicy: { type: "readOnly" },
+      collaborationMode: { mode: "plan", settings: { model: "fixture-fast", reasoning_effort: "high", developer_instructions: "Keep plan" } } });
+    const original = structuredClone(f.server.at(-1)!.params), turn = f.accept(first);
+    if (notification) f.session.fromServer({ ...notification, params: { ...notification.params, threadId: "thread", turnId: turn } });
+    capacityFailure(f, turn, notification ? [] : [{ type: "agentMessage", text: "已完成一部分" }]);
+    const retry = f.server.at(-1)!; assert.notEqual(retry.id, first.id);
+    assert.match(retry.params.input[0].text, /继续.*不要重复/s);
+    assert.deepEqual(retry.params, { ...original, input: retry.params.input, model: "fixture-deep",
+      collaborationMode: { ...original.collaborationMode, settings: { ...original.collaborationMode.settings, model: "fixture-deep" } } });
+    const continued = f.accept(retry, "continued");
+    f.session.fromServer({ method: "item/completed", params: { threadId: "thread", turnId: continued,
+      item: { type: "userMessage", id: "continuation", content: retry.params.input } } });
+    f.complete(continued);
+    assert.deepEqual(f.records.load("thread")!.task.messages, ["执行原始任务"]);
+  }
+});
+
+test("persistent recovery can be cancelled while waiting without leaking internal responses", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  for (const action of ["interrupt", "new-input", "manual", "shadow", "switch", "rollback", "archive", "close"] as const) {
+    const c = config(); c.native!.capacityRetry = "until-available";
+    const f = await fixture(t, async () => classification(), false, c);
+    capacityFailure(f, f.accept(await f.start("执行任务")));
+    capacityFailure(f, f.accept(f.server.at(-1)!, "second"));
+    const before = f.server.length;
+    if (action === "manual" || action === "shadow") f.session.setMode(action);
+    else if (action === "close") f.session.close();
+    else if (action === "new-input") await f.start("新的任务");
+    else if (action === "switch") await f.request("thread/start", { threadSource: "user", cwd: f.dir });
+    else await f.request(action === "interrupt" ? "turn/interrupt" : action === "rollback" ? "thread/rollback" : "thread/archive", { threadId: "thread" });
+    const expected = f.server.length; t.mock.timers.tick(60_000);
+    assert.equal(f.server.length, expected, action);
+    assert.equal(f.server.filter(m => typeof m.id === "string" && m.id.startsWith("fenjue:")).length, 1, action);
+    assert.equal(f.client.some(m => typeof m.id === "string" && m.id.startsWith("fenjue:")), false);
+    if (action === "new-input") assert.equal(expected, before + 1);
+  }
+});
+
+test("persistent recovery waits for approval and stops on non-capacity failures", async t => {
+  const c = config(); c.native!.capacityRetry = "until-available";
+  for (const answered of [false, true]) {
+    const f = await fixture(t, async () => classification(), false, c);
+    const first = await f.start("执行任务"), turn = f.accept(first);
+    f.session.fromServer({ id: "approval", method: "item/commandExecution/requestApproval", params: { threadId: "thread", turnId: turn } });
+    if (answered) await f.session.fromClient({ id: "approval", result: { decision: "accept" } });
+    capacityFailure(f, turn);
+    assert.equal(f.server.filter(m => m.method === "turn/start").length, answered ? 2 : 1);
+  }
+  const f = await fixture(t, async () => classification(), false, c);
+  capacityFailure(f, f.accept(await f.start("执行任务")));
+  capacityFailure(f, f.accept(f.server.at(-1)!, "second"), [], { message: "Invalid request", codexErrorInfo: "other" });
+  assert.equal(f.server.filter(m => m.method === "turn/start").length, 2);
+});
+
+test("switching to another bound thread stops a waiting recovery", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const c = config(); c.native!.capacityRetry = "until-available";
+  const f = await fixture(t, async () => classification(), false, c);
+  const other = await f.request("thread/start", { threadSource: "user", cwd: f.dir });
+  f.session.fromServer({ id: other.id, result: { thread: { id: "other" }, model: "fixture-fast", reasoningEffort: "medium" } });
+  capacityFailure(f, f.accept(await f.start("执行任务")));
+  capacityFailure(f, f.accept(f.server.at(-1)!, "second"));
+  await f.request("turn/start", { threadId: "other", input: [{ type: "text", text: "另一个会话的任务" }] });
+  const before = f.server.length; t.mock.timers.tick(60_000);
+  assert.equal(f.server.length, before);
+  assert.equal(f.server.at(-1)!.params.threadId, "other");
+});
+
+test("user action while a recovery start is in flight prevents another recovery after acceptance", async t => {
+  for (const action of ["interrupt", "new-input", "manual", "switch"] as const) {
+    const c = config(); c.native!.capacityRetry = "until-available";
+    const f = await fixture(t, async () => classification(), false, c);
+    capacityFailure(f, f.accept(await f.start("执行任务")));
+    const recovery = f.server.at(-1)!;
+    if (action === "manual") f.session.setMode("manual");
+    else if (action === "new-input") await f.start("更新任务约束");
+    else if (action === "switch") await f.request("thread/start", { threadSource: "user", cwd: f.dir });
+    else await f.request("turn/interrupt", { threadId: "thread" });
+    capacityFailure(f, f.accept(recovery, "late-accepted"));
+    assert.equal(f.events.filter(e => e.type === "retrying").length, 1, action);
+  }
+});
+
+test("native model picker acknowledged before recovery acceptance keeps manual selection for the next turn", async t => {
+  let calls = 0;
+  const c = config(); c.native!.capacityRetry = "until-available";
+  const f = await fixture(t, async () => { calls++; return classification(); }, false, c);
+  capacityFailure(f, f.accept(await f.start("执行任务")));
+  const recovery = f.server.at(-1)!, submittedRoute = { model: recovery.params.model, effort: recovery.params.effort };
+  const selected = { model: "fixture-fast", effort: "high" };
+  const picker = await f.request("thread/settings/update", { threadId: "thread", ...selected });
+  f.session.fromServer({ id: picker.id, result: {} });
+  const turn = f.accept(recovery, "late-accepted");
+  assert.equal(f.records.load("thread")!.mode, "manual");
+  assert.deepEqual(f.records.load("thread")!.route, selected);
+  f.complete(turn);
+  assert.deepEqual(f.events.at(-1)!.route, submittedRoute, "current work must still report its actual submitted model");
+  await f.start("新的任务", selected); assert.equal(calls, 1);
+});
+
+test("persistent recovery handles a capacity rejection when starting its backup turn", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const c = config(); c.native!.capacityRetry = "until-available";
+  const f = await fixture(t, async () => classification(), false, c);
+  capacityFailure(f, f.accept(await f.start("执行任务")));
+  const second = f.server.at(-1)!;
+  f.session.fromServer({ id: second.id, error: { code: -1, message: overload.message, data: overload } });
+  assert.equal(f.events.at(-1)!.attempt, 2);
+  t.mock.timers.tick(1000);
+  const third = f.server.at(-1)!; assert.notEqual(third.id, second.id);
+  assert.equal(third.params.model, "fixture-fast");
+  f.complete(f.accept(third, "third"));
+});
+
 test("capacity retry respects available model efforts in both directions", async t => {
   for (const [features, expected] of [
     [{ reasoning: "mechanical" }, { model: "fixture-deep", effort: "medium" }],
@@ -105,6 +280,46 @@ test("capacity retry respects available model efforts in both directions", async
     f.complete(f.accept(retry, "retry-ok"));
     assert.equal(f.events.at(-1)!.status, "completed");
   }
+});
+
+test("capacity fallback is opt-in and directional without confusing task selection with recovery", async t => {
+  for (const [policy, expertSelected, expectedRetry] of [
+    [undefined, false, false], ["off", true, false], ["main-to-expert", false, true],
+    ["main-to-expert", true, false], ["bidirectional", true, true],
+  ] as const) {
+    const c = config(); c.native!.capacityFallback = policy;
+    const f = await fixture(t, async () => classification(expertSelected ? { scope: "cross_system", reasoning: "diagnosis" } : {}), false, c);
+    const first = await f.start("检查当前故障"), selected = structuredClone(f.server.at(-1)!.params);
+    capacityFailure(f, f.accept(first));
+    assert.equal(f.server.filter(m => m.method === "turn/start").length, expectedRetry ? 2 : 1);
+    if (expectedRetry) {
+      const accepted = f.accept(f.server.at(-1)!);
+      const event = f.events.findLast(e => e.type === "accepted")!;
+      assert.deepEqual(event.requestedRoute, { model: selected.model, effort: selected.effort });
+      assert.equal(event.selectionReason, "classified"); assert.equal(event.fallbackPolicy, policy);
+      assert.deepEqual(event.suggestion, event.requestedRoute);
+      f.complete(accepted);
+    }
+  }
+  const c = config();
+  for (const native of [{ capacityFallback: "bidirectional" }, { ...c.native, capacityFallback: "other" },
+    { ...c.native, classifierContext: "other" }]) assert.throws(() => parseConfig({ ...c, native }));
+});
+
+test("latest-message ablation hides prior evidence only from classification, preserving execution and task state", async t => {
+  const c = config(); c.native!.classifierContext = "latest-message";
+  const seen: TaskView[] = [];
+  const f = await fixture(t, async view => { seen.push(structuredClone(view)); return classification({ relation: "continue" }); }, false, c);
+  const turn = f.accept(await f.start("修复权限逻辑，必须保留审计"));
+  f.session.fromServer({ method: "item/completed", params: { threadId: "thread", turnId: turn,
+    item: { id: "evidence", type: "agentMessage", text: "根因已经确认" } } });
+  f.complete(turn);
+  f.accept(await f.start("按确定方案落实修复"));
+  assert.deepEqual(seen.at(-1), { currentTask: { messages: [], evidence: [], incomplete: false },
+    newMessages: ["按确定方案落实修复"], evidence: [], incomplete: false });
+  assert.deepEqual(f.records.load("thread")!.task.messages, ["修复权限逻辑，必须保留审计", "按确定方案落实修复"]);
+  assert.ok(f.records.load("thread")!.task.evidence.includes("根因已经确认"));
+  assert.equal(f.server.at(-1)!.params.threadId, "thread");
 });
 
 test("capacity retry never repeats a turn after output, tool start, approval or a steer", async t => {

@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { parseEnv, promisify } from "node:util";
-import { mkdtemp, readFile, mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve, dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { readConfig, type Config } from "../src/config.js";
@@ -17,10 +17,11 @@ import { ARCHITECT_POLICY, ARCHITECT_INSTRUCTIONS, completedWork, reviewPrompt, 
   type WorkTurn } from "../src/architect-review.js";
 
 const args = process.argv.slice(2), flags = new Map<string, string>();
-let live = false;
+let live = false, resume = false;
 while (args.length) {
   const flag = args.shift()!;
   if (flag === "--live") { live = true; continue; }
+  if (flag === "--resume") { resume = true; continue; }
   if (flag === "--dry-run") continue;
   if (!["--suite", "--config", "--env-file", "--output", "--task", "--max-runs", "--repeats"].includes(flag) || !args.length) throw new Error(`未知或缺值参数：${flag}`);
   flags.set(flag, args.shift()!);
@@ -31,31 +32,53 @@ const suite = { ...original, tasks: flags.has("--task") ? original.tasks.filter(
 if (!suite.tasks.length) throw new Error("没有匹配任务");
 const repeats = Number(flags.get("--repeats") ?? 1), runs = suite.tasks.length * suite.strategies.length * repeats;
 if (!Number.isSafeInteger(repeats) || repeats < 1 || repeats > 10) throw new Error("repeats 范围为 1–10");
-if (live && (!Number.isSafeInteger(Number(flags.get("--max-runs"))) || Number(flags.get("--max-runs")) < runs)) throw new Error(`需显式 --live --max-runs ${runs}；一次 run 是完整任务，包含多次模型/工具调用`);
+if (resume && (!live || !flags.has("--output"))) throw new Error("--resume 需要 --live 和已有批次的 --output");
 const directory = resolve(flags.get("--output") ?? `.fenjue/execution/${Date.now()}`);
-// Refuse existing directories: reports and frozen acceptance cannot be reused.
-await mkdir(directory, { mode: 0o700, recursive: false }).catch(async error => {
+const plan = Array.from({ length: repeats }, (_, i) => i + 1).flatMap(repeat => suite.tasks.flatMap((task, index) => {
+  const order = (index + repeat - 1) % suite.strategies.length;
+  return [...suite.strategies.slice(order), ...suite.strategies.slice(0, order)].map(strategy => ({ task, strategy, repeat }));
+}));
+const previous = resume ? JSON.parse(await readFile(join(directory, "manifest.json"), "utf8")) : undefined;
+const savedReport = resume ? JSON.parse(await readFile(join(directory, "report.json"), "utf8")) : undefined;
+const rows: ExecutionResult[] = savedReport?.rows ?? [];
+if (resume && (previous.mode !== "live" || previous.repeats !== repeats || digest(previous.suite) !== digest(suite) ||
+    !Array.isArray(rows) || rows.length > runs || rows.some((row, index) => {
+      const run = plan[index]!; return row.task !== run.task.id || row.strategy !== run.strategy.id || row.repeat !== run.repeat;
+    }))) throw new Error("已有报告与任务顺序、策略或重复次数不一致，不能续跑");
+const remainingRuns = runs - rows.length;
+if (live && (!flags.has("--max-runs") || !Number.isSafeInteger(Number(flags.get("--max-runs"))) || Number(flags.get("--max-runs")) < remainingRuns)) {
+  throw new Error(`需显式 --live --max-runs ${remainingRuns}；一次 run 是完整任务，包含多次模型/工具调用`);
+}
+// Existing artifacts may only be reused through an explicit, validated resume.
+if (!resume) await mkdir(directory, { mode: 0o700, recursive: false }).catch(async error => {
   if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   await mkdir(dirname(directory), { recursive: true, mode: 0o700 }); await mkdir(directory, { mode: 0o700 });
 });
 const frozen = join(directory, "suite"), allFiles = await snapshotFiles(sourceDirectory);
-await copySnapshot(sourceDirectory, frozen, allFiles);
+if (resume) {
+  if (previous.suiteDigest !== digest(allFiles) || previous.suiteDigest !== digest(await snapshotFiles(frozen))) throw new Error("任务集或冻结文件已变化，不能续跑");
+  const recorded = new Set(rows.map(row => `${row.task}-${row.strategy}-${row.repeat}`));
+  for (const entry of await readdir(join(directory, "runs"), { withFileTypes: true })) {
+    if (entry.isDirectory() && !recorded.has(entry.name)) throw new Error(`运行目录 ${entry.name} 尚未进入报告，需核对实际消耗后再续跑`);
+  }
+} else await copySnapshot(sourceDirectory, frozen, allFiles);
 const snapshots = Object.fromEntries(await Promise.all(suite.tasks.map(async task => {
   const path = inside(frozen, task.snapshot), files = await snapshotFiles(path);
   if (!Object.keys(files).length) throw new Error(`空任务快照：${task.id}`);
   return [task.id, { path, files, digest: digest(files) }] as const;
 })));
-const manifest: Record<string, unknown> = { version: 1, mode: live ? "live" : "dry-run", suiteDigest: digest(allFiles),
+const manifest: Record<string, unknown> = previous ?? { version: 1, mode: live ? "live" : "dry-run", suiteDigest: digest(allFiles),
   policies: Object.fromEntries(suite.strategies.map(s => [s.id, s.kind === "fixed" ? "fixed" :
     nativePolicy({ native: s.kind === "expert-auto" ? { expertPolicy: s.expertPolicy } : {} })])),
   suite, plannedExecutions: runs, repeats,
+  capacityFallback: "off",
   ...(suite.strategies.some(s => s.kind === "advisor-auto") ? { architectPolicy: ARCHITECT_POLICY,
     architectInstructions: ARCHITECT_INSTRUCTIONS, maxReviewsPerTask: 3, reviewExecution: "isolated-read-only-thread" } : {}),
   snapshots: Object.fromEntries(Object.entries(snapshots).map(([id, s]) => [id, { digest: s.digest, files: s.files }])),
   tokenLimit: "observed soft limit; in-flight requests may exceed it", subscriptionCost: "unknown" };
-await saveJSON(join(directory, "manifest.json"), manifest);
+if (!resume) await saveJSON(join(directory, "manifest.json"), manifest);
 const preflight = [];
-for (const task of suite.tasks) {
+if (!resume) for (const task of suite.tasks) {
   const workspace = join(directory, "preflight", task.id), snapshot = snapshots[task.id]!;
   await copySnapshot(snapshot.path, workspace, snapshot.files);
   const answer = join(directory, "preflight", `${task.id}-answer.txt`); await writeFile(answer, "");
@@ -63,8 +86,10 @@ for (const task of suite.tasks) {
   preflight.push({ task: task.id, initialAcceptance: acceptance });
   await rm(workspace, { recursive: true, force: true }); await rm(answer);
 }
-await saveJSON(join(directory, "preflight.json"), preflight);
-await rm(join(directory, "preflight"), { recursive: true, force: true });
+if (!resume) {
+  await saveJSON(join(directory, "preflight.json"), preflight);
+  await rm(join(directory, "preflight"), { recursive: true, force: true });
+}
 if (preflight.some(p => p.initialAcceptance.passed || !p.initialAcceptance.valid)) {
   throw new Error("初始快照应尚未通过验收且验收器可正常运行；检查 preflight.json");
 }
@@ -85,6 +110,14 @@ if (!live) {
   const version = (await exec(codex, ["--version"])).stdout.trim();
   const catalog = JSON.parse(config.catalog ? await readFile(config.catalog, "utf8") :
     (await exec(codex, ["debug", "models", "--bundled"], { maxBuffer: 16 * 1024 * 1024 })).stdout);
+  if (resume) {
+    if (previous.codex !== version || previous.configDigest !== digest(config) || previous.catalogDigest !== digest(catalog)) {
+      throw new Error("Codex 版本、配置或模型目录已变化，不能续跑原批次");
+    }
+    const at = new Date().toISOString();
+    await saveJSON(join(directory, `checkpoint-${Date.now()}.json`), { manifest: previous, report: savedReport });
+    manifest.resumptions = [...(previous.resumptions ?? []), { at, recordedExecutions: rows.length, remainingExecutions: remainingRuns }];
+  }
   for (const strategy of suite.strategies) {
     validateNativeCatalog(catalog, strategyConfig(config, strategy));
     if (strategy.kind === "fixed" && !catalog.models.some((m: any) => m.slug === strategy.route.model &&
@@ -94,19 +127,16 @@ if (!live) {
         m.supported_reasoning_levels.some((r: any) => r.effort === strategy.advisorRoute.effort))) throw new Error("审查模型组合不在原生目录或不支持当前认证");
   }
   Object.assign(manifest, { codex: version, node: process.version, catalogDigest: digest(catalog), configDigest: digest(config), classifier: { model: config.semantic.model,
-    provider: config.semantic.provider, minConfidence: config.semantic.minConfidence }, startedAt: new Date().toISOString() });
+    provider: config.semantic.provider, minConfidence: config.semantic.minConfidence }, startedAt: previous?.startedAt ?? new Date().toISOString() });
   config.catalog = join(directory, "catalog.json");
   await saveJSON(config.catalog, catalog);
   await saveJSON(join(directory, "manifest.json"), manifest);
-  const rows: ExecutionResult[] = [], controller = new AbortController();
+  const controller = new AbortController();
   const stop = () => controller.abort(new Error("Evaluation interrupted"));
   process.on("SIGINT", stop); process.on("SIGTERM", stop);
   try {
-    for (let repeat = 1; repeat <= repeats; repeat++) for (const [index, task] of suite.tasks.entries()) {
-      // Rotate ordering to reduce systematic warm-cache/time-of-day bias.
-      const order = (index + repeat - 1) % suite.strategies.length;
-      const strategies = [...suite.strategies.slice(order), ...suite.strategies.slice(0, order)];
-      for (const strategy of strategies) {
+    // Keep the original rotated ordering; all recorded attempts consume their slot.
+    for (const { task, strategy, repeat } of plan.slice(rows.length)) {
         controller.signal.throwIfAborted();
         const result = await execute(task, strategy, repeat, strategyConfig(config, strategy), codex, secrets, controller.signal);
         rows.push(result);
@@ -117,15 +147,16 @@ if (!live) {
         // Stop on infrastructure failure rather than spending the rest of a
         // batch on broken credentials/network/runtime. Preserve partial report.
         if (result.status === "infrastructure-error") throw new Error("基础设施失败，已保存部分报告并停止后续执行");
-      }
     }
   } finally { process.off("SIGINT", stop); process.off("SIGTERM", stop); }
   if (rows.some(r => r.status !== "completed" || !r.acceptance?.passed)) process.exitCode = 1;
 }
 
 function strategyConfig(config: Config, strategy: ExecutionSuite["strategies"][number]): Config {
+  const classifierContext = strategy.kind === "sol-auto" || strategy.kind === "expert-auto" ? strategy.classifierContext ?? "task" : "task";
   return { ...structuredClone(config), rules: [], capture: undefined,
-    native: strategy.kind === "expert-auto" ? { expertModel: strategy.expertModel, expertPolicy: strategy.expertPolicy } : {},
+    native: { ...(strategy.kind === "expert-auto" ? { expertModel: strategy.expertModel, expertPolicy: strategy.expertPolicy } : {}),
+      capacityFallback: "off", classifierContext },
     semantic: { ...config.semantic!, mode: "auto" } };
 }
 async function execute(task: ExecutionTask, strategy: ExecutionSuite["strategies"][number], repeat: number,
@@ -250,7 +281,8 @@ async function execute(task: ExecutionTask, strategy: ExecutionSuite["strategies
     await saveJSON(join(runDir, "changes.json"), [...new Set([...Object.keys(snapshot.files), ...Object.keys(after)])]
       .filter(name => snapshot.files[name] !== after[name]).map(name => ({ path: name, before: snapshot.files[name] ?? null, after: after[name] ?? null })));
   } catch (error) {
-    row.status = timeoutHit ? "timeout" : budgetHit ? "budget" : row.status === "completed" ? "infrastructure-error" : row.status;
+    // A per-RPC/turn deadline can fire before the outer task timer callback.
+    row.status = timeoutHit || Date.now() - started >= task.limits.wallMs ? "timeout" : budgetHit ? "budget" : row.status === "completed" ? "infrastructure-error" : row.status;
     row.error = redactCapture(String(error), secrets);
   } finally {
     clearTimeout(timer); signal.removeEventListener("abort", stop);

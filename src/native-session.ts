@@ -17,11 +17,14 @@ interface Pending {
   state?: NativeState; decision?: Record<string, unknown>; text?: string; incomplete?: boolean;
   automatic?: boolean;
   decisionId?: string; receivedAt?: string;
-  capacityRetry?: { previousError: any; parentTurnId: string };
+  submittedRoute?: Route;
+  capacityRetry?: { previousError: any; parentTurnId: string; attempt: number; requestedRoute: Route; blocked?: boolean };
 }
 interface ActiveTurn {
   turnId: string; route: Route;
-  retry?: { parameters: any; blocked: boolean; previousError?: any };
+  automatic?: boolean;
+  retry?: { parameters: any; blocked: boolean; worked: boolean; attempt: number; awaiting: Set<string | number>;
+    selectionReason: string; requestedRoute: Route; previousError?: any };
 }
 function inputText(input: any): { text: string; incomplete: boolean } {
   const items = Array.isArray(input) ? input : [];
@@ -90,10 +93,15 @@ export class NativeSession {
   }
   private cancel(threadId: string, reason: string): boolean {
     const pending = this.pending.get(threadId);
-    if (!pending || pending.sent) return false;
+    if (!pending) return false;
+    if (pending.sent) {
+      if (pending.capacityRetry) pending.capacityRetry.blocked = true;
+      return false;
+    }
     pending.controller.abort(); this.pending.delete(threadId);
     if (pending.state) this.records.discardExecution(threadId, pending.state.taskId);
-    this.replyError(pending.message, reason); this.emit("classification-cancelled", threadId, { reason });
+    if (!pending.capacityRetry) this.replyError(pending.message, reason);
+    this.emit("classification-cancelled", threadId, { reason });
     return true;
   }
   setMode(mode: NativeMode): void {
@@ -111,10 +119,14 @@ export class NativeSession {
   async fromClient(message: NativeMessage): Promise<void> {
     if (this.closed) return;
     const p = message.params ?? {}, threadId = p.threadId as string | undefined;
+    if (message.id !== undefined && !message.method) {
+      for (const active of this.active.values()) active.retry?.awaiting.delete(message.id);
+    }
     if (!p.ephemeral && (message.method === "thread/resume" || message.method === "thread/fork" ||
       (message.method === "thread/start" && p.threadSource === "user"))) {
       for (const job of this.reviewJobs.values()) job.abort(new Error("用户切换了会话"));
       for (const active of this.active.values()) if (active.retry) active.retry.blocked = true;
+      for (const [id, job] of this.pending) if (job.capacityRetry) this.cancel(id, "用户切换了会话，已停止容量重试");
     }
     if (message.method === "thread/list") {
       const provider = this.config.auth === "mock" ? "fenjue_native_fixture" : "openai";
@@ -158,7 +170,15 @@ export class NativeSession {
       }
     }
     const state = threadId ? this.states.get(threadId) : undefined;
+    if (state && threadId && message.method === "turn/start" && this.foreground !== threadId) {
+      for (const [id, job] of this.pending) if (id !== threadId && job.capacityRetry) this.cancel(id, "用户切换了会话，已停止容量重试");
+      for (const [id, active] of this.active) if (id !== threadId && active.retry) active.retry.blocked = true;
+    }
     if (threadId && ["turn/start", "turn/interrupt", "thread/settings/update", "thread/rollback", "thread/archive"].includes(message.method ?? "")) {
+      const cancelledRetry = this.pending.get(threadId)?.capacityRetry && this.cancel(threadId, "用户操作已停止容量重试");
+      if (cancelledRetry && message.method === "turn/interrupt") {
+        this.sendClient({ id: message.id, result: {} }); return;
+      }
       const retry = this.active.get(threadId)?.retry;
       if (retry) retry.blocked = true;
       const review = this.reviewJobs.get(threadId);
@@ -239,9 +259,11 @@ export class NativeSession {
     const state = threadId ? this.states.get(threadId) : undefined;
     const active = threadId ? this.active.get(threadId) : undefined;
     if (active?.retry && (!p.turnId || p.turnId === active.turnId) && message.method?.startsWith("item/") && p.item?.type !== "userMessage") {
-      // Starts, deltas and approval requests arrive before completed items.
-      // Once any output/work begins, replaying the input is no longer safe.
-      active.retry.blocked = true;
+      // Once work begins, recovery must continue from history instead of replaying input.
+      active.retry.worked = true;
+      if (message.method.includes("requestApproval") || message.method === "item/tool/requestUserInput") {
+        active.retry.awaiting.add(message.id ?? message.method);
+      }
     }
     if (threadId && state) {
       if (message.method === "turn/started" && typeof p.turn?.id === "string") {
@@ -332,6 +354,16 @@ export class NativeSession {
       if (pending && pending.message.id === request.id) {
         if (!response.error && response.result?.turn?.id) this.accept(threadId, response.result.turn.id);
         else if (response.error) {
+          if (pending.capacityRetry && !pending.capacityRetry.blocked && this.config.native?.capacityRetry === "until-available" && isCapacityError(response.error.data)) {
+            this.pending.delete(threadId);
+            const previous = pending.capacityRetry;
+            if (this.retryCapacity(threadId, { id: previous.parentTurnId, status: "failed", error: response.error.data, items: [] }, {
+              turnId: previous.parentTurnId, route: pending.state!.route, automatic: pending.automatic,
+              retry: { parameters: pending.message.params, blocked: false, worked: false, awaiting: new Set(),
+                attempt: previous.attempt, previousError: previous.previousError, requestedRoute: previous.requestedRoute,
+                selectionReason: String(pending.decision?.selectionReason ?? "unknown") },
+            })) return;
+          }
           if (pending.state) this.records.discardExecution(threadId, pending.state.taskId);
           if (pending.capacityRetry) this.emit("retry-failed", threadId, { status: "failed", turnId: pending.capacityRetry.parentTurnId, route: pending.state?.route,
             error: { message: response.error.message, codexErrorInfo: response.error.data?.codexErrorInfo },
@@ -345,6 +377,11 @@ export class NativeSession {
       if (state && (p.model != null || p.effort != null)) {
         const fromRoute = { ...state.route }, fromMode = state.mode;
         state.mode = "manual"; state.route = effective(p, state.route);
+        const pending = this.pending.get(threadId);
+        if (pending?.state && pending.sent) {
+          pending.submittedRoute ??= { ...pending.state.route };
+          pending.state.mode = "manual"; pending.state.route = { ...state.route };
+        }
         this.records.save(threadId, state); this.emit("mode", threadId, { reason: "native-model-picker", fromRoute, toRoute: { ...state.route }, fromMode, toMode: state.mode, turnId: state.activeTurnId ?? state.lastTurnId });
       }
     } else if (request.method === "thread/rollback" && threadId && !response.error) {
@@ -357,11 +394,15 @@ export class NativeSession {
     if (!job?.sent || !job.state) return;
     this.pending.delete(threadId);
     const state = job.state;
+    const route = job.submittedRoute ?? state.route;
     if (this.states.get(threadId)?.taskId !== state.taskId) this.historyNeeded.delete(threadId);
     state.activeTurnId = turnId;
     this.states.set(threadId, state);
-    this.active.set(threadId, { turnId, route: { ...state.route },
-      ...(!job.automatic && state.mode === "auto" ? { retry: { parameters: structuredClone(job.message.params), blocked: false,
+    this.active.set(threadId, { turnId, route: { ...route }, automatic: job.automatic,
+      ...((!job.automatic || this.config.native?.capacityRetry === "until-available") && state.mode === "auto" ? { retry: { parameters: structuredClone(job.message.params), blocked: job.capacityRetry?.blocked ?? false,
+        worked: false, attempt: job.capacityRetry?.attempt ?? 0, awaiting: new Set<string | number>(),
+        requestedRoute: job.capacityRetry?.requestedRoute ?? { ...route },
+        selectionReason: String(job.decision?.selectionReason ?? job.decision?.reason ?? "unknown"),
         ...(job.capacityRetry ? { previousError: job.capacityRetry.previousError } : {}) } } : {}) });
     this.records.save(threadId, state);
     if (job.capacityRetry) this.records.retryExecution(threadId, state.taskId, job.capacityRetry.parentTurnId, turnId);
@@ -377,24 +418,43 @@ export class NativeSession {
   }
   private retryCapacity(threadId: string, turn: any, active: ActiveTurn): boolean {
     const attempt = active.retry, state = this.states.get(threadId);
-    if (!attempt || attempt.blocked || attempt.previousError || !state || this.closed || state.mode !== "auto" ||
+    const persistent = this.config.native?.capacityRetry === "until-available";
+    if (!attempt || attempt.blocked || attempt.awaiting.size || (!persistent && attempt.previousError) || !state || this.closed || state.mode !== "auto" ||
         this.foreground !== threadId || turn.status !== "failed" || !isCapacityError(turn.error) ||
-        (turn.items ?? []).some((item: any) => item.type !== "userMessage") || this.active.has(threadId) || this.pending.has(threadId)) return false;
+        this.active.has(threadId) || this.pending.has(threadId)) return false;
+    const worked = attempt.worked || (turn.items ?? []).some((item: any) => item.type !== "userMessage");
+    if (worked && !persistent) return false;
     const main = mainRoute(this.config).model, expert = this.config.native?.expertModel;
+    const fallback = this.config.native?.capacityFallback ?? "off";
+    if (fallback === "off" || (!persistent && fallback === "main-to-expert" && active.route.model !== main)) return false;
     if (!expert || expert === main || ![main, expert].includes(active.route.model) || !["low", "medium", "high"].includes(active.route.effort)) return false;
-    const route = { model: active.route.model === main ? expert : main,
+    const route = { model: active.route.model === main || fallback === "main-to-expert" ? expert : main,
       effort: active.route.effort === "low" ? "medium" : active.route.effort };
     const params = structuredClone(attempt.parameters); applyRoute(params, route);
+    if (persistent) params.input = [{ type: "text", text: "上一轮因模型容量不足中断。请从当前会话中已完成的进度继续处理用户任务；先核对已有结果，不要重复已经完成的命令或外部操作。" }];
     const message: NativeMessage = { id: "fenjue:" + randomUUID(), method: "turn/start", params };
     const retryState = structuredClone(state); retryState.route = route;
     const input = inputText(params.input);
-    this.pending.set(threadId, { message, controller: new AbortController(), sent: true, state: retryState, ...input,
-      capacityRetry: { previousError: turn.error, parentTurnId: turn.id },
-      decision: { reason: "capacity-retry", parentTurnId: turn.id, attempt: 1, policy: this.policy } });
-    this.requests.set(message.id!, message);
+    const number = attempt.attempt + 1, waitMs = number === 1 ? 0 : Math.min(30_000, 1000 * 2 ** Math.min(number - 2, 5));
+    const job: Pending = { message, controller: new AbortController(), sent: false, state: retryState, automatic: active.automatic, ...input,
+      capacityRetry: { previousError: attempt.previousError ?? turn.error, parentTurnId: turn.id, attempt: number, requestedRoute: attempt.requestedRoute },
+      decision: { reason: "capacity-retry", requestedRoute: attempt.requestedRoute, suggestion: state.suggestion,
+        selectionReason: attempt.selectionReason, fallbackPolicy: fallback, retryPolicy: persistent ? "until-available" : "once",
+        parentTurnId: turn.id, attempt: number, policy: this.policy } };
+    this.pending.set(threadId, job);
     this.records.retryExecution(threadId, state.taskId, turn.id);
-    this.emit("retrying", threadId, { turnId: turn.id, route, fromModel: active.route.model, toModel: route.model, attempt: 1 });
-    this.sendServer(message);
+    this.emit("retrying", threadId, { turnId: turn.id, route, requestedRoute: attempt.requestedRoute,
+      selectionReason: attempt.selectionReason, fallbackPolicy: fallback, retryPolicy: persistent ? "until-available" : "once",
+      fromModel: active.route.model, toModel: route.model, attempt: number, waitMs });
+    const send = () => {
+      if (job.controller.signal.aborted || this.closed) return;
+      job.sent = true; this.requests.set(message.id!, message); this.sendServer(message);
+    };
+    if (!waitMs) send();
+    else {
+      const timer = setTimeout(send, waitMs);
+      job.controller.signal.addEventListener("abort", () => clearTimeout(timer), { once: true });
+    }
     return true;
   }
   private inspect(threadId: string, method = "thread/read", params?: Record<string, unknown>, signal?: AbortSignal,
@@ -576,7 +636,7 @@ export class NativeSession {
           classification = await classify(context, "initial");
           demandView = context; signal.throwIfAborted();
           newTask ||= confidentNewTask(classification, s.minConfidence);
-          if (newTask && !explicitNew && previous.task.messages.length) {
+          if (newTask && !explicitNew && previous.task.messages.length && this.config.native?.classifierContext !== "latest-message") {
             boundaryClassification = classification;
             demandView = prepare({ ...view, currentTask: { messages: [], evidence: [], incomplete: false } }, "new-task");
             classification = await classify(demandView, "new-task");
@@ -628,7 +688,7 @@ export class NativeSession {
       }).finally(() => this.demandJobs.delete(controller));
   }
   private classifierView(view: TaskView): TaskView {
-    return classifierContext(view, this.config.semantic!, this.config.native?.expertPolicy === "constraints");
+    return classifierContext(view, this.config.semantic!, this.config.native?.expertPolicy === "constraints", this.config.native?.classifierContext);
   }
   close(): void {
     if (this.closed) return;

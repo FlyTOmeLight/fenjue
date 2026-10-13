@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { resolve } from "node:path";
 import { readFile } from "node:fs/promises";
-import { parseEnv } from "node:util";
+import { parseEnv, promisify } from "node:util";
+import { execFile } from "node:child_process";
 import { readConfig } from "./config.js";
 import { launch } from "./launcher.js";
 import { latestLog, showStatus } from "./status.js";
@@ -12,8 +13,10 @@ import { nativeControl } from "./native-control.js";
 import { tasksCommand } from "./execution-capture.js";
 import { feedbackCommand } from "./feedback.js";
 import { judgeCommand } from "./judge.js";
+import { mainRoute, nativePolicy } from "./native-policy.js";
 
-const help = `焚诀 0.2：Codex 任务路由
+const { version } = JSON.parse(await readFile(new URL("../../package.json", import.meta.url), "utf8"));
+const help = `焚诀 ${version}：Codex 任务路由
 用法：
   fenjue codex [--config 文件] [--env-file 文件] [--log-dir 目录] [--no-bar] [--no-title] -- [Codex 参数]
   fenjue codex-native [同上参数] -- [交互 Codex 参数]
@@ -33,6 +36,7 @@ const help = `焚诀 0.2：Codex 任务路由
   fenjue feedback add --task ID --outcome accepted|rework|blocked --reviewer 姓名 --reason 具体原因 [--turn ID] [--cause 原因类型] [--evidence 证据]
   fenjue feedback report [--days 7] [--dir 原生日志目录] [--capture-dir 采集目录] [--out 周报.md或.json]
   fenjue --help
+  fenjue --version [--config 文件]
 
 默认配置：./fenjue.config.json
 示例：
@@ -64,6 +68,40 @@ async function main(): Promise<number> {
   // Internal handoff applies only to this CLI, never to tools Codex may spawn.
   delete process.env.FENJUE_TMUX_SOCKET;
   const args = process.argv.slice(2);
+  if (args[0] === "--version" || args[0] === "-V") {
+    if (args.length !== 1 && (args.length !== 3 || args[1] !== "--config" || !args[2])) throw new Error("用法：fenjue --version [--config 文件]");
+    process.stdout.write(`fenjue ${version}\n`);
+    const executable = process.env.FENJUE_CODEX_BIN ?? "codex";
+    try {
+      const { stdout } = await promisify(execFile)(executable, ["--version"], { timeout: 5000 });
+      process.stdout.write(`${stdout.trim()}\n`);
+    } catch (error) {
+      throw new Error(`无法读取 Codex 版本（${executable}）：${(error as NodeJS.ErrnoException).code ?? "执行失败"}`);
+    }
+    if (args[2]) {
+      const config = await readConfig(resolve(args[2]));
+      const semantic = config.semantic;
+      if (!semantic || config.native === undefined) {
+        process.stdout.write(`路由（启动配置）：${semantic?.mode ?? "固定规则"} / Responses 入口\n`);
+      } else {
+        const native = config.native;
+        process.stdout.write([
+          `路由（启动配置）：${semantic.mode} / ${nativePolicy(config)}`,
+          `分类器：${semantic.model}；支持度阈值 ${semantic.minConfidence}；上下文 ${native.classifierContext ?? "task"}`,
+          `主模型：${mainRoute(config).model}；专家模型：${native.expertModel ?? "未配置"}`,
+          !native.expertModel ? "模型选择：仅使用主模型" : native.expertPolicy === "constraints" ? "模型选择：独立约束用主模型，耦合约束用专家" : "模型选择：局部/同项目多文件用主模型，跨独立系统用专家",
+          "思考强度：机械且可逆用 low；实施用 medium；诊断/架构/根因未知/敏感逻辑用 high",
+          "保留规则：支持度不足保留已有模型或档位；指代不清或缺少条件时不降档；首轮默认主模型 medium",
+          ...(native.rules?.length ? [`显式路线：${native.rules.map(rule => `${rule.prefix} → ${rule.model} / ${rule.effort}`).join("；")}`] : []),
+          `容量恢复：${native.capacityFallback ?? "off"} / ${native.capacityRetry ?? "once"}`,
+          `推理需求：${native.reasoningDemand ?? "关闭"}（影子建议不改变选档）`,
+          `专家审查：${native.review ? `${native.review.model} / ${native.review.effort}，每任务最多 ${native.review.maxReviewsPerTask} 次` : "关闭"}`,
+          "运行中手动切换以会话状态为准；配置改动需重启生效",
+        ].join("\n") + "\n");
+      }
+    }
+    return 0;
+  }
   if (!args.length || args[0] === "--help" || args[0] === "-h") { process.stdout.write(help); return 0; }
   const command = args.shift();
   if (command === "routing") {

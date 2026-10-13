@@ -4,7 +4,7 @@ Task-aware model and reasoning routing for the Codex CLI.
 
 Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型和思考强度。它保留原生工具、审批和会话恢复流程，并提供路由日志、合成任务评测与 Codex Judge 判分入口。
 
-**状态：实验性 [0.3.0](https://github.com/FlyTOmeLight/fenjue/releases/tag/v0.3.0)。** 当前提供源码安装，尚未发布 npm 包。模型名称是配置示例，是否可用由你的账号和 Codex 模型目录决定。合成任务结果见下文，日常质量与费用收益仍需实测。
+**状态：实验性 [0.3.1](https://github.com/FlyTOmeLight/fenjue/releases/tag/v0.3.1)。** 当前提供源码安装，尚未发布 npm 包。模型名称是配置示例，是否可用由你的账号和 Codex 模型目录决定。合成任务结果见下文，日常质量与费用收益仍需实测。
 
 ## 能做什么
 
@@ -23,13 +23,16 @@ Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型
 ```bash
 git clone https://github.com/FlyTOmeLight/fenjue.git
 cd fenjue
-git checkout v0.3.0
+git checkout v0.3.1
 npm ci --ignore-scripts
 npm run build
 npm start -- --help
+npm start -- --version
 ```
 
 Fenjue 不安装 Codex，也不提供模型账号。登录方式沿用本机 Codex。
+
+`npm start -- --version` 显示焚诀与 Codex 的版本；追加 `--config fenjue.config.json` 可查看该配置的路由模式、模型、选档与恢复策略。运行中 F8 或 `/model` 的手动覆盖以会话状态为准。
 
 ## 第一次启动：观察路由
 

@@ -298,6 +298,7 @@ try:
         supervisor.write_text(
             f'import {{ startTmuxSession }} from {json.dumps((ROOT / "dist/src/tmux.js").as_uri())};\n'
             'const session = await startTmuxSession([process.argv[2]]);\n'
+            'if (process.env.FENJUE_TEST_PAUSE_ATTACH) { await new Promise(r=>process.stdin.once("data",r)); process.stdin.pause(); }\n'
             'try { process.exitCode = await session.attach(); } finally { await session.close(); }\n')
         # Repeated immediate exits exercise the tmux startup/SIGCHLD race.
         for _attempt in range(10):
@@ -316,21 +317,39 @@ try:
             library = temp / "utempter-race.so"
             subprocess.check_call(["cc", "-shared", "-fPIC", "-o", str(library),
                                    str(ROOT / "scripts/fixtures/utempter-race.c")])
-            marker = temp / "utempter-marker"
             race = temp / "utempter-race.mjs"
             race.write_text('import {closeSync,writeFileSync} from "node:fs";\n'
                             'writeFileSync(process.env.FENJUE_TEST_STATE,JSON.stringify({socket:process.env.TMUX.split(",")[0]}));\n'
                             '[0,1,2].forEach(fd=>closeSync(fd)); setInterval(()=>{},1000);\n')
-            terminal = Terminal([str(supervisor), str(race)], {
-                **env, "LD_PRELOAD": str(library), "FENJUE_TEST_UTEMPTER_MARKER": str(marker),
-            })
-            try:
-                assert terminal.wait() == 143, "Lost SIGCHLD must recover the real pane signal exit status"
-                assert marker.exists() and "signal=0" in marker.read_text(), "utempter critical section was not exercised"
-                assert not Path(json.loads(state_file.read_text())["socket"]).exists(), "Recovery left a tmux server behind"
-                utempter_race_verified = True
-            finally:
-                terminal.close()
+            for late_attach in [False, True]:
+                marker = temp / f"utempter-marker-{late_attach}"
+                state_file.unlink(missing_ok=True)
+                terminal = Terminal([str(supervisor), str(race)], {
+                    **env, "LD_PRELOAD": str(library), "FENJUE_TEST_UTEMPTER_MARKER": str(marker),
+                    **({"FENJUE_TEST_PAUSE_ATTACH": "1"} if late_attach else {}),
+                })
+                try:
+                    if late_attach:
+                        def lost_exit_receipt():
+                            if not marker.exists():
+                                return False
+                            try:
+                                socket = json.loads(state_file.read_text())["socket"]
+                            except (FileNotFoundError, json.JSONDecodeError):
+                                return False
+                            return terminal.pane_format(socket, "#{pane_dead}:#{pane_dead_status}:#{pane_dead_signal}") == "1::"
+                        terminal.until(lost_exit_receipt, "dead pane without receipt before client attaches")
+                        terminal.send("\n")
+                    assert terminal.wait() == 143, "Lost SIGCHLD must recover the real pane signal exit status"
+                    assert marker.exists() and "signal=0" in marker.read_text(), "utempter critical section was not exercised"
+                    assert not Path(json.loads(state_file.read_text())["socket"]).exists(), "Recovery left a tmux server behind"
+                finally:
+                    try:
+                        if late_attach and not terminal.exited:
+                            terminal.send("\n")  # Release the gate if its precheck failed.
+                    finally:
+                        terminal.close()
+            utempter_race_verified = True
 
         terminal = Terminal(argv, env)
         try:

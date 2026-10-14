@@ -33,7 +33,8 @@ bind-key -n WheelUpPane if-shell -F -t = '#{||:#{pane_in_mode},#{mouse_any_flag}
 bind-key -n WheelDownPane send-keys -M
 set -g remain-on-exit on
 set-hook -g pane-died 'detach-client -s fenjue'
-set-hook -g client-attached 'if-shell -F "#{pane_dead}" "detach-client"'
+# PTY EOF can precede the exit receipt; wait for status before detaching.
+set-hook -g client-attached 'if-shell -F "#{&&:#{pane_dead},#{!=:#{pane_dead_status}#{pane_dead_signal},}}" "detach-client"'
 `;
 
 // Respect Codex's root options before deciding whether its first positional

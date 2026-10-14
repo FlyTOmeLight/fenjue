@@ -2,14 +2,14 @@
 
 ## v0.6.0
 
-日期：2026-10-15。新增 `desktop install` / `desktop uninstall`，自动生成包装器、注册当前用户的 Dock 接入及取消接入。修复 Linux tmux 启用 `utempter` 时的退出竞态：删除登录记录期间会暂时重置 `SIGCHLD` 处理，pane 已结束却未留下退出状态，外层客户端因此持续等待。现在只在 Linux 的私有 tmux 窗格已结束且退出状态、信号均缺失时，向该服务器补发 `SIGCHLD`，让 tmux 收取真实退出结果；客户端退出后停止检查。不重跑 Codex、不伪造退出码，也不放宽验收超时。
+日期：2026-10-15。新增 `desktop install` / `desktop uninstall`，自动生成包装器、注册当前用户的 Dock 接入及取消接入。修复 Linux tmux 启用 `utempter` 时的退出竞态：删除登录记录期间会暂时重置 `SIGCHLD` 处理，pane 已结束却未留下退出状态，外层客户端因此持续等待。现在只在 Linux 的私有 tmux 窗格已结束且退出状态、信号均缺失时，向该服务器补发 `SIGCHLD`，让 tmux 收取真实退出结果；客户端退出后停止检查；晚接入客户端也会等待真实退出回执后再脱离。不重跑 Codex、不伪造退出码，也不放宽验收超时。
 
 发布验证从仅包含公开跟踪文件的临时源码目录开始，重新执行锁文件安装。环境：macOS、Node.js 26.11.1、tmux 3.8、Codex CLI 0.162.1；桌面协议使用 ChatGPT 26.1007.71326 内置 Codex 0.162.0-alpha.17.2。
 
 | 检查 | 结果 |
 | --- | --- |
 | 缺陷红色复现 | GitHub x86_64 / tmux 3.4 的 pane_dead 为 1、退出状态及信号为空，客户端仍 attached；同一 Linux amd64、tmux 3.4 与 libevent，启用 utempter 后第 3 次复现，未启用时连续 50 次通过 |
-| 缺失退出回执恢复 | 原失败的 Linux tmux 3.4 + utempter 环境连续 100 次返回 143；确定性临界区故障注入 5/5 通过，并断言 marker 及服务器清理，旧实现同一注入稳定超时 |
+| 缺失退出回执恢复 | 原失败的 Linux tmux 3.4 + utempter 环境连续 100 次返回 143；确定性临界区故障注入通过，并覆盖正常及晚接入客户端，断言 marker、真实退出码及服务器清理，旧实现同一注入稳定超时 |
 | `npm ci --ignore-scripts` / `npm run check` / `npm test` | 干净源码安装、类型检查通过；247/247 测试通过，无跳过 |
 | `npm run verify:terminal` | macOS 13 项通过；Linux + utempter 另加确定性信号丢失回归；立即 SIGTERM 重复 10 次，保留取消、继续输入、早退错误可见、退出码及清理断言 |
 | `npm run verify:desktop` | 自动 Sol/low、Astra/high、手动 Sol/medium、恢复自动 Astra/high 四轮通过；分类器及模型均为本机模拟 |

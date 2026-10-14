@@ -14,13 +14,16 @@ import { tasksCommand } from "./execution-capture.js";
 import { feedbackCommand } from "./feedback.js";
 import { judgeCommand } from "./judge.js";
 import { mainRoute, nativePolicy } from "./native-policy.js";
-import { prepareDesktop } from "./desktop.js";
+import { installDesktop, prepareDesktop } from "./desktop.js";
+import { uninstallDesktopDock } from "./desktop-dock.js";
 
 const { version } = JSON.parse(await readFile(new URL("../../package.json", import.meta.url), "utf8"));
 const help = `焚诀 ${version}：Codex 任务路由
 用法：
   fenjue codex [--config 文件] [--env-file 文件] [--log-dir 目录] [--no-bar] [--no-title] -- [Codex 参数]
   fenjue codex-native [同上参数] -- [交互 Codex 参数]
+  fenjue desktop install [--config 文件] --env-file 文件 [--log-dir 目录] [--app App路径]
+  fenjue desktop uninstall
   fenjue desktop [--config 文件] [--env-file 文件] [--log-dir 目录] [--app App路径]
   fenjue routing auto|manual|shadow --socket 本次启动显示的路径
   fenjue status [--watch] [--log 文件 | --log-dir 目录]
@@ -136,6 +139,15 @@ async function main(): Promise<number> {
     return 0;
   }
   if (command !== "codex" && command !== "codex-native" && command !== "desktop") throw new Error("未知命令，请运行 fenjue --help");
+  const desktopAction = command === "desktop" && (args[0] === "install" || args[0] === "uninstall") ? args.shift() : undefined;
+  if (desktopAction && process.platform !== "darwin") throw new Error("Dock 安装与卸载仅支持 macOS");
+  if (desktopAction === "uninstall") {
+    if (args.length) throw new Error("用法：fenjue desktop uninstall（无需配置或密钥）");
+    const result = await uninstallDesktopDock();
+    process.stdout.write(`[fenjue] 已取消 Dock 自动接入；完全退出 ChatGPT App 后从 Dock 重开生效。\n[fenjue] 配置、密钥、包装器和路由日志均保留。\n`);
+    if (result.preservedEnvironment) process.stdout.write("[fenjue] GUI 中其他 CODEX_CLI_PATH 已保留。\n");
+    return 0;
+  }
   let path = "fenjue.config.json", logDir: string | undefined, envFile: string | undefined;
   let appPath: string | undefined;
   let title = true, bar = true;
@@ -169,6 +181,12 @@ async function main(): Promise<number> {
     if (forwarded.length || !title || !bar) throw new Error("desktop 不接受 Codex 参数或 --no-bar/--no-title；App 会传入自己的启动参数");
     if (!config.semantic) throw new Error("桌面原生路由需要 semantic 分类配置");
     if (config.semantic.apiKeyEnv && !process.env[config.semantic.apiKeyEnv]) throw new Error(`缺少分类器密钥 ${config.semantic.apiKeyEnv}；请设置环境变量或使用 --env-file`);
+    if (desktopAction === "install" && config.semantic.apiKeyEnv && !envFile) throw new Error("Dock 启动不会继承终端中的分类器密钥，请使用 --env-file 指定密钥文件");
+    if (desktopAction === "install") {
+      const { agent } = await installDesktop({ configFile: path, envFile, appPath, logDir });
+      process.stdout.write(`[fenjue] 已安装 Dock 自动接入：${agent}\n[fenjue] 完全退出 ChatGPT App，再点原 Dock 图标即可启用；以后登录自动生效，无需终端窗口。\n[fenjue] 卸载：fenjue desktop uninstall\n`);
+      return 0;
+    }
     const desktop = await prepareDesktop({ configFile: path, envFile, appPath, logDir });
     process.stderr.write(`[fenjue] 桌面包装器：${desktop.launcher}\n[fenjue] 完全退出 ChatGPT App 后运行以下命令；无需独立网关终端。\n`);
     process.stdout.write(desktop.launchCommand + "\n");

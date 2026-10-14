@@ -1,6 +1,8 @@
-import { access, mkdir, writeFile } from "node:fs/promises";
+import { access, chmod, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { installDesktopDock, type DockSystem } from "./desktop-dock.js";
 
 export const shellQuote = (value: string) => "'" + value.replaceAll("'", "'\\''") + "'";
 
@@ -46,4 +48,23 @@ ${args.map(shellQuote).join(" ")} "$runtime_dir" "$@"
 . "$runtime_dir/launch.sh"
 `, { mode: 0o700 });
   return { launcher, launchCommand: `env -u CODEX_APP_SERVER_WS_URL -u CODEX_APP_SERVER_FORCE_CLI CODEX_CLI_PATH=${shellQuote(launcher)} ${shellQuote(appExecutable)}` };
+}
+
+// A failed installation must also restore the wrapper referenced by the old agent.
+export async function installDesktop(options: Parameters<typeof prepareDesktop>[0], os?: DockSystem) {
+  const launcher = join(resolve(options.logDir ?? ".fenjue/desktop"), "codex-desktop");
+  let previous: { contents: Buffer; mode: number } | undefined;
+  try { previous = { contents: await readFile(launcher), mode: (await stat(launcher)).mode }; }
+  catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error; }
+  try {
+    const desktop = await prepareDesktop(options);
+    const agent = await installDesktopDock(desktop.launcher, os);
+    return { ...desktop, agent };
+  } catch (error) {
+    if (previous) {
+      await writeFile(launcher, previous.contents);
+      await chmod(launcher, previous.mode);
+    } else await rm(launcher, { force: true });
+    throw error;
+  }
 }

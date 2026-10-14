@@ -39,13 +39,30 @@ Fenjue 不安装 Codex，也不提供模型账号。登录方式沿用本机 Cod
 
 ## Mac ChatGPT App 启动
 
-完成上面的源码安装与构建后，准备已登录的 App 和分类器密钥文件：
+Dock 安装与卸载命令需要 main 分支的最新源码，v0.5.1 不包含这两个子命令。完成上面的源码安装后，先更新并构建：
 
 ```bash
-npm start -- desktop --config examples/desktop.json --env-file /path/to/gateway.env
+git switch main
+git pull --ff-only
+npm ci --ignore-scripts
+npm run build
 ```
 
-命令会生成包装器。推荐按[桌面接入指南配置 Dock 启动](docs/desktop.md#推荐从原-dock-图标启动)：只需设置一次，以后直接点原 Dock 图标，就能在本地 Codex 聊天中自动选择模型与思考强度，无需双击 `.command` 或打开终端。也可用输出的 App 启动命令临时调试。示例默认启用 auto；密钥文件需包含 `AI_GATEWAY_API_KEY`，桌面入口无需 tmux。普通 ChatGPT 和 Dot 主聊天不走此路由。日志、手动选模、更新和取消接入方法见[完整指南](docs/desktop.md)。
+准备已登录的 App 和分类器密钥文件，一条命令安装：
+
+```bash
+npm start -- desktop install --config examples/desktop.json --env-file /path/to/gateway.env
+```
+
+命令自动生成包装器并安装当前用户的 Dock 接入。完全退出 App 后，再点原 Dock 图标，就能在本地 Codex 聊天中自动选择模型与思考强度，无需双击 `.command` 或打开终端。示例默认启用 auto；`--env-file` 指定的文件需包含 `AI_GATEWAY_API_KEY`，Dock 启动不会继承终端里的密钥变量。普通 ChatGPT 和 Dot 主聊天不走此路由。
+
+取消 Dock 接入时运行：
+
+```bash
+npm start -- desktop uninstall
+```
+
+卸载后完全退出并重新打开 App；配置、密钥和日志会保留。安装与卸载命令仅支持 macOS，详细用法、临时启动、更新和排查方法见[桌面接入指南](docs/desktop.md)。
 
 ## 第一次启动：观察路由
 

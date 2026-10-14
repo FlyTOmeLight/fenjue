@@ -9,67 +9,46 @@
 
 启动脚本先准备私有 FIFO，再用 `exec` 原位运行 App 内置 Codex，保留 App 分配的进程 ID 和直接父子关系；焚诀在单独的路由子进程中转发协议。这样可以保留 App 注入的桌面工具管道、插件配置与启动参数，也让工具继续按原来的进程身份接受 App 校验。`--version`、`debug models` 等非服务命令直接透传给内置 Codex。包装器只拦截 stdio `app-server`，不打开 TCP 监听端口。
 
-## 生成桌面入口
+## 推荐：一条命令安装 Dock 接入
 
-需要已经登录的 Mac ChatGPT App、Node.js 22.18+ 和分类器密钥。先完成仓库安装与构建，在仓库目录运行：
+需要 macOS、已经登录的 Mac ChatGPT App、Node.js 22.18+ 和分类器密钥。安装与卸载命令需要 main 分支的最新源码，v0.5.1 不包含这两个子命令。已有源码安装的用户先在仓库目录更新并构建：
+
+```bash
+git switch main
+git pull --ff-only
+npm ci --ignore-scripts
+npm run build
+```
+
+然后一条命令安装：
+
+```bash
+npm start -- desktop install --config examples/desktop.json --env-file /path/to/gateway.env
+```
+
+把 `/path/to/gateway.env` 换成自己的环境文件路径。示例使用 Vercel 上的 Jev 分类器，文件需包含 `AI_GATEWAY_API_KEY`。Dock 启动的 App 不继承终端里的密钥变量，因此安装时必须通过 `--env-file` 提供分类器所需密钥。包装器只保存文件路径，不写入密钥；示例启用自动模式，不配置容量重试、自动专家审查或额外会话采集。
+
+安装命令自动生成包装器、注册当前用户的 LaunchAgent，并为本次 GUI 登录设置 `CODEX_CLI_PATH`。默认包装器位于仓库的 `.fenjue/desktop/codex-desktop`，登录任务位于 `~/Library/LaunchAgents/io.github.flytomelight.fenjue.desktop-env.plist`，无需手工复制配置或使用 Python。
+
+等待 App 正在执行的任务结束，使用 `⌘Q` 完全退出 ChatGPT App，再点原 Dock 图标打开。在本地 Codex 聊天发起任务即可。安装命令不会退出或重启 App；已运行的 App 不会自动获得新环境变量。以后直接点原 Dock 图标，无需 `.command` 或终端窗口。
+
+这个 LaunchAgent 只在用户登录时设置 GUI 启动环境中的 `CODEX_CLI_PATH`，不会自动启动 App，也没有常驻的路由服务。密钥仍由包装器从指定环境文件读取，plist 中只保存包装器路径。此方式作用于本地 Codex；普通 ChatGPT 和 Dot 主聊天不会进入焚诀路由。
+
+同一套接入可重复安装。若当前 `CODEX_CLI_PATH` 指向其他程序，安装会报错，避免覆盖已有接入。仓库、Node.js 和密钥文件需保留在生成入口时的位置。更新焚诀后先构建，再用原参数重新执行 `desktop install`，完全退出并重新打开 App；移动仓库、改变 `--log-dir` 或更换 Node.js 安装路径后也需重新安装。
+
+### 临时：从终端启动
+
+只生成包装器、不安装 Dock 接入时使用：
 
 ```bash
 npm start -- desktop --config examples/desktop.json --env-file /path/to/gateway.env
 ```
 
-示例使用 Vercel 上的 Jev 分类器，环境文件需包含 `AI_GATEWAY_API_KEY`。只读取配置所需的密钥变量，包装器中只保存文件路径，不写入密钥。示例启用自动模式，不配置容量重试、自动专家审查或额外会话采集。
-
-命令生成的包装器默认位于仓库的 `.fenjue/desktop/codex-desktop`。推荐按下面的方法配置一次，以后直接点原 Dock 图标即可启用焚诀，不用双击 `.command`，也不会打开终端窗口。
-
-### 推荐：从原 Dock 图标启动
-
-在生成包装器的同一个仓库目录执行以下命令。配置步骤需要 Python 3，用于安全生成 plist，支持仓库路径中含空格或中文。
-
-```bash
-python3 - <<'PYTHON'
-from pathlib import Path
-import plistlib
-
-launcher = Path(".fenjue/desktop/codex-desktop").resolve(strict=True)
-agent = Path.home() / "Library/LaunchAgents/io.github.flytomelight.fenjue.desktop-env.plist"
-agent.parent.mkdir(parents=True, exist_ok=True)
-agent.write_bytes(plistlib.dumps({
-    "Label": "io.github.flytomelight.fenjue.desktop-env",
-    "ProgramArguments": ["/bin/launchctl", "setenv", "CODEX_CLI_PATH", str(launcher)],
-    "RunAtLoad": True,
-    "LimitLoadToSessionType": "Aqua",
-}))
-agent.chmod(0o600)
-print(f"已生成 {agent}")
-PYTHON
-```
-
-如果使用了 `--log-dir`，先把上面 `Path(...)` 中的路径改成该目录下的 `codex-desktop`。然后注册当前用户的登录任务：
-
-```bash
-agent="$HOME/Library/LaunchAgents/io.github.flytomelight.fenjue.desktop-env.plist"
-service="gui/$(id -u)/io.github.flytomelight.fenjue.desktop-env"
-plutil -lint "$agent"
-if launchctl print "$service" >/dev/null 2>&1; then
-  launchctl bootout "$service"
-fi
-launchctl bootstrap "gui/$(id -u)" "$agent"
-launchctl kickstart -k "$service"
-```
-
-等待 App 正在执行的任务结束，使用 `⌘Q` 完全退出 ChatGPT App，再点原 Dock 图标打开。在本地 Codex 聊天发起任务即可；已运行的 App 不会自动获得新环境变量。首次配置完成后可以关闭终端。
-
-这个 LaunchAgent 只在用户登录时设置 GUI 启动环境中的 `CODEX_CLI_PATH`，不会自动启动 App，也没有常驻的路由服务。密钥仍由包装器从指定环境文件读取，plist 中只保存包装器路径。此方式作用于本地 Codex；普通 ChatGPT 和 Dot 主聊天不会进入焚诀路由。
-
-仓库、Node.js 和密钥文件需保留在生成入口时的位置。更新焚诀后先构建，再用原参数重新运行 `desktop` 生成包装器，完全退出并重新打开 App；如果移动仓库、改变 `--log-dir` 或更换 Node.js 安装路径，应重新生成包装器并更新上述登录任务。
-
-### 临时：从终端启动
-
-`desktop` 命令也会输出一条带 `CODEX_CLI_PATH` 的完整 App 启动命令。完全退出 App 后执行它，可临时启用焚诀；终端会显示 App 日志。此方式适合调试。
+命令会输出一条带 `CODEX_CLI_PATH` 的完整 App 启动命令。完全退出 App 后执行它，可临时启用焚诀；终端会显示 App 日志。此方式适合调试。
 
 两种方式都不修改 App 包或 `~/.codex/config.toml`。包装器随 App 的本地后端连接启动和停止。云端或 SSH 主机不在此入口的验证范围内。
 
-默认 App 路径为 `/Applications/ChatGPT.app`。其他安装位置使用 `--app /path/to/ChatGPT.app`；调试其他 Codex 后端时使用 `FENJUE_CODEX_BIN`。桌面命令不接受 `--` 后的 CLI 操作或配置覆盖；参数由 App 提供。重新运行 desktop 命令会更新所选日志目录中的包装器，下次启动后端时生效。
+默认 App 路径为 `/Applications/ChatGPT.app`。其他安装位置使用 `--app /path/to/ChatGPT.app`；调试其他 Codex 后端时使用 `FENJUE_CODEX_BIN`。桌面命令不接受 `--` 后的 CLI 操作或配置覆盖；参数由 App 提供。重新生成包装器后，下次启动后端时生效。
 
 ## 确认路由与手动选择
 
@@ -99,15 +78,15 @@ npm start -- routing auto --socket /path/from/desktop-PID.json
 
 `[new]` 只标识新任务，不指定模型。检查日志中 `accepted` 事件的 `reason` 应为 `classified`，模型由分类结果决定。不要依赖模型在回复里自报的名称；App 的选择器是否跟随路由更新，也要在界面中确认。
 
-## 停止与恢复
+## 一条命令卸载 Dock 接入
 
-如果配置了 Dock 自动接入，执行以下命令取消：
+在仓库目录执行：
 
 ```bash
-launchctl bootout "gui/$(id -u)/io.github.flytomelight.fenjue.desktop-env"
-launchctl unsetenv CODEX_CLI_PATH
-rm "$HOME/Library/LaunchAgents/io.github.flytomelight.fenjue.desktop-env.plist"
+npm start -- desktop uninstall
 ```
+
+命令移除焚诀的用户 LaunchAgent，并清除它设置的 GUI 启动环境变量；若 `CODEX_CLI_PATH` 已指向其他程序，则保留该值。卸载保留配置、密钥文件、包装器、日志和任务状态，不要求 App、配置或密钥文件仍然存在。
 
 然后完全退出 App，再从 Dock 打开，即恢复原来的连接方式。只使用临时终端启动方式时，退出 App 后从 Dock 打开即可恢复。
 
@@ -126,7 +105,7 @@ launchctl print "gui/$(id -u)/io.github.flytomelight.fenjue.desktop-env"
 
 直接从终端运行 App 可执行文件时，终端会显示 App 的运行日志。一般的信息日志不代表错误，但连续出现 `dynamic_app_tools_peer_rejected`、`missing-code-signing-identity` 或 `Codex app tools pipe closed`，表示桌面工具连接失败，不能只通过重定向日志处理。
 
-v0.5.0 的旧包装器把 Node 路由进程放在内置后端的父进程位置，自动选模可用，但会触发桌面工具的进程身份拒绝。修正后的启动器让内置 Codex 与 App 保持直接父子关系，路由进程不再成为桌面工具的祖先。更新代码并构建后，重新运行 `desktop` 命令生成包装器，再完全退出 App 并使用新入口启动；只重新构建不会更换已经运行的进程。
+v0.5.0 的旧包装器把 Node 路由进程放在内置后端的父进程位置，自动选模可用，但会触发桌面工具的进程身份拒绝。修正后的启动器让内置 Codex 与 App 保持直接父子关系，路由进程不再成为桌面工具的祖先。更新代码并构建后，重新运行 `desktop install` 更新 Dock 接入，再完全退出 App 并使用新入口启动；只重新构建不会更换已经运行的进程。
 
 验收必须同时检查：两条不同复杂度消息均完成且自动选择不同路线；至少一个 `codex_app` 桌面工具实际调用成功；新启动后的 App 日志中没有上述签名拒绝。模型回复或模拟测试通过均不能代替桌面工具验收。
 

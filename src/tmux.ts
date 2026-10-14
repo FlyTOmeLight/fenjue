@@ -94,6 +94,9 @@ export async function startTmuxSession(argv: string[]) {
     await writeFile(entry, JSON.stringify(argv), { mode: 0o600 });
     await command(["-f", configPath, "new-session", "-d", "-s", "fenjue", "-x", String(process.stdout.columns || 100),
       "-y", String(process.stdout.rows || 30), "--", process.execPath, fileURLToPath(new URL("./tmux-entry.js", import.meta.url)), entry]);
+    // A very short-lived pane can exit during tmux's utmp update and leave
+    // SIGCHLD unprocessed. Release user code only after new-session returns.
+    await command(["wait-for", "-S", "fenjue-pane-ready"]);
     return {
       socket,
       async attach(): Promise<number> {

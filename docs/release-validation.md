@@ -1,5 +1,28 @@
 # 发布验证
 
+## v0.6.0
+
+日期：2026-10-15。新增 `desktop install` / `desktop uninstall`，自动生成包装器、注册当前用户的 Dock 接入及取消接入。修复 Linux tmux 启用 `utempter` 时的快速退出竞态：pane 已结束，但 tmux 尚未收取退出状态，外层客户端持续等待。现在由 `tmux-entry` 等待 `wait-for` 启动信号，`new-session` 返回后才放行实际命令；不增加固定延时、不重试退出，也不放宽验收超时。
+
+发布验证从仅包含公开跟踪文件的临时源码目录开始，重新执行锁文件安装。环境：macOS、Node.js 26.11.1、tmux 3.8、Codex CLI 0.162.1；桌面协议使用 ChatGPT 26.1007.71326 内置 Codex 0.162.0-alpha.17.2。
+
+| 检查 | 结果 |
+| --- | --- |
+| 缺陷红色复现 | GitHub x86_64 / tmux 3.4 的 pane_dead 为 1、退出状态及信号为空，客户端仍 attached；同一 Linux amd64、tmux 3.4 与 libevent，启用 utempter 后第 3 次复现，未启用时连续 50 次通过 |
+| 启动屏障回归 | 原失败环境的系统 tmux 与 tmux 3.4 + utempter 各 10 次立即 SIGTERM 均返回 143；正式终端验收也重复该场景 10 次 |
+| `npm ci --ignore-scripts` / `npm run check` / `npm test` | 干净源码安装、类型检查通过；247/247 测试通过，无跳过 |
+| `npm run verify:terminal` | 13 项通过，包括取消、继续输入、早退错误可见、信号退出码及清理；真实模型调用为零 |
+| `npm run verify:desktop` | 自动 Sol/low、Astra/high、手动 Sol/medium、恢复自动 Astra/high 四轮通过；分类器及模型均为本机模拟 |
+| `npm run verify:codex` / `npm run verify:native` | 实际 Codex 对本机模拟上游通过，原生跨模型、工具续接、审批、中断、恢复和压缩通过 |
+| `npm run verify:native:terminal` / `npm run verify:native:router` | 实际原生终端、路由、底栏及交互通过 |
+| `npm run verify:native:review` | 专家只读边界与自动修正通过 |
+| `npm run verify:native:capacity` | 单次容量失败恢复通过；`--persistent` 连续重试及 `--persistent --terminal` 的真实终端显示和后续输入通过 |
+| `--help` / `--version` | 显示安装与卸载子命令，版本为 fenjue 0.6.0 / Codex 0.162.1 |
+| 离线分类评测 / 任务套件 dry-run | 3/3 声明路线符合，六任务起始验收通过预检 |
+| Dock 命令实际验收 | 本次功能实现时已在 macOS 验证安装、重复安装、卸载、重复卸载及重新安装，完成后恢复原登录任务；支持路径特殊字符、冲突保护和失败恢复包装器/登录任务/GUI 环境 |
+
+本轮发布检查没有新增远程模型调用。此前真实 App 中的自动切换、桌面工具与原 Dock 图标启动证据见 [桌面接入](desktop.md#修复版桌面工具验收)；本轮未再次操作 App 界面，也未把模拟模型回复当成真实质量评测。临时失败诊断已移除，CI 保留 tmux 版本及架构输出。远端 main 与 tag 的 Node 22 / 24 / 26 检查以仓库 [Actions](https://github.com/FlyTOmeLight/fenjue/actions) 为准。
+
 ## v0.5.1
 
 日期：2026-10-15。修复 v0.5.0 桌面启动器的进程祖先链：启动脚本通过 `exec` 原位运行内置 Codex，路由进程转为其子进程，通过私有 FIFO 转发原生协议；保留原始参数、环境、签名和 App 的校验。普通非服务命令同样原位执行。

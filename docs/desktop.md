@@ -11,11 +11,11 @@
 
 ## 推荐：一条命令安装 Dock 接入
 
-需要 macOS、已经登录的 Mac ChatGPT App、Node.js 22.18+ 和分类器密钥。安装与卸载命令需要 main 分支的最新源码，v0.5.1 不包含这两个子命令。已有源码安装的用户先在仓库目录更新并构建：
+需要 macOS、已经登录的 Mac ChatGPT App、Node.js 22.18+ 和分类器密钥。首次使用先按 [README](../README.md#安装) 获取源码；已有源码安装的用户在仓库目录更新到 v0.6.0 并构建：
 
 ```bash
-git switch main
-git pull --ff-only
+git fetch --tags origin
+git checkout v0.6.0
 npm ci --ignore-scripts
 npm run build
 ```

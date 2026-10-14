@@ -6,7 +6,7 @@ Mac ChatGPT App 可通过实验性的原生 App Server 包装器接入，见 [�
 
 Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型和思考强度。它保留原生工具、审批和会话恢复流程，并提供路由日志、合成任务评测与 Codex Judge 判分入口。
 
-**状态：实验性 [0.5.1](https://github.com/FlyTOmeLight/fenjue/releases/tag/v0.5.1)。** 当前提供源码安装，尚未发布 npm 包。模型名称是配置示例，是否可用由你的账号和 Codex 模型目录决定。合成任务结果见下文，日常质量与费用收益仍需实测。
+**状态：实验性 [0.6.0](https://github.com/FlyTOmeLight/fenjue/releases/tag/v0.6.0)。** 当前提供源码安装，尚未发布 npm 包。模型名称是配置示例，是否可用由你的账号和 Codex 模型目录决定。合成任务结果见下文，日常质量与费用收益仍需实测。
 
 ## 能做什么
 
@@ -26,7 +26,7 @@ Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型
 ```bash
 git clone https://github.com/FlyTOmeLight/fenjue.git
 cd fenjue
-git checkout v0.5.1
+git checkout v0.6.0
 npm ci --ignore-scripts
 npm run build
 npm start -- --help
@@ -39,16 +39,7 @@ Fenjue 不安装 Codex，也不提供模型账号。登录方式沿用本机 Cod
 
 ## Mac ChatGPT App 启动
 
-Dock 安装与卸载命令需要 main 分支的最新源码，v0.5.1 不包含这两个子命令。完成上面的源码安装后，先更新并构建：
-
-```bash
-git switch main
-git pull --ff-only
-npm ci --ignore-scripts
-npm run build
-```
-
-准备已登录的 App 和分类器密钥文件，一条命令安装：
+完成上面的 v0.6.0 源码安装后，准备已登录的 App 和分类器密钥文件，一条命令安装：
 
 ```bash
 npm start -- desktop install --config examples/desktop.json --env-file /path/to/gateway.env

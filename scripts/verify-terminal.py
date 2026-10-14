@@ -196,7 +196,7 @@ class Terminal:
         self.send("\x1b")
         self.until(lambda: self.pane_format(socket, "#{pane_in_mode}") == "0", "Escape returns to live input")
 
-    def wait(self, socket_file=None):
+    def wait(self):
         result = None
 
         def exited():
@@ -208,22 +208,7 @@ class Terminal:
                 return True
             return False
 
-        try:
-            self.until(exited, "wrapper exit")
-        except AssertionError:
-            if socket_file is not None and socket_file.exists():
-                socket = socket_file.read_text()
-                for command in [
-                    ["tmux", "-S", socket, "list-panes", "-a", "-F", "#{pane_id}:#{pane_pid}:#{pane_dead}:#{pane_dead_status}:#{pane_dead_signal}:#{pane_current_command}"],
-                    ["tmux", "-S", socket, "list-clients", "-F", "#{client_pid}:#{client_session}:#{client_flags}"],
-                    ["ps", "-axo", "pid,ppid,stat,command"],
-                ]:
-                    diagnostic = subprocess.run(command, text=True, capture_output=True, timeout=3)
-                    output = diagnostic.stdout
-                    if command[0] == "ps":
-                        output = "\n".join(line for line in output.splitlines() if str(temp) in line or socket in line)
-                    print(f"Terminal timeout diagnostic ({command[0]}): {output} {diagnostic.stderr}", flush=True)
-            raise
+        self.until(exited, "wrapper exit")
         return result
 
     def close(self):
@@ -312,15 +297,13 @@ try:
         supervisor = temp / "signal-session.mjs"
         supervisor.write_text(
             f'import {{ startTmuxSession }} from {json.dumps((ROOT / "dist/src/tmux.js").as_uri())};\n'
-            'import {writeFileSync} from "node:fs";\n'
             'const session = await startTmuxSession([process.argv[2]]);\n'
-            'writeFileSync(process.argv[3], session.socket);\n'
             'try { process.exitCode = await session.attach(); } finally { await session.close(); }\n')
-        for attempt in range(10):
-            signal_socket = temp / f"signal-socket-{attempt}"
-            terminal = Terminal([str(supervisor), str(killed), str(signal_socket)], env)
+        # Repeated immediate exits exercise the tmux startup/SIGCHLD race.
+        for _attempt in range(10):
+            terminal = Terminal([str(supervisor), str(killed)], env)
             try:
-                actual = terminal.wait(signal_socket)
+                actual = terminal.wait()
                 assert actual == 143, f"Pane termination signal must preserve exit status: got {actual}; output={terminal.output[-2000:]!r}"
             finally:
                 terminal.close()

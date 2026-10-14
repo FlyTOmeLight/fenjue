@@ -2,7 +2,7 @@ import { access, mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const quote = (value: string) => "'" + value.replaceAll("'", "'\\''") + "'";
+export const shellQuote = (value: string) => "'" + value.replaceAll("'", "'\\''") + "'";
 
 // Only intercept the known stdio service invocation. CLI commands, app-server
 // subcommands and unrecognized future switches retain the original behavior.
@@ -23,8 +23,8 @@ export function desktopServerIndex(args: string[]): number {
   return command;
 }
 
-// The App must spawn the router so its per-process tool pipe and configuration
-// reach the real backend. A separately started server cannot inherit that state.
+// The launcher execs the backend in place; the router must not become an
+// ancestor of the App's signed desktop-tool processes.
 export async function prepareDesktop(options: {
   configFile: string; envFile?: string; appPath?: string; executable?: string; logDir?: string;
 }) {
@@ -35,8 +35,15 @@ export async function prepareDesktop(options: {
   const directory = resolve(options.logDir ?? ".fenjue/desktop");
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const launcher = join(directory, "codex-desktop");
-  const args = [process.execPath, fileURLToPath(new URL("./desktop-proxy.js", import.meta.url)), executable,
+  const args = [process.execPath, fileURLToPath(new URL("./desktop-proxy.js", import.meta.url)), "prepare", executable,
     resolve(options.configFile), options.envFile ? resolve(options.envFile) : "", directory, "--"];
-  await writeFile(launcher, `#!/bin/sh\nexec ${args.map(quote).join(" ")} "$@"\n`, { mode: 0o700 });
-  return { launcher, launchCommand: `env -u CODEX_APP_SERVER_WS_URL -u CODEX_APP_SERVER_FORCE_CLI CODEX_CLI_PATH=${quote(launcher)} ${quote(appExecutable)}` };
+  await writeFile(launcher, `#!/bin/sh
+set -eu
+umask 077
+runtime_dir=$(mktemp -d "\${TMPDIR:-/tmp}/fenjue-desktop.XXXXXX")
+trap 'rm -rf "$runtime_dir"' EXIT
+${args.map(shellQuote).join(" ")} "$runtime_dir" "$@"
+. "$runtime_dir/launch.sh"
+`, { mode: 0o700 });
+  return { launcher, launchCommand: `env -u CODEX_APP_SERVER_WS_URL -u CODEX_APP_SERVER_FORCE_CLI CODEX_CLI_PATH=${shellQuote(launcher)} ${shellQuote(appExecutable)}` };
 }

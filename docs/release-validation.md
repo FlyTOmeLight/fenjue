@@ -1,5 +1,22 @@
 # 发布验证
 
+## v0.5.1
+
+日期：2026-10-15。修复 v0.5.0 桌面启动器的进程祖先链：启动脚本通过 `exec` 原位运行内置 Codex，路由进程转为其子进程，通过私有 FIFO 转发原生协议；保留原始参数、环境、签名和 App 的校验。普通非服务命令同样原位执行。
+
+| 检查 | 结果 |
+| --- | --- |
+| 旧版进程回归 | 服务与非服务命令的 PID/PPID 断言均失败，证明旧版插入了 Node 祖先 |
+| `npm run check` / `npm test` | 通过，239/239，无跳过 |
+| 新增启动器回归 | 后端保留原 PID/PPID，参数与桌面管道透传，EOF / SIGTERM 后 sidecar、FIFO、socket 和控制文件清理通过 |
+| `npm run verify:desktop` | 内置 Codex 四轮本机模拟通过，分类器 3 次、真实模型调用为零 |
+| 原生协议 / 终端回归 | 12 轮原生与 13 项终端验收通过，均为本机模拟 |
+| 修复版真实协议双轮 | Sol/low → Astra/high，均返回最终回答并完成 |
+| 修复版 App 重启后 | 内置后端直接由 App 启动，路由处于子进程；自动分类选择 Sol/medium，`codex_app.list_artifacts` 实际调用完成且无工具错误 |
+| 签名与工具错误 | 新启动日志中 peer_rejected、missing-code-signing-identity、tools pipe closed、MCP discovery failed 均为零 |
+
+桌面工具调用通过正常工具接口完成，未使用 Computer Use 控制 App、连接私有工具管道或改变签名校验。打开本地文件的工具请求返回 `queued`，因此未宣称文件已显示。实际验收覆盖桌面工具服务恢复，不表示全部工具逐项通过。原始日志、会话 ID、个人路径和密钥文件留在本地。
+
 ## v0.5.0
 
 日期：2026-10-15。在 macOS、Node.js 26.11.1 环境中，仅复制公开源码到干净临时目录，从锁文件重新安装依赖，不复制个人配置、会话、已有 node_modules 或 dist。桌面后端使用 ChatGPT 26.1007.71326 内置 Codex 0.162.0-alpha.17.2。

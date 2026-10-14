@@ -10,7 +10,7 @@
 
 原生入口不支持 `--profile`、`--oss`、自选 `--remote` 和 `--worktree`。原生 remote resume 不支持通过 CLI 参数覆盖既有权限，恢复时保留原会话权限。
 
-`desktop` 复用原生路由，生成由 Mac ChatGPT App 启动的 stdio 包装器，保留 App 的参数与环境；不启动 TUI 或 tmux。已在 ChatGPT 26.1007.71326 / 内置 Codex 0.162.0-alpha.17.2 的同一聊天中实测 Sol/low 与 Astra/high 自动切换，两轮均完成。桌面入口、版本范围与 GUI 验证边界见 [桌面接入](desktop.md)。
+`desktop` 复用原生路由，生成由 Mac ChatGPT App 启动的 stdio 包装器，保留 App 的参数与环境；不启动 TUI 或 tmux。v0.5.1 修复了 Node 包装进程成为后端祖先时触发的桌面工具签名拒绝。在 ChatGPT 26.1007.71326 / 内置 Codex 0.162.0-alpha.17.2 上，真实协议双轮 Sol/low → Astra/high 均完成；修复版 App 重启后自动分类正常，实际 codex_app 工具调用成功，签名拒绝日志为零。桌面入口、版本范围与 GUI 验证边界见 [桌面接入](desktop.md)。
 
 ## 检查入口
 

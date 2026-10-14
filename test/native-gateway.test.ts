@@ -9,7 +9,7 @@ import { startNativeGateway } from "../src/native-gateway.js";
 import { NativeRecords } from "../src/native-records.js";
 import { semanticConfig } from "./fixtures.js";
 
-for (const desktop of [false, true]) test(`${desktop ? "desktop" : "default"} gateway preserves backend arguments and environment, accepts resume, and rejects simultaneous clients`, { timeout: 5000 }, async t => {
+test("gateway preserves backend arguments and environment, accepts resume, and rejects simultaneous clients", { timeout: 5000 }, async t => {
   const root = await mkdtemp(join(tmpdir(), "fenjue-gateway-test-"));
   const executable = join(root, "backend.mjs"), socket = join(root, "app.sock");
   await writeFile(executable, `#!/usr/bin/env node
@@ -26,9 +26,8 @@ process.on('SIGTERM', () => setTimeout(() => process.exit(0), 150));
   await chmod(executable, 0o700);
   const failures: Error[] = [], clients: WebSocket[] = [];
   const serverArgs = ["--listen", "stdio://"];
-  const backendArgs = desktop ? ["-c", 'mcp_servers.app_tools.command="/test/App Tools"', "app-server", "--analytics-default-enabled"] : undefined;
   const toolsPipe = join(root, "app-tools.sock");
-  const gateway = await startNativeGateway({ socket, executable, serverArgs, backendArgs,
+  const gateway = await startNativeGateway({ socket, executable, serverArgs,
     env: { ...process.env, CODEX_APP_TOOLS_PIPE_PATH: toolsPipe },
     config: semanticConfig(), records: new NativeRecords(root, undefined, [], message => assert.fail(message)),
     onFailure: error => failures.push(error) });
@@ -49,7 +48,7 @@ process.on('SIGTERM', () => setTimeout(() => process.exit(0), 150));
     return response;
   }
   const picker = await connect(), first = await request(picker);
-  assert.deepEqual(first.result.argv, backendArgs ?? ["app-server", ...serverArgs], "preserve App arguments including ordering and spaces");
+  assert.deepEqual(first.result.argv, ["app-server", ...serverArgs], "preserve App arguments including ordering and spaces");
   assert.equal(first.result.toolsPipe, toolsPipe, "preserve the App tool pipe environment");
   const duplicate = await connect();
   const [code, reason] = await once(duplicate, "close");

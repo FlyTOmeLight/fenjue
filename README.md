@@ -6,7 +6,7 @@ Mac ChatGPT App 可通过实验性的原生 App Server 包装器接入，见 [�
 
 Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型和思考强度。它保留原生工具、审批和会话恢复流程，并提供路由日志、合成任务评测与 Codex Judge 判分入口。
 
-**状态：实验性 [0.5.0](https://github.com/FlyTOmeLight/fenjue/releases/tag/v0.5.0)。** 当前提供源码安装，尚未发布 npm 包。模型名称是配置示例，是否可用由你的账号和 Codex 模型目录决定。合成任务结果见下文，日常质量与费用收益仍需实测。
+**状态：实验性 [0.5.1](https://github.com/FlyTOmeLight/fenjue/releases/tag/v0.5.1)。** 当前提供源码安装，尚未发布 npm 包。模型名称是配置示例，是否可用由你的账号和 Codex 模型目录决定。合成任务结果见下文，日常质量与费用收益仍需实测。
 
 ## 能做什么
 
@@ -26,7 +26,7 @@ Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型
 ```bash
 git clone https://github.com/FlyTOmeLight/fenjue.git
 cd fenjue
-git checkout v0.5.0
+git checkout v0.5.1
 npm ci --ignore-scripts
 npm run build
 npm start -- --help

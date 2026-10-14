@@ -3,10 +3,11 @@
 `fenjue desktop` 生成一个原生 App Server 包装器。App 通过 `CODEX_CLI_PATH` 启动它，并传入自己的参数和环境。焚诀在提交新轮次前选择模型和思考强度，后端仍使用 App 内置 Codex。
 
 ```text
-ChatGPT App → Fenjue stdio 包装器 → 原生路由 → App 内置 Codex App Server → 模型
+进程关系：ChatGPT App → App 内置 Codex → Fenjue 路由子进程
+协议流向：ChatGPT App ↔ Fenjue 路由子进程 ↔ App 内置 Codex → 模型
 ```
 
-这样可以保留 App 注入的桌面工具管道、插件配置与启动参数。`--version`、`debug models` 等非服务命令直接透传给内置 Codex。包装器只拦截 stdio `app-server`，不打开 TCP 监听端口。
+启动脚本先准备私有 FIFO，再用 `exec` 原位运行 App 内置 Codex，保留 App 分配的进程 ID 和直接父子关系；焚诀在单独的路由子进程中转发协议。这样可以保留 App 注入的桌面工具管道、插件配置与启动参数，也让工具继续按原来的进程身份接受 App 校验。`--version`、`debug models` 等非服务命令直接透传给内置 Codex。包装器只拦截 stdio `app-server`，不打开 TCP 监听端口。
 
 ## 启动
 
@@ -58,7 +59,15 @@ npm start -- routing auto --socket /path/from/desktop-PID.json
 
 ## 停止与恢复
 
-退出 App 后，正常从访达或 Dock 打开 App 即恢复原来的连接方式；无需删除全局配置。包装器退出时关闭自己创建的后端，清理私有 Unix socket 和控制文件；日志与任务状态保留。
+退出 App 后，正常从访达或 Dock 打开 App 即恢复原来的连接方式；无需删除全局配置。App 管理内置后端的生命周期，路由子进程在输入关闭或后端退出后清理私有 FIFO、Unix socket 和控制文件；日志与任务状态保留。
+
+## 故障排查
+
+直接从终端运行 App 可执行文件时，终端会显示 App 的运行日志。一般的信息日志不代表错误，但连续出现 `dynamic_app_tools_peer_rejected`、`missing-code-signing-identity` 或 `Codex app tools pipe closed`，表示桌面工具连接失败，不能只通过重定向日志处理。
+
+v0.5.0 的旧包装器把 Node 路由进程放在内置后端的父进程位置，自动选模可用，但会触发桌面工具的进程身份拒绝。修正后的启动器让内置 Codex 与 App 保持直接父子关系，路由进程不再成为桌面工具的祖先。更新代码并构建后，重新运行 `desktop` 命令生成包装器，再完全退出 App 并使用新入口启动；只重新构建不会更换已经运行的进程。
+
+验收必须同时检查：两条不同复杂度消息均完成且自动选择不同路线；至少一个 `codex_app` 桌面工具实际调用成功；新启动后的 App 日志中没有上述签名拒绝。模型回复或模拟测试通过均不能代替桌面工具验收。
 
 ## 验证范围
 
@@ -68,7 +77,7 @@ npm start -- routing auto --socket /path/from/desktop-PID.json
 npm run verify:desktop
 ```
 
-该命令使用生成的包装器和 App 内置 Codex，分类器和模型均为本机模拟服务，真实模型调用为零。验证 App 风格的参数、自动 Sol/Astra 切换、手动覆盖、恢复自动与退出清理，不操作 App 界面。网关单元测试另外验证桌面工具管道环境和原始参数的传递。
+该命令使用生成的包装器和 App 内置 Codex，分类器和模型均为本机模拟服务，真实模型调用为零。验证 App 风格的参数、自动 Sol/Astra 切换、手动覆盖、恢复自动与退出清理，不操作 App 界面。启动器回归测试另外检查后端保持原 PID/PPID、桌面工具环境和参数透传，以及 EOF / SIGTERM 清理。
 
 真实分类器与模型的协议验证需要明确运行以下命令，固定执行两轮模型任务，可能消耗订阅用量及分类器费用；测试结束后归档测试聊天：
 
@@ -89,4 +98,12 @@ node dist/scripts/verify-native-router-live.js --desktop \
 | 字符串转大写 | Sol / low | 最终回答返回，轮次完成 |
 | 跨服务一致性架构比较 | Astra / high | 最终回答返回，轮次完成 |
 
-两轮均为 `mode: auto`、`reason: classified`，证明 App 聊天已进入焚诀并完成跨模型切换。这项验证由用户操作界面，通过日志及聊天回复核验；未目视核对模型选择器是否同步显示，也未单独验收打开文件等桌面工具。环境与参数透传由离线测试覆盖。真实会话 ID、原始日志和个人环境路径保留在本地，不进入公开仓库。
+两轮均为 `mode: auto`、`reason: classified`，证明 App 聊天已进入焚诀并完成跨模型切换。这次使用 v0.5.0 旧包装器的验证未覆盖桌面工具，之后发现上述签名兼容问题，因此不能把这两轮结果视为完整桌面兼容验收。这项验证由用户操作界面，通过日志及聊天回复核验；未目视核对模型选择器是否同步显示，也未单独验收打开文件等桌面工具。环境与参数透传由离线测试覆盖。真实会话 ID、原始日志和个人环境路径保留在本地，不进入公开仓库。
+
+### 修复版桌面工具验收
+
+2026-10-15，用户使用修复版启动器正常重启 App。实际进程确认内置 Codex 直接以 App 为父进程，焚诀路由进程以该后端为父进程。新启动日志中的 `dynamic_app_tools_peer_rejected`、`missing-code-signing-identity`、`Codex app tools pipe closed` 和桌面 MCP 发现失败均为零。
+
+通过真正的 `codex_app` 工具调用读取了本聊天的附件列表，路由状态中记录 `status: completed` 且无工具错误；打开本地验收文件的请求也被 App 接收，但返回 `queued`，因此不将它计为文件已显示。本轮 App 请求另记录自动分类选择 Sol/medium；修复版启动器的独立真实协议双轮确认 Sol/low → Astra/high，均返回最终回答并完成。
+
+这些证据覆盖自动路由和桌面工具服务恢复；不表示所有桌面工具都已逐一测试。

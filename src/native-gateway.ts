@@ -9,7 +9,7 @@ import { NativeSession, type NativeMessage } from "./native-session.js";
 import { NativeRecords, type NativeEvent, type NativeMode } from "./native-records.js";
 
 export async function startNativeGateway(options: {
-  socket: string; executable: string; serverArgs: string[]; backendArgs?: string[]; env: NodeJS.ProcessEnv;
+  socket: string; executable: string; serverArgs: string[]; env: NodeJS.ProcessEnv;
   config: Config; records: NativeRecords; onEvent?: (event: NativeEvent) => void;
   classify?: Classify; initialManual?: boolean; onFailure: (error: Error) => void;
 }) {
@@ -27,7 +27,7 @@ export async function startNativeGateway(options: {
   wss.on("connection", ws => {
     if (connected || closed) { ws.close(1008, "One Codex client per gateway"); return; }
     connected = true;
-    const backend = spawn(options.executable, options.backendArgs ?? ["app-server", ...options.serverArgs], {
+    const backend = spawn(options.executable, ["app-server", ...options.serverArgs], {
       stdio: ["pipe", "pipe", "pipe"], env: options.env, shell: false,
     });
     let session: NativeSession;

@@ -45,7 +45,7 @@ Fenjue 不安装 Codex，也不提供模型账号。登录方式沿用本机 Cod
 npm start -- desktop --config examples/desktop.json --env-file /path/to/gateway.env
 ```
 
-命令会生成包装器并输出 App 启动命令。完全退出 App 后执行输出的命令，即可在本地 Codex 聊天中自动选择模型与思考强度。示例默认启用 auto；密钥文件需包含 `AI_GATEWAY_API_KEY`。桌面入口无需 tmux。日志、手动选模、恢复自动和退出方法见 [桌面接入指南](docs/desktop.md)。
+命令会生成包装器。推荐按[桌面接入指南配置 Dock 启动](docs/desktop.md#推荐从原-dock-图标启动)：只需设置一次，以后直接点原 Dock 图标，就能在本地 Codex 聊天中自动选择模型与思考强度，无需双击 `.command` 或打开终端。也可用输出的 App 启动命令临时调试。示例默认启用 auto；密钥文件需包含 `AI_GATEWAY_API_KEY`，桌面入口无需 tmux。普通 ChatGPT 和 Dot 主聊天不走此路由。日志、手动选模、更新和取消接入方法见[完整指南](docs/desktop.md)。
 
 ## 第一次启动：观察路由
 

@@ -308,6 +308,30 @@ try:
             finally:
                 terminal.close()
 
+        utempter_race_verified = False
+        if sys.platform == "linux" and "libutempter" in subprocess.run(
+                ["ldd", shutil.which("tmux")], text=True, capture_output=True).stdout:
+            # Fault injection uses a temporary shared library, never a system
+            # change. Its marker proves the SIGCHLD critical section was hit.
+            library = temp / "utempter-race.so"
+            subprocess.check_call(["cc", "-shared", "-fPIC", "-o", str(library),
+                                   str(ROOT / "scripts/fixtures/utempter-race.c")])
+            marker = temp / "utempter-marker"
+            race = temp / "utempter-race.mjs"
+            race.write_text('import {closeSync,writeFileSync} from "node:fs";\n'
+                            'writeFileSync(process.env.FENJUE_TEST_STATE,JSON.stringify({socket:process.env.TMUX.split(",")[0]}));\n'
+                            '[0,1,2].forEach(fd=>closeSync(fd)); setInterval(()=>{},1000);\n')
+            terminal = Terminal([str(supervisor), str(race)], {
+                **env, "LD_PRELOAD": str(library), "FENJUE_TEST_UTEMPTER_MARKER": str(marker),
+            })
+            try:
+                assert terminal.wait() == 143, "Lost SIGCHLD must recover the real pane signal exit status"
+                assert marker.exists() and "signal=0" in marker.read_text(), "utempter critical section was not exercised"
+                assert not Path(json.loads(state_file.read_text())["socket"]).exists(), "Recovery left a tmux server behind"
+                utempter_race_verified = True
+            finally:
+                terminal.close()
+
         terminal = Terminal(argv, env)
         try:
             terminal.until(lambda: terminal.contains("READY"), "session for termination check")
@@ -321,6 +345,8 @@ try:
         checks = ["visible bottom bar", "pane title forwarded to outer terminal", "mouse drag selection + clipboard command", "low/high/low routing", "wheel scrollback", "wheel down + Escape resume input",
                   "terminal resize", "Ctrl-C cancellation", "continued input", "child exit status", "visible early failure",
                   "pane signal status", "SIGTERM cleanup"]
+        if utempter_race_verified:
+            checks.append("Linux utempter missing SIGCHLD recovery")
         if "--native" in sys.argv:
             codex = os.environ.get("FENJUE_CODEX_BIN") or shutil.which("codex")
             assert codex, "Install Codex CLI for --native"

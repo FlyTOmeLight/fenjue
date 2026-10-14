@@ -1,5 +1,6 @@
 import { spawn, execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { setTimeout as delay } from "node:timers/promises";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { tmpdir, constants } from "node:os";
 import { join } from "node:path";
@@ -94,20 +95,40 @@ export async function startTmuxSession(argv: string[]) {
     await writeFile(entry, JSON.stringify(argv), { mode: 0o600 });
     await command(["-f", configPath, "new-session", "-d", "-s", "fenjue", "-x", String(process.stdout.columns || 100),
       "-y", String(process.stdout.rows || 30), "--", process.execPath, fileURLToPath(new URL("./tmux-entry.js", import.meta.url)), entry]);
-    // A very short-lived pane can exit during tmux's utmp update and leave
-    // SIGCHLD unprocessed. Release user code only after new-session returns.
-    await command(["wait-for", "-S", "fenjue-pane-ready"]);
     return {
       socket,
       async attach(): Promise<number> {
         try {
-          const code = await new Promise<number>((resolve, reject) => {
-            const client = spawn("tmux", ["-u", "-S", socket, "attach-session", "-t", "fenjue"], {
-              env, stdio: "inherit", shell: false, signal: abort.signal,
-            });
+          const client = spawn("tmux", ["-u", "-S", socket, "attach-session", "-t", "fenjue"], {
+            env, stdio: "inherit", shell: false, signal: abort.signal,
+          });
+          const exited = new Promise<number>((resolve, reject) => {
             client.once("error", reject);
             client.once("exit", (code, signal) => resolve(code ?? 128 + (signal ? constants.signals[signal] : 1)));
           });
+          const stop = new AbortController();
+          let recoveryError: unknown;
+          const recovery = process.platform === "linux" ? (async () => {
+            while (true) {
+              await delay(250, undefined, { signal: stop.signal });
+              const state = (await exec("tmux", ["-S", socket, "display-message", "-p", "-t", "fenjue:0.0",
+                "#{pane_dead}:#{pane_dead_status}:#{pane_dead_signal}:#{pid}"], { env, timeout: 2000, signal: stop.signal })).stdout.trim().split(":");
+              // libutempter temporarily resets SIGCHLD during pane teardown.
+              // Only a dead pane without an exit receipt needs another reap;
+              // the PID comes from this session's private tmux server.
+              if (state[0] === "1" && !state[1] && !state[2]) {
+                const serverPid = Number(state[3]);
+                if (!Number.isSafeInteger(serverPid) || serverPid < 2) throw new Error("无法读取私有 tmux 服务器 PID");
+                process.kill(serverPid, "SIGCHLD");
+              }
+            }
+          })().catch(error => {
+            if (!stop.signal.aborted) { recoveryError = error; client.kill("SIGTERM"); }
+          }) : Promise.resolve();
+          let code: number;
+          try { code = await exited; }
+          finally { stop.abort(); await recovery; }
+          if (recoveryError) throw recoveryError;
           if (interrupted) return interrupted;
           if (code) return code;
           const state = (await command(["display-message", "-p", "-t", "fenjue:0.0", "#{pane_dead}:#{pane_dead_status}:#{pane_dead_signal}"])).stdout.trim().split(":");

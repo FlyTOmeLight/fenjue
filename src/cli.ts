@@ -14,12 +14,14 @@ import { tasksCommand } from "./execution-capture.js";
 import { feedbackCommand } from "./feedback.js";
 import { judgeCommand } from "./judge.js";
 import { mainRoute, nativePolicy } from "./native-policy.js";
+import { prepareDesktop } from "./desktop.js";
 
 const { version } = JSON.parse(await readFile(new URL("../../package.json", import.meta.url), "utf8"));
 const help = `焚诀 ${version}：Codex 任务路由
 用法：
   fenjue codex [--config 文件] [--env-file 文件] [--log-dir 目录] [--no-bar] [--no-title] -- [Codex 参数]
   fenjue codex-native [同上参数] -- [交互 Codex 参数]
+  fenjue desktop [--config 文件] [--env-file 文件] [--log-dir 目录] [--app App路径]
   fenjue routing auto|manual|shadow --socket 本次启动显示的路径
   fenjue status [--watch] [--log 文件 | --log-dir 目录]
   fenjue cases list [--dir 采集目录]
@@ -133,13 +135,20 @@ async function main(): Promise<number> {
     finally { if (watch) { process.off("SIGINT", stop); process.off("SIGTERM", stop); } }
     return 0;
   }
-  if (command !== "codex" && command !== "codex-native") throw new Error("未知命令，请运行 fenjue --help");
+  if (command !== "codex" && command !== "codex-native" && command !== "desktop") throw new Error("未知命令，请运行 fenjue --help");
   let path = "fenjue.config.json", logDir: string | undefined, envFile: string | undefined;
+  let appPath: string | undefined;
   let title = true, bar = true;
   const forwarded: string[] = [];
   while (args.length) {
     const flag = args.shift()!;
     if (flag === "--") { forwarded.push(...args); break; }
+    if (command === "desktop" && flag === "--app") {
+      const value = args.shift();
+      if (!value || value.startsWith("--")) throw new Error(`${flag} 缺少值`);
+      appPath = value;
+      continue;
+    }
     if (flag === "--no-title") { title = false; continue; }
     if (flag === "--no-bar") { bar = false; continue; }
     if (flag === "--config" || flag === "--log-dir" || flag === "--env-file") {
@@ -155,6 +164,15 @@ async function main(): Promise<number> {
     const value = parseEnv(await readFile(resolve(envFile), "utf8"))[key];
     if (!value) throw new Error(`指定环境文件未设置 ${key}`);
     process.env[key] = value;
+  }
+  if (command === "desktop") {
+    if (forwarded.length || !title || !bar) throw new Error("desktop 不接受 Codex 参数或 --no-bar/--no-title；App 会传入自己的启动参数");
+    if (!config.semantic) throw new Error("桌面原生路由需要 semantic 分类配置");
+    if (config.semantic.apiKeyEnv && !process.env[config.semantic.apiKeyEnv]) throw new Error(`缺少分类器密钥 ${config.semantic.apiKeyEnv}；请设置环境变量或使用 --env-file`);
+    const desktop = await prepareDesktop({ configFile: path, envFile, appPath, logDir });
+    process.stderr.write(`[fenjue] 桌面包装器：${desktop.launcher}\n[fenjue] 完全退出 ChatGPT App 后运行以下命令；无需独立网关终端。\n`);
+    process.stdout.write(desktop.launchCommand + "\n");
+    return 0;
   }
   if (bar && !tmuxSocket && process.stdin.isTTY && process.stdout.isTTY && process.env.TERM !== "dumb" && interactiveCodex(forwarded)) {
     const session = await startTmuxSession([resolve(process.argv[1]!), ...process.argv.slice(2)]);

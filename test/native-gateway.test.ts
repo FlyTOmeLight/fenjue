@@ -9,21 +9,27 @@ import { startNativeGateway } from "../src/native-gateway.js";
 import { NativeRecords } from "../src/native-records.js";
 import { semanticConfig } from "./fixtures.js";
 
-test("gateway accepts resume after picker disconnects and still rejects simultaneous clients", { timeout: 5000 }, async t => {
+for (const desktop of [false, true]) test(`${desktop ? "desktop" : "default"} gateway preserves backend arguments and environment, accepts resume, and rejects simultaneous clients`, { timeout: 5000 }, async t => {
   const root = await mkdtemp(join(tmpdir(), "fenjue-gateway-test-"));
   const executable = join(root, "backend.mjs"), socket = join(root, "app.sock");
   await writeFile(executable, `#!/usr/bin/env node
 import { createInterface } from 'node:readline';
 createInterface({ input: process.stdin }).on('line', line => {
   const message = JSON.parse(line);
-  process.stdout.write(JSON.stringify({ id: message.id, result: { pid: process.pid } }) + '\\n');
+  process.stdout.write(JSON.stringify({ id: message.id, result: {
+    pid: process.pid, argv: process.argv.slice(2), toolsPipe: process.env.CODEX_APP_TOOLS_PIPE_PATH
+  } }) + '\\n');
 });
 // Keep the old backend alive long enough to overlap the new connection.
 process.on('SIGTERM', () => setTimeout(() => process.exit(0), 150));
 `);
   await chmod(executable, 0o700);
   const failures: Error[] = [], clients: WebSocket[] = [];
-  const gateway = await startNativeGateway({ socket, executable, serverArgs: [], env: process.env,
+  const serverArgs = ["--listen", "stdio://"];
+  const backendArgs = desktop ? ["-c", 'mcp_servers.app_tools.command="/test/App Tools"', "app-server", "--analytics-default-enabled"] : undefined;
+  const toolsPipe = join(root, "app-tools.sock");
+  const gateway = await startNativeGateway({ socket, executable, serverArgs, backendArgs,
+    env: { ...process.env, CODEX_APP_TOOLS_PIPE_PATH: toolsPipe },
     config: semanticConfig(), records: new NativeRecords(root, undefined, [], message => assert.fail(message)),
     onFailure: error => failures.push(error) });
   t.after(async () => {
@@ -43,11 +49,15 @@ process.on('SIGTERM', () => setTimeout(() => process.exit(0), 150));
     return response;
   }
   const picker = await connect(), first = await request(picker);
+  assert.deepEqual(first.result.argv, backendArgs ?? ["app-server", ...serverArgs], "preserve App arguments including ordering and spaces");
+  assert.equal(first.result.toolsPipe, toolsPipe, "preserve the App tool pipe environment");
   const duplicate = await connect();
   const [code, reason] = await once(duplicate, "close");
   assert.equal(code, 1008); assert.equal(reason.toString(), "One Codex client per gateway");
   const disconnected = once(picker, "close"); picker.close(); await disconnected;
   const resumed = await connect(), second = await request(resumed);
+  assert.deepEqual(second.result.argv, first.result.argv);
+  assert.equal(second.result.toolsPipe, toolsPipe);
   assert.notEqual(first.result.pid, second.result.pid);
   const deadline = Date.now() + 2000;
   while (true) {

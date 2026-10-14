@@ -13,7 +13,7 @@ npm test
 npm run verify:terminal
 ```
 
-这些检查使用本地模拟服务，不需要真实模型凭据。涉及原生 Codex 协议时，安装 Codex 后运行 `npm run verify:native`；涉及真实模型效果时，单独记录调用预算、版本、配置和验收标准。
+这些检查使用本地模拟服务，不需要真实模型凭据。涉及原生 Codex 协议时，安装 Codex 后运行 `npm run verify:native`；涉及桌面包装器时，在安装 Mac ChatGPT App 后运行 `npm run verify:desktop`，通过本机模拟服务检查参数传递、自动切换、手动覆盖和退出清理；该检查不操作 GUI。涉及真实模型效果时，单独记录调用预算、版本、配置和验收标准。
 
 ## 提交修改
 

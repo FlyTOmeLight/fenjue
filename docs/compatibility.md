@@ -2,13 +2,15 @@
 
 源码要求 Node.js 22.18+。交互底栏依赖独立安装的 tmux，终端验证依赖 Python 3。当前实现包含 Unix PTY 和 tmux 路径；Windows 原生环境尚未验证。
 
-## 两个执行入口
+## 执行入口
 
 `codex-native` 使用本机 Codex App Server 按轮次提交真实模型和 effort。Codex 负责该模型的提示、工具和上下文。原生入口需要 semantic 分类配置；配置专家模型时支持跨模型选择。
 
 `codex` 的交互会话在配置含 `native` 时走原生入口；exec / review 使用 Responses 代理。代理只改写 `fenjue-auto` 请求，跨模型仍需通过请求契约校验。
 
 原生入口不支持 `--profile`、`--oss`、自选 `--remote` 和 `--worktree`。原生 remote resume 不支持通过 CLI 参数覆盖既有权限，恢复时保留原会话权限。
+
+`desktop` 复用原生路由，生成由 Mac ChatGPT App 启动的 stdio 包装器，保留 App 的参数与环境；不启动 TUI 或 tmux。已在 ChatGPT 26.1007.71326 / 内置 Codex 0.162.0-alpha.17.2 的同一聊天中实测 Sol/low 与 Astra/high 自动切换，两轮均完成。桌面入口、版本范围与 GUI 验证边界见 [桌面接入](desktop.md)。
 
 ## 检查入口
 
@@ -17,6 +19,7 @@
 | `npm run check` / `npm test` | 否 | 本地模拟 |
 | `npm run verify:terminal` | 否 | 本地模拟；需要 tmux、Python 3 |
 | `npm run verify:codex` | 是 | 本地模拟 |
+| `npm run verify:desktop` | 是（默认 App 内置版本） | 本地模拟 |
 | `npm run verify:native` | 是 | 本地模拟 |
 | `npm run verify:native:terminal` | 是 | 本地模拟；需要 tmux、Python 3 |
 | `npm run verify:native:router` | 是 | 本地模拟；需要 tmux、Python 3 |

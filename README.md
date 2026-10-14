@@ -1,13 +1,16 @@
 # Fenjue · 焚诀
 
-Task-aware model and reasoning routing for the Codex CLI.
+Task-aware model and reasoning routing for Codex CLI and the Mac ChatGPT App.
+
+Mac ChatGPT App 可通过实验性的原生 App Server 包装器接入，见 [桌面接入指南](docs/desktop.md)。
 
 Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型和思考强度。它保留原生工具、审批和会话恢复流程，并提供路由日志、合成任务评测与 Codex Judge 判分入口。
 
-**状态：实验性 [0.4.0](https://github.com/FlyTOmeLight/fenjue/releases/tag/v0.4.0)。** 当前提供源码安装，尚未发布 npm 包。模型名称是配置示例，是否可用由你的账号和 Codex 模型目录决定。合成任务结果见下文，日常质量与费用收益仍需实测。
+**状态：实验性 [0.5.0](https://github.com/FlyTOmeLight/fenjue/releases/tag/v0.5.0)。** 当前提供源码安装，尚未发布 npm 包。模型名称是配置示例，是否可用由你的账号和 Codex 模型目录决定。合成任务结果见下文，日常质量与费用收益仍需实测。
 
 ## 能做什么
 
+- 支持 Mac ChatGPT App 本地聊天自动选模，沿用 App 内置 Codex、登录及桌面工具连接。
 - 根据当前阶段分别选择主模型或专家模型，以及 low / medium / high；支持显式指定 xhigh。
 - 在同一任务内随阶段升降档；正在执行的轮次与工具续接保持路线固定。
 - 支持 `shadow`（只观察）、`auto`（自动选择）、`manual`（固定选择）。
@@ -23,7 +26,7 @@ Fenjue 使用任务分类器判断当前工作阶段，再为 Codex 选择模型
 ```bash
 git clone https://github.com/FlyTOmeLight/fenjue.git
 cd fenjue
-git checkout v0.4.0
+git checkout v0.5.0
 npm ci --ignore-scripts
 npm run build
 npm start -- --help
@@ -33,6 +36,16 @@ npm start -- --version
 Fenjue 不安装 Codex，也不提供模型账号。登录方式沿用本机 Codex。
 
 `npm start -- --version` 显示焚诀与 Codex 的版本；追加 `--config fenjue.config.json` 可查看该配置的路由模式、模型、选档与恢复策略。运行中 F8 或 `/model` 的手动覆盖以会话状态为准。
+
+## Mac ChatGPT App 启动
+
+完成上面的源码安装与构建后，准备已登录的 App 和分类器密钥文件：
+
+```bash
+npm start -- desktop --config examples/desktop.json --env-file /path/to/gateway.env
+```
+
+命令会生成包装器并输出 App 启动命令。完全退出 App 后执行输出的命令，即可在本地 Codex 聊天中自动选择模型与思考强度。示例默认启用 auto；密钥文件需包含 `AI_GATEWAY_API_KEY`。桌面入口无需 tmux。日志、手动选模、恢复自动和退出方法见 [桌面接入指南](docs/desktop.md)。
 
 ## 第一次启动：观察路由
 
@@ -135,6 +148,7 @@ npm start -- judge result --input examples/judge-quality.json \
 ## 文档与贡献
 
 - [配置、启动与恢复](docs/daily-use.md)
+- [Mac ChatGPT App 桌面接入](docs/desktop.md)
 - [运行环境和兼容性](docs/compatibility.md)
 - [合成分类与执行用例](evals/README.md)
 - [反馈与专家审查](docs/continuous-iteration.md)

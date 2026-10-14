@@ -1,6 +1,6 @@
 {
   "name": "fenjue",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "description": "Task-aware model and reasoning routing for Codex",
   "type": "module",
@@ -22,6 +22,7 @@
     "test": "npm run build && node --test dist/test/*.test.js",
     "check": "tsc --noEmit",
     "verify:codex": "npm run build && node dist/scripts/verify-codex.js",
+    "verify:desktop": "npm run build && node dist/scripts/verify-desktop.js",
     "verify:native": "npm run build && node dist/scripts/verify-native-routing.js",
     "verify:native:terminal": "npm run build && python3 scripts/verify-native-terminal.py",
     "verify:native:router": "npm run build && python3 scripts/verify-native-terminal.py --router",
